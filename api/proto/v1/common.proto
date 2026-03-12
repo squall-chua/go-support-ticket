@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package api.v1;
+
+option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
+
+import "google/protobuf/timestamp.proto";
+
+message PaginationRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message PaginationResponse {
+  string next_page_token = 1;
+  int32 total_size = 2;
+}

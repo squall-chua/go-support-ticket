@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package api.v1;
+
+option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
+
+import "google/protobuf/timestamp.proto";
+import "api/proto/v1/common.proto";
+import "google/api/annotations.proto";
+
+message ApprovalConfig {
+  string action = 1;
+  string ticket_type = 2;
+  int32 required_approvals = 3;
+  repeated string eligible_roles = 4;
+}
+
+message ApprovalRequestData {
+  string id = 1;
+  string ticket_id = 2;
+  string action = 3;
+  string requester = 4;
+  string status = 5; // PENDING, APPROVED, REJECTED
+  int32 required_approvals = 6;
+  repeated ApprovalDecision decisions = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message ApprovalDecision {
+  string approver = 1;
+  bool approved = 2;
+  string reason = 3;
+  google.protobuf.Timestamp decided_at = 4;
+}
+
+message DecideApprovalRequest {
+  string approval_request_id = 1;
+  bool approve = 2;
+  string reason = 3;
+}
+
+message DecideApprovalResponse {
+  ApprovalRequestData request = 1;
+}
+
+message ListPendingApprovalsRequest {
+  PaginationRequest pagination = 1;
+}
+
+message ListPendingApprovalsResponse {
+  repeated ApprovalRequestData requests = 1;
+  PaginationResponse pagination = 2;
+}
+
+service ApprovalService {
+  rpc DecideApproval(DecideApprovalRequest) returns (DecideApprovalResponse) {
+    option (google.api.http) = {
+      post: "/v1/approvals/{approval_request_id}/decide"
+      body: "*"
+    };
+  }
+  rpc ListPendingApprovals(ListPendingApprovalsRequest) returns (ListPendingApprovalsResponse) {
+    option (google.api.http) = {
+      get: "/v1/approvals/pending"
+    };
+  }
+}

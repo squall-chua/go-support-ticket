@@ -1,0 +1,200 @@
+syntax = "proto3";
+
+package api.v1;
+
+option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
+
+import "google/protobuf/timestamp.proto";
+import "api/proto/v1/common.proto";
+import "google/api/annotations.proto";
+
+message TicketType {
+  string id = 1;
+  string name = 2;
+  string display_name = 3;
+  string description = 4;
+  bool require_approval = 5;
+  bool auto_visible = 6;
+}
+
+message Ticket {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string ticket_type = 4;
+  string status = 5; // OPEN, IN_PROGRESS, PENDING_APPROVAL, RESOLVED, CLOSED, MERGED
+  string priority = 6; // LOW, MEDIUM, HIGH, URGENT
+  string customer_id = 7;
+  string created_by = 8;
+  string assigned_to = 9;
+  string merged_into = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message CreateTicketTypeRequest {
+  string name = 1;
+  string display_name = 2;
+  string description = 3;
+  bool require_approval = 4;
+  bool auto_visible = 5;
+}
+
+message CreateTicketTypeResponse {
+  TicketType ticket_type = 1;
+}
+
+message ListTicketTypesRequest {}
+
+message ListTicketTypesResponse {
+  repeated TicketType ticket_types = 1;
+}
+
+message CreateTicketRequest {
+  string title = 1;
+  string description = 2;
+  string ticket_type = 3;
+  string priority = 4;
+  string customer_id = 5;
+}
+
+message CreateTicketResponse {
+  Ticket ticket = 1;
+}
+
+message GetTicketRequest {
+  string ticket_id = 1;
+}
+
+message GetTicketResponse {
+  Ticket ticket = 1;
+}
+
+message UpdateTicketRequest {
+  string ticket_id = 1;
+  string title = 2;
+  string description = 3;
+  string priority = 4;
+}
+
+message UpdateTicketResponse {
+  Ticket ticket = 1;
+}
+
+message TransitionStatusRequest {
+  string ticket_id = 1;
+  string new_status = 2;
+}
+
+message TransitionStatusResponse {
+  Ticket ticket = 1;
+}
+
+message AssignTicketRequest {
+  string ticket_id = 1;
+  string assign_to = 2;
+}
+
+message AssignTicketResponse {
+  Ticket ticket = 1;
+}
+
+message DistributeTicketsRequest {
+  repeated TicketAssignment assignments = 1;
+}
+
+message TicketAssignment {
+  string ticket_id = 1;
+  string assign_to = 2;
+}
+
+message DistributeTicketsResponse {
+  repeated TicketAssignmentResult results = 1;
+}
+
+message TicketAssignmentResult {
+  string ticket_id = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+message MergeTicketsRequest {
+  string source_ticket_id = 1;
+  string target_ticket_id = 2;
+}
+
+message MergeTicketsResponse {
+  Ticket source_ticket = 1; // updated to MERGED state
+  Ticket target_ticket = 2;
+}
+
+message ListTicketsRequest {
+  string status = 1;
+  string assigned_to = 2;
+  PaginationRequest pagination = 3;
+}
+
+message ListTicketsResponse {
+  repeated Ticket tickets = 1;
+  PaginationResponse pagination = 2;
+}
+
+service TicketService {
+  rpc CreateTicketType(CreateTicketTypeRequest) returns (CreateTicketTypeResponse) {
+    option (google.api.http) = {
+      post: "/v1/ticket-types"
+      body: "*"
+    };
+  }
+  rpc ListTicketTypes(ListTicketTypesRequest) returns (ListTicketTypesResponse) {
+    option (google.api.http) = {
+      get: "/v1/ticket-types"
+    };
+  }
+  rpc CreateTicket(CreateTicketRequest) returns (CreateTicketResponse) {
+    option (google.api.http) = {
+      post: "/v1/tickets"
+      body: "*"
+    };
+  }
+  rpc GetTicket(GetTicketRequest) returns (GetTicketResponse) {
+    option (google.api.http) = {
+      get: "/v1/tickets/{ticket_id}"
+    };
+  }
+  rpc UpdateTicket(UpdateTicketRequest) returns (UpdateTicketResponse) {
+    option (google.api.http) = {
+      put: "/v1/tickets/{ticket_id}"
+      body: "*"
+    };
+  }
+  rpc TransitionStatus(TransitionStatusRequest) returns (TransitionStatusResponse) {
+    option (google.api.http) = {
+      post: "/v1/tickets/{ticket_id}/status"
+      body: "*"
+    };
+  }
+  rpc AssignTicket(AssignTicketRequest) returns (AssignTicketResponse) {
+    option (google.api.http) = {
+      post: "/v1/tickets/{ticket_id}/assign"
+      body: "*"
+    };
+  }
+  rpc DistributeTickets(DistributeTicketsRequest) returns (DistributeTicketsResponse) {
+    option (google.api.http) = {
+      post: "/v1/tickets/distribute"
+      body: "*"
+    };
+  }
+  rpc MergeTickets(MergeTicketsRequest) returns (MergeTicketsResponse) {
+    option (google.api.http) = {
+      post: "/v1/tickets/merge"
+      body: "*"
+    };
+  }
+  rpc ListTickets(ListTicketsRequest) returns (ListTicketsResponse) {
+    option (google.api.http) = {
+      get: "/v1/tickets"
+    };
+  }
+}
