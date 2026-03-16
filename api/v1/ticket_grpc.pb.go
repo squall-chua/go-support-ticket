@@ -21,30 +21,38 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	TicketService_CreateTicketType_FullMethodName  = "/api.v1.TicketService/CreateTicketType"
 	TicketService_ListTicketTypes_FullMethodName   = "/api.v1.TicketService/ListTicketTypes"
+	TicketService_UpdateTicketType_FullMethodName  = "/api.v1.TicketService/UpdateTicketType"
+	TicketService_DeleteTicketType_FullMethodName  = "/api.v1.TicketService/DeleteTicketType"
 	TicketService_CreateTicket_FullMethodName      = "/api.v1.TicketService/CreateTicket"
 	TicketService_GetTicket_FullMethodName         = "/api.v1.TicketService/GetTicket"
 	TicketService_UpdateTicket_FullMethodName      = "/api.v1.TicketService/UpdateTicket"
-	TicketService_TransitionStatus_FullMethodName  = "/api.v1.TicketService/TransitionStatus"
 	TicketService_AssignTicket_FullMethodName      = "/api.v1.TicketService/AssignTicket"
 	TicketService_DistributeTickets_FullMethodName = "/api.v1.TicketService/DistributeTickets"
 	TicketService_MergeTickets_FullMethodName      = "/api.v1.TicketService/MergeTickets"
 	TicketService_ListTickets_FullMethodName       = "/api.v1.TicketService/ListTickets"
+	TicketService_AddComment_FullMethodName        = "/api.v1.TicketService/AddComment"
+	TicketService_DeleteTicket_FullMethodName      = "/api.v1.TicketService/DeleteTicket"
 )
 
 // TicketServiceClient is the client API for TicketService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TicketServiceClient interface {
+	// Ticket Type
 	CreateTicketType(ctx context.Context, in *CreateTicketTypeRequest, opts ...grpc.CallOption) (*CreateTicketTypeResponse, error)
 	ListTicketTypes(ctx context.Context, in *ListTicketTypesRequest, opts ...grpc.CallOption) (*ListTicketTypesResponse, error)
+	UpdateTicketType(ctx context.Context, in *UpdateTicketTypeRequest, opts ...grpc.CallOption) (*UpdateTicketTypeResponse, error)
+	DeleteTicketType(ctx context.Context, in *DeleteTicketTypeRequest, opts ...grpc.CallOption) (*DeleteTicketTypeResponse, error)
+	// Ticket
 	CreateTicket(ctx context.Context, in *CreateTicketRequest, opts ...grpc.CallOption) (*CreateTicketResponse, error)
 	GetTicket(ctx context.Context, in *GetTicketRequest, opts ...grpc.CallOption) (*GetTicketResponse, error)
 	UpdateTicket(ctx context.Context, in *UpdateTicketRequest, opts ...grpc.CallOption) (*UpdateTicketResponse, error)
-	TransitionStatus(ctx context.Context, in *TransitionStatusRequest, opts ...grpc.CallOption) (*TransitionStatusResponse, error)
 	AssignTicket(ctx context.Context, in *AssignTicketRequest, opts ...grpc.CallOption) (*AssignTicketResponse, error)
 	DistributeTickets(ctx context.Context, in *DistributeTicketsRequest, opts ...grpc.CallOption) (*DistributeTicketsResponse, error)
 	MergeTickets(ctx context.Context, in *MergeTicketsRequest, opts ...grpc.CallOption) (*MergeTicketsResponse, error)
 	ListTickets(ctx context.Context, in *ListTicketsRequest, opts ...grpc.CallOption) (*ListTicketsResponse, error)
+	AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*AddCommentResponse, error)
+	DeleteTicket(ctx context.Context, in *DeleteTicketRequest, opts ...grpc.CallOption) (*DeleteTicketResponse, error)
 }
 
 type ticketServiceClient struct {
@@ -75,6 +83,26 @@ func (c *ticketServiceClient) ListTicketTypes(ctx context.Context, in *ListTicke
 	return out, nil
 }
 
+func (c *ticketServiceClient) UpdateTicketType(ctx context.Context, in *UpdateTicketTypeRequest, opts ...grpc.CallOption) (*UpdateTicketTypeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateTicketTypeResponse)
+	err := c.cc.Invoke(ctx, TicketService_UpdateTicketType_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ticketServiceClient) DeleteTicketType(ctx context.Context, in *DeleteTicketTypeRequest, opts ...grpc.CallOption) (*DeleteTicketTypeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTicketTypeResponse)
+	err := c.cc.Invoke(ctx, TicketService_DeleteTicketType_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ticketServiceClient) CreateTicket(ctx context.Context, in *CreateTicketRequest, opts ...grpc.CallOption) (*CreateTicketResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateTicketResponse)
@@ -99,16 +127,6 @@ func (c *ticketServiceClient) UpdateTicket(ctx context.Context, in *UpdateTicket
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateTicketResponse)
 	err := c.cc.Invoke(ctx, TicketService_UpdateTicket_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ticketServiceClient) TransitionStatus(ctx context.Context, in *TransitionStatusRequest, opts ...grpc.CallOption) (*TransitionStatusResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TransitionStatusResponse)
-	err := c.cc.Invoke(ctx, TicketService_TransitionStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -155,20 +173,45 @@ func (c *ticketServiceClient) ListTickets(ctx context.Context, in *ListTicketsRe
 	return out, nil
 }
 
+func (c *ticketServiceClient) AddComment(ctx context.Context, in *AddCommentRequest, opts ...grpc.CallOption) (*AddCommentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddCommentResponse)
+	err := c.cc.Invoke(ctx, TicketService_AddComment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ticketServiceClient) DeleteTicket(ctx context.Context, in *DeleteTicketRequest, opts ...grpc.CallOption) (*DeleteTicketResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTicketResponse)
+	err := c.cc.Invoke(ctx, TicketService_DeleteTicket_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TicketServiceServer is the server API for TicketService service.
 // All implementations should embed UnimplementedTicketServiceServer
 // for forward compatibility.
 type TicketServiceServer interface {
+	// Ticket Type
 	CreateTicketType(context.Context, *CreateTicketTypeRequest) (*CreateTicketTypeResponse, error)
 	ListTicketTypes(context.Context, *ListTicketTypesRequest) (*ListTicketTypesResponse, error)
+	UpdateTicketType(context.Context, *UpdateTicketTypeRequest) (*UpdateTicketTypeResponse, error)
+	DeleteTicketType(context.Context, *DeleteTicketTypeRequest) (*DeleteTicketTypeResponse, error)
+	// Ticket
 	CreateTicket(context.Context, *CreateTicketRequest) (*CreateTicketResponse, error)
 	GetTicket(context.Context, *GetTicketRequest) (*GetTicketResponse, error)
 	UpdateTicket(context.Context, *UpdateTicketRequest) (*UpdateTicketResponse, error)
-	TransitionStatus(context.Context, *TransitionStatusRequest) (*TransitionStatusResponse, error)
 	AssignTicket(context.Context, *AssignTicketRequest) (*AssignTicketResponse, error)
 	DistributeTickets(context.Context, *DistributeTicketsRequest) (*DistributeTicketsResponse, error)
 	MergeTickets(context.Context, *MergeTicketsRequest) (*MergeTicketsResponse, error)
 	ListTickets(context.Context, *ListTicketsRequest) (*ListTicketsResponse, error)
+	AddComment(context.Context, *AddCommentRequest) (*AddCommentResponse, error)
+	DeleteTicket(context.Context, *DeleteTicketRequest) (*DeleteTicketResponse, error)
 }
 
 // UnimplementedTicketServiceServer should be embedded to have
@@ -184,6 +227,12 @@ func (UnimplementedTicketServiceServer) CreateTicketType(context.Context, *Creat
 func (UnimplementedTicketServiceServer) ListTicketTypes(context.Context, *ListTicketTypesRequest) (*ListTicketTypesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTicketTypes not implemented")
 }
+func (UnimplementedTicketServiceServer) UpdateTicketType(context.Context, *UpdateTicketTypeRequest) (*UpdateTicketTypeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateTicketType not implemented")
+}
+func (UnimplementedTicketServiceServer) DeleteTicketType(context.Context, *DeleteTicketTypeRequest) (*DeleteTicketTypeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteTicketType not implemented")
+}
 func (UnimplementedTicketServiceServer) CreateTicket(context.Context, *CreateTicketRequest) (*CreateTicketResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateTicket not implemented")
 }
@@ -192,9 +241,6 @@ func (UnimplementedTicketServiceServer) GetTicket(context.Context, *GetTicketReq
 }
 func (UnimplementedTicketServiceServer) UpdateTicket(context.Context, *UpdateTicketRequest) (*UpdateTicketResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateTicket not implemented")
-}
-func (UnimplementedTicketServiceServer) TransitionStatus(context.Context, *TransitionStatusRequest) (*TransitionStatusResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method TransitionStatus not implemented")
 }
 func (UnimplementedTicketServiceServer) AssignTicket(context.Context, *AssignTicketRequest) (*AssignTicketResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method AssignTicket not implemented")
@@ -207,6 +253,12 @@ func (UnimplementedTicketServiceServer) MergeTickets(context.Context, *MergeTick
 }
 func (UnimplementedTicketServiceServer) ListTickets(context.Context, *ListTicketsRequest) (*ListTicketsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListTickets not implemented")
+}
+func (UnimplementedTicketServiceServer) AddComment(context.Context, *AddCommentRequest) (*AddCommentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddComment not implemented")
+}
+func (UnimplementedTicketServiceServer) DeleteTicket(context.Context, *DeleteTicketRequest) (*DeleteTicketResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteTicket not implemented")
 }
 func (UnimplementedTicketServiceServer) testEmbeddedByValue() {}
 
@@ -264,6 +316,42 @@ func _TicketService_ListTicketTypes_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TicketService_UpdateTicketType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTicketTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketServiceServer).UpdateTicketType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketService_UpdateTicketType_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketServiceServer).UpdateTicketType(ctx, req.(*UpdateTicketTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TicketService_DeleteTicketType_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTicketTypeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketServiceServer).DeleteTicketType(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketService_DeleteTicketType_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketServiceServer).DeleteTicketType(ctx, req.(*DeleteTicketTypeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TicketService_CreateTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateTicketRequest)
 	if err := dec(in); err != nil {
@@ -314,24 +402,6 @@ func _TicketService_UpdateTicket_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TicketServiceServer).UpdateTicket(ctx, req.(*UpdateTicketRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TicketService_TransitionStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TransitionStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TicketServiceServer).TransitionStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TicketService_TransitionStatus_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TicketServiceServer).TransitionStatus(ctx, req.(*TransitionStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -408,6 +478,42 @@ func _TicketService_ListTickets_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TicketService_AddComment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddCommentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketServiceServer).AddComment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketService_AddComment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketServiceServer).AddComment(ctx, req.(*AddCommentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TicketService_DeleteTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTicketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketServiceServer).DeleteTicket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TicketService_DeleteTicket_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketServiceServer).DeleteTicket(ctx, req.(*DeleteTicketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TicketService_ServiceDesc is the grpc.ServiceDesc for TicketService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -424,6 +530,14 @@ var TicketService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TicketService_ListTicketTypes_Handler,
 		},
 		{
+			MethodName: "UpdateTicketType",
+			Handler:    _TicketService_UpdateTicketType_Handler,
+		},
+		{
+			MethodName: "DeleteTicketType",
+			Handler:    _TicketService_DeleteTicketType_Handler,
+		},
+		{
 			MethodName: "CreateTicket",
 			Handler:    _TicketService_CreateTicket_Handler,
 		},
@@ -434,10 +548,6 @@ var TicketService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateTicket",
 			Handler:    _TicketService_UpdateTicket_Handler,
-		},
-		{
-			MethodName: "TransitionStatus",
-			Handler:    _TicketService_TransitionStatus_Handler,
 		},
 		{
 			MethodName: "AssignTicket",
@@ -454,6 +564,14 @@ var TicketService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTickets",
 			Handler:    _TicketService_ListTickets_Handler,
+		},
+		{
+			MethodName: "AddComment",
+			Handler:    _TicketService_AddComment_Handler,
+		},
+		{
+			MethodName: "DeleteTicket",
+			Handler:    _TicketService_DeleteTicket_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

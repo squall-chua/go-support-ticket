@@ -9,7 +9,7 @@ package apiv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -22,28 +22,77 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type PaginationRequest struct {
+type SortOrder int32
+
+const (
+	SortOrder_SORT_ORDER_UNSPECIFIED SortOrder = 0
+	SortOrder_SORT_ORDER_ASC         SortOrder = 1
+	SortOrder_SORT_ORDER_DESC        SortOrder = 2
+)
+
+// Enum value maps for SortOrder.
+var (
+	SortOrder_name = map[int32]string{
+		0: "SORT_ORDER_UNSPECIFIED",
+		1: "SORT_ORDER_ASC",
+		2: "SORT_ORDER_DESC",
+	}
+	SortOrder_value = map[string]int32{
+		"SORT_ORDER_UNSPECIFIED": 0,
+		"SORT_ORDER_ASC":         1,
+		"SORT_ORDER_DESC":        2,
+	}
+)
+
+func (x SortOrder) Enum() *SortOrder {
+	p := new(SortOrder)
+	*p = x
+	return p
+}
+
+func (x SortOrder) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SortOrder) Descriptor() protoreflect.EnumDescriptor {
+	return file_api_proto_v1_common_proto_enumTypes[0].Descriptor()
+}
+
+func (SortOrder) Type() protoreflect.EnumType {
+	return &file_api_proto_v1_common_proto_enumTypes[0]
+}
+
+func (x SortOrder) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SortOrder.Descriptor instead.
+func (SortOrder) EnumDescriptor() ([]byte, []int) {
+	return file_api_proto_v1_common_proto_rawDescGZIP(), []int{0}
+}
+
+type PageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	PageNumber    int32                  `protobuf:"varint,2,opt,name=page_number,json=pageNumber,proto3" json:"page_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PaginationRequest) Reset() {
-	*x = PaginationRequest{}
+func (x *PageRequest) Reset() {
+	*x = PageRequest{}
 	mi := &file_api_proto_v1_common_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PaginationRequest) String() string {
+func (x *PageRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PaginationRequest) ProtoMessage() {}
+func (*PageRequest) ProtoMessage() {}
 
-func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
+func (x *PageRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_api_proto_v1_common_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,47 +104,47 @@ func (x *PaginationRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PaginationRequest.ProtoReflect.Descriptor instead.
-func (*PaginationRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use PageRequest.ProtoReflect.Descriptor instead.
+func (*PageRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_common_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *PaginationRequest) GetPageSize() int32 {
+func (x *PageRequest) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
 	}
 	return 0
 }
 
-func (x *PaginationRequest) GetPageToken() string {
+func (x *PageRequest) GetPageNumber() int32 {
 	if x != nil {
-		return x.PageToken
+		return x.PageNumber
 	}
-	return ""
+	return 0
 }
 
-type PaginationResponse struct {
+type PageInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	NextPageToken string                 `protobuf:"bytes,1,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
-	TotalSize     int32                  `protobuf:"varint,2,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
+	TotalSize     int32                  `protobuf:"varint,1,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
+	PageNumber    int32                  `protobuf:"varint,2,opt,name=page_number,json=pageNumber,proto3" json:"page_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *PaginationResponse) Reset() {
-	*x = PaginationResponse{}
+func (x *PageInfo) Reset() {
+	*x = PageInfo{}
 	mi := &file_api_proto_v1_common_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *PaginationResponse) String() string {
+func (x *PageInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*PaginationResponse) ProtoMessage() {}
+func (*PageInfo) ProtoMessage() {}
 
-func (x *PaginationResponse) ProtoReflect() protoreflect.Message {
+func (x *PageInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_api_proto_v1_common_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -107,38 +156,99 @@ func (x *PaginationResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use PaginationResponse.ProtoReflect.Descriptor instead.
-func (*PaginationResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use PageInfo.ProtoReflect.Descriptor instead.
+func (*PageInfo) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_common_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PaginationResponse) GetNextPageToken() string {
-	if x != nil {
-		return x.NextPageToken
-	}
-	return ""
-}
-
-func (x *PaginationResponse) GetTotalSize() int32 {
+func (x *PageInfo) GetTotalSize() int32 {
 	if x != nil {
 		return x.TotalSize
 	}
 	return 0
 }
 
+func (x *PageInfo) GetPageNumber() int32 {
+	if x != nil {
+		return x.PageNumber
+	}
+	return 0
+}
+
+type TimeRange struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StartTime     *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime       *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TimeRange) Reset() {
+	*x = TimeRange{}
+	mi := &file_api_proto_v1_common_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TimeRange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TimeRange) ProtoMessage() {}
+
+func (x *TimeRange) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_common_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TimeRange.ProtoReflect.Descriptor instead.
+func (*TimeRange) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_common_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *TimeRange) GetStartTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StartTime
+	}
+	return nil
+}
+
+func (x *TimeRange) GetEndTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EndTime
+	}
+	return nil
+}
+
 var File_api_proto_v1_common_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x19api/proto/v1/common.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"O\n" +
-	"\x11PaginationRequest\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
+	"\x19api/proto/v1/common.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"K\n" +
+	"\vPageRequest\x12\x1b\n" +
+	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1f\n" +
+	"\vpage_number\x18\x02 \x01(\x05R\n" +
+	"pageNumber\"J\n" +
+	"\bPageInfo\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tR\tpageToken\"[\n" +
-	"\x12PaginationResponse\x12&\n" +
-	"\x0fnext_page_token\x18\x01 \x01(\tR\rnextPageToken\x12\x1d\n" +
+	"total_size\x18\x01 \x01(\x05R\ttotalSize\x12\x1f\n" +
+	"\vpage_number\x18\x02 \x01(\x05R\n" +
+	"pageNumber\"}\n" +
+	"\tTimeRange\x129\n" +
 	"\n" +
-	"total_size\x18\x02 \x01(\x05R\ttotalSizeB7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
+	"start_time\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
+	"\bend_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime*P\n" +
+	"\tSortOrder\x12\x1a\n" +
+	"\x16SORT_ORDER_UNSPECIFIED\x10\x00\x12\x12\n" +
+	"\x0eSORT_ORDER_ASC\x10\x01\x12\x13\n" +
+	"\x0fSORT_ORDER_DESC\x10\x02B7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
 
 var (
 	file_api_proto_v1_common_proto_rawDescOnce sync.Once
@@ -152,17 +262,23 @@ func file_api_proto_v1_common_proto_rawDescGZIP() []byte {
 	return file_api_proto_v1_common_proto_rawDescData
 }
 
-var file_api_proto_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_proto_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_api_proto_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_api_proto_v1_common_proto_goTypes = []any{
-	(*PaginationRequest)(nil),  // 0: api.v1.PaginationRequest
-	(*PaginationResponse)(nil), // 1: api.v1.PaginationResponse
+	(SortOrder)(0),                // 0: api.v1.SortOrder
+	(*PageRequest)(nil),           // 1: api.v1.PageRequest
+	(*PageInfo)(nil),              // 2: api.v1.PageInfo
+	(*TimeRange)(nil),             // 3: api.v1.TimeRange
+	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_api_proto_v1_common_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: api.v1.TimeRange.start_time:type_name -> google.protobuf.Timestamp
+	4, // 1: api.v1.TimeRange.end_time:type_name -> google.protobuf.Timestamp
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_common_proto_init() }
@@ -175,13 +291,14 @@ func file_api_proto_v1_common_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_common_proto_rawDesc), len(file_api_proto_v1_common_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   2,
+			NumEnums:      1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_api_proto_v1_common_proto_goTypes,
 		DependencyIndexes: file_api_proto_v1_common_proto_depIdxs,
+		EnumInfos:         file_api_proto_v1_common_proto_enumTypes,
 		MessageInfos:      file_api_proto_v1_common_proto_msgTypes,
 	}.Build()
 	File_api_proto_v1_common_proto = out.File

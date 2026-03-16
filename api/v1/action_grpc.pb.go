@@ -19,18 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ActionService_ListActionSchemas_FullMethodName    = "/api.v1.ActionService/ListActionSchemas"
-	ActionService_SubmitAction_FullMethodName         = "/api.v1.ActionService/SubmitAction"
-	ActionService_ListActionExecutions_FullMethodName = "/api.v1.ActionService/ListActionExecutions"
+	ActionService_ListAvailableActions_FullMethodName = "/api.v1.ActionService/ListAvailableActions"
+	ActionService_ExecuteAction_FullMethodName        = "/api.v1.ActionService/ExecuteAction"
+	ActionService_GetActionExecution_FullMethodName   = "/api.v1.ActionService/GetActionExecution"
+	ActionService_UpdateActionSchema_FullMethodName   = "/api.v1.ActionService/UpdateActionSchema"
 )
 
 // ActionServiceClient is the client API for ActionService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ActionServiceClient interface {
-	ListActionSchemas(ctx context.Context, in *ListActionSchemasRequest, opts ...grpc.CallOption) (*ListActionSchemasResponse, error)
-	SubmitAction(ctx context.Context, in *SubmitActionRequest, opts ...grpc.CallOption) (*SubmitActionResponse, error)
-	ListActionExecutions(ctx context.Context, in *ListActionExecutionsRequest, opts ...grpc.CallOption) (*ListActionExecutionsResponse, error)
+	ListAvailableActions(ctx context.Context, in *ListAvailableActionsRequest, opts ...grpc.CallOption) (*ListAvailableActionsResponse, error)
+	ExecuteAction(ctx context.Context, in *ExecuteActionRequest, opts ...grpc.CallOption) (*ActionExecution, error)
+	GetActionExecution(ctx context.Context, in *GetActionExecutionRequest, opts ...grpc.CallOption) (*ActionExecution, error)
+	UpdateActionSchema(ctx context.Context, in *UpdateActionSchemaRequest, opts ...grpc.CallOption) (*UpdateActionSchemaResponse, error)
 }
 
 type actionServiceClient struct {
@@ -41,30 +43,40 @@ func NewActionServiceClient(cc grpc.ClientConnInterface) ActionServiceClient {
 	return &actionServiceClient{cc}
 }
 
-func (c *actionServiceClient) ListActionSchemas(ctx context.Context, in *ListActionSchemasRequest, opts ...grpc.CallOption) (*ListActionSchemasResponse, error) {
+func (c *actionServiceClient) ListAvailableActions(ctx context.Context, in *ListAvailableActionsRequest, opts ...grpc.CallOption) (*ListAvailableActionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListActionSchemasResponse)
-	err := c.cc.Invoke(ctx, ActionService_ListActionSchemas_FullMethodName, in, out, cOpts...)
+	out := new(ListAvailableActionsResponse)
+	err := c.cc.Invoke(ctx, ActionService_ListAvailableActions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *actionServiceClient) SubmitAction(ctx context.Context, in *SubmitActionRequest, opts ...grpc.CallOption) (*SubmitActionResponse, error) {
+func (c *actionServiceClient) ExecuteAction(ctx context.Context, in *ExecuteActionRequest, opts ...grpc.CallOption) (*ActionExecution, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SubmitActionResponse)
-	err := c.cc.Invoke(ctx, ActionService_SubmitAction_FullMethodName, in, out, cOpts...)
+	out := new(ActionExecution)
+	err := c.cc.Invoke(ctx, ActionService_ExecuteAction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *actionServiceClient) ListActionExecutions(ctx context.Context, in *ListActionExecutionsRequest, opts ...grpc.CallOption) (*ListActionExecutionsResponse, error) {
+func (c *actionServiceClient) GetActionExecution(ctx context.Context, in *GetActionExecutionRequest, opts ...grpc.CallOption) (*ActionExecution, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListActionExecutionsResponse)
-	err := c.cc.Invoke(ctx, ActionService_ListActionExecutions_FullMethodName, in, out, cOpts...)
+	out := new(ActionExecution)
+	err := c.cc.Invoke(ctx, ActionService_GetActionExecution_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *actionServiceClient) UpdateActionSchema(ctx context.Context, in *UpdateActionSchemaRequest, opts ...grpc.CallOption) (*UpdateActionSchemaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateActionSchemaResponse)
+	err := c.cc.Invoke(ctx, ActionService_UpdateActionSchema_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +87,10 @@ func (c *actionServiceClient) ListActionExecutions(ctx context.Context, in *List
 // All implementations should embed UnimplementedActionServiceServer
 // for forward compatibility.
 type ActionServiceServer interface {
-	ListActionSchemas(context.Context, *ListActionSchemasRequest) (*ListActionSchemasResponse, error)
-	SubmitAction(context.Context, *SubmitActionRequest) (*SubmitActionResponse, error)
-	ListActionExecutions(context.Context, *ListActionExecutionsRequest) (*ListActionExecutionsResponse, error)
+	ListAvailableActions(context.Context, *ListAvailableActionsRequest) (*ListAvailableActionsResponse, error)
+	ExecuteAction(context.Context, *ExecuteActionRequest) (*ActionExecution, error)
+	GetActionExecution(context.Context, *GetActionExecutionRequest) (*ActionExecution, error)
+	UpdateActionSchema(context.Context, *UpdateActionSchemaRequest) (*UpdateActionSchemaResponse, error)
 }
 
 // UnimplementedActionServiceServer should be embedded to have
@@ -87,14 +100,17 @@ type ActionServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedActionServiceServer struct{}
 
-func (UnimplementedActionServiceServer) ListActionSchemas(context.Context, *ListActionSchemasRequest) (*ListActionSchemasResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListActionSchemas not implemented")
+func (UnimplementedActionServiceServer) ListAvailableActions(context.Context, *ListAvailableActionsRequest) (*ListAvailableActionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAvailableActions not implemented")
 }
-func (UnimplementedActionServiceServer) SubmitAction(context.Context, *SubmitActionRequest) (*SubmitActionResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method SubmitAction not implemented")
+func (UnimplementedActionServiceServer) ExecuteAction(context.Context, *ExecuteActionRequest) (*ActionExecution, error) {
+	return nil, status.Error(codes.Unimplemented, "method ExecuteAction not implemented")
 }
-func (UnimplementedActionServiceServer) ListActionExecutions(context.Context, *ListActionExecutionsRequest) (*ListActionExecutionsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListActionExecutions not implemented")
+func (UnimplementedActionServiceServer) GetActionExecution(context.Context, *GetActionExecutionRequest) (*ActionExecution, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetActionExecution not implemented")
+}
+func (UnimplementedActionServiceServer) UpdateActionSchema(context.Context, *UpdateActionSchemaRequest) (*UpdateActionSchemaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateActionSchema not implemented")
 }
 func (UnimplementedActionServiceServer) testEmbeddedByValue() {}
 
@@ -116,56 +132,74 @@ func RegisterActionServiceServer(s grpc.ServiceRegistrar, srv ActionServiceServe
 	s.RegisterService(&ActionService_ServiceDesc, srv)
 }
 
-func _ActionService_ListActionSchemas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListActionSchemasRequest)
+func _ActionService_ListAvailableActions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAvailableActionsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ActionServiceServer).ListActionSchemas(ctx, in)
+		return srv.(ActionServiceServer).ListAvailableActions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ActionService_ListActionSchemas_FullMethodName,
+		FullMethod: ActionService_ListAvailableActions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ActionServiceServer).ListActionSchemas(ctx, req.(*ListActionSchemasRequest))
+		return srv.(ActionServiceServer).ListAvailableActions(ctx, req.(*ListAvailableActionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ActionService_SubmitAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubmitActionRequest)
+func _ActionService_ExecuteAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExecuteActionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ActionServiceServer).SubmitAction(ctx, in)
+		return srv.(ActionServiceServer).ExecuteAction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ActionService_SubmitAction_FullMethodName,
+		FullMethod: ActionService_ExecuteAction_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ActionServiceServer).SubmitAction(ctx, req.(*SubmitActionRequest))
+		return srv.(ActionServiceServer).ExecuteAction(ctx, req.(*ExecuteActionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ActionService_ListActionExecutions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListActionExecutionsRequest)
+func _ActionService_GetActionExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetActionExecutionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ActionServiceServer).ListActionExecutions(ctx, in)
+		return srv.(ActionServiceServer).GetActionExecution(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ActionService_ListActionExecutions_FullMethodName,
+		FullMethod: ActionService_GetActionExecution_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ActionServiceServer).ListActionExecutions(ctx, req.(*ListActionExecutionsRequest))
+		return srv.(ActionServiceServer).GetActionExecution(ctx, req.(*GetActionExecutionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ActionService_UpdateActionSchema_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateActionSchemaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ActionServiceServer).UpdateActionSchema(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ActionService_UpdateActionSchema_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ActionServiceServer).UpdateActionSchema(ctx, req.(*UpdateActionSchemaRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -178,16 +212,20 @@ var ActionService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ActionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListActionSchemas",
-			Handler:    _ActionService_ListActionSchemas_Handler,
+			MethodName: "ListAvailableActions",
+			Handler:    _ActionService_ListAvailableActions_Handler,
 		},
 		{
-			MethodName: "SubmitAction",
-			Handler:    _ActionService_SubmitAction_Handler,
+			MethodName: "ExecuteAction",
+			Handler:    _ActionService_ExecuteAction_Handler,
 		},
 		{
-			MethodName: "ListActionExecutions",
-			Handler:    _ActionService_ListActionExecutions_Handler,
+			MethodName: "GetActionExecution",
+			Handler:    _ActionService_GetActionExecution_Handler,
+		},
+		{
+			MethodName: "UpdateActionSchema",
+			Handler:    _ActionService_UpdateActionSchema_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

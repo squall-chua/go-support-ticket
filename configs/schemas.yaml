@@ -1,0 +1,70 @@
+support_ticket:
+  ticket.created:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.updated:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.assigned:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.comment.added:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+approval:
+  approval.requested:
+    queue_type: kafka
+    destinations:
+      - approval-events
+    dlq_postfix: .failed
+  approval.decided:
+    queue_type: kafka
+    destinations:
+      - approval-events
+    dlq_postfix: .failed
+action:
+  action.schema.created:
+    queue_type: kafka
+    destinations:
+      - action-events
+    dlq_postfix: .failed
+  action.execution.status.updated:
+    queue_type: kafka
+    destinations:
+      - action-events
+    dlq_postfix: .failed
+  action.execution.pending_approval:
+    queue_type: kafka
+    destinations:
+      - action-events
+    dlq_postfix: .failed
+audit:
+  audit.log.created:
+    queue_type: kafka
+    destinations:
+      - audit-events
+    dlq_postfix: .failed
+ticket_type:
+  ticket_type.created:
+    queue_type: kafka
+    destinations:
+      - ticket-type-events
+    dlq_postfix: .failed
+  ticket_type.updated:
+    queue_type: kafka
+    destinations:
+      - ticket-type-events
+    dlq_postfix: .failed
+  ticket_type.deleted:
+    queue_type: kafka
+    destinations:
+      - ticket-type-events
+    dlq_postfix: .failed

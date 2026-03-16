@@ -19,16 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ApprovalService_DecideApproval_FullMethodName       = "/api.v1.ApprovalService/DecideApproval"
-	ApprovalService_ListPendingApprovals_FullMethodName = "/api.v1.ApprovalService/ListPendingApprovals"
+	ApprovalService_CreateApproval_FullMethodName = "/api.v1.ApprovalService/CreateApproval"
+	ApprovalService_DecideApproval_FullMethodName = "/api.v1.ApprovalService/DecideApproval"
+	ApprovalService_ListApprovals_FullMethodName  = "/api.v1.ApprovalService/ListApprovals"
 )
 
 // ApprovalServiceClient is the client API for ApprovalService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ApprovalServiceClient interface {
+	CreateApproval(ctx context.Context, in *CreateApprovalRequest, opts ...grpc.CallOption) (*CreateApprovalResponse, error)
 	DecideApproval(ctx context.Context, in *DecideApprovalRequest, opts ...grpc.CallOption) (*DecideApprovalResponse, error)
-	ListPendingApprovals(ctx context.Context, in *ListPendingApprovalsRequest, opts ...grpc.CallOption) (*ListPendingApprovalsResponse, error)
+	ListApprovals(ctx context.Context, in *ListApprovalsRequest, opts ...grpc.CallOption) (*ListApprovalsResponse, error)
 }
 
 type approvalServiceClient struct {
@@ -37,6 +39,16 @@ type approvalServiceClient struct {
 
 func NewApprovalServiceClient(cc grpc.ClientConnInterface) ApprovalServiceClient {
 	return &approvalServiceClient{cc}
+}
+
+func (c *approvalServiceClient) CreateApproval(ctx context.Context, in *CreateApprovalRequest, opts ...grpc.CallOption) (*CreateApprovalResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateApprovalResponse)
+	err := c.cc.Invoke(ctx, ApprovalService_CreateApproval_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *approvalServiceClient) DecideApproval(ctx context.Context, in *DecideApprovalRequest, opts ...grpc.CallOption) (*DecideApprovalResponse, error) {
@@ -49,10 +61,10 @@ func (c *approvalServiceClient) DecideApproval(ctx context.Context, in *DecideAp
 	return out, nil
 }
 
-func (c *approvalServiceClient) ListPendingApprovals(ctx context.Context, in *ListPendingApprovalsRequest, opts ...grpc.CallOption) (*ListPendingApprovalsResponse, error) {
+func (c *approvalServiceClient) ListApprovals(ctx context.Context, in *ListApprovalsRequest, opts ...grpc.CallOption) (*ListApprovalsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListPendingApprovalsResponse)
-	err := c.cc.Invoke(ctx, ApprovalService_ListPendingApprovals_FullMethodName, in, out, cOpts...)
+	out := new(ListApprovalsResponse)
+	err := c.cc.Invoke(ctx, ApprovalService_ListApprovals_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +75,9 @@ func (c *approvalServiceClient) ListPendingApprovals(ctx context.Context, in *Li
 // All implementations should embed UnimplementedApprovalServiceServer
 // for forward compatibility.
 type ApprovalServiceServer interface {
+	CreateApproval(context.Context, *CreateApprovalRequest) (*CreateApprovalResponse, error)
 	DecideApproval(context.Context, *DecideApprovalRequest) (*DecideApprovalResponse, error)
-	ListPendingApprovals(context.Context, *ListPendingApprovalsRequest) (*ListPendingApprovalsResponse, error)
+	ListApprovals(context.Context, *ListApprovalsRequest) (*ListApprovalsResponse, error)
 }
 
 // UnimplementedApprovalServiceServer should be embedded to have
@@ -74,11 +87,14 @@ type ApprovalServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedApprovalServiceServer struct{}
 
+func (UnimplementedApprovalServiceServer) CreateApproval(context.Context, *CreateApprovalRequest) (*CreateApprovalResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateApproval not implemented")
+}
 func (UnimplementedApprovalServiceServer) DecideApproval(context.Context, *DecideApprovalRequest) (*DecideApprovalResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DecideApproval not implemented")
 }
-func (UnimplementedApprovalServiceServer) ListPendingApprovals(context.Context, *ListPendingApprovalsRequest) (*ListPendingApprovalsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListPendingApprovals not implemented")
+func (UnimplementedApprovalServiceServer) ListApprovals(context.Context, *ListApprovalsRequest) (*ListApprovalsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListApprovals not implemented")
 }
 func (UnimplementedApprovalServiceServer) testEmbeddedByValue() {}
 
@@ -100,6 +116,24 @@ func RegisterApprovalServiceServer(s grpc.ServiceRegistrar, srv ApprovalServiceS
 	s.RegisterService(&ApprovalService_ServiceDesc, srv)
 }
 
+func _ApprovalService_CreateApproval_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateApprovalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApprovalServiceServer).CreateApproval(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ApprovalService_CreateApproval_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApprovalServiceServer).CreateApproval(ctx, req.(*CreateApprovalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ApprovalService_DecideApproval_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DecideApprovalRequest)
 	if err := dec(in); err != nil {
@@ -118,20 +152,20 @@ func _ApprovalService_DecideApproval_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApprovalService_ListPendingApprovals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListPendingApprovalsRequest)
+func _ApprovalService_ListApprovals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListApprovalsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApprovalServiceServer).ListPendingApprovals(ctx, in)
+		return srv.(ApprovalServiceServer).ListApprovals(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ApprovalService_ListPendingApprovals_FullMethodName,
+		FullMethod: ApprovalService_ListApprovals_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApprovalServiceServer).ListPendingApprovals(ctx, req.(*ListPendingApprovalsRequest))
+		return srv.(ApprovalServiceServer).ListApprovals(ctx, req.(*ListApprovalsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -144,12 +178,16 @@ var ApprovalService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ApprovalServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "CreateApproval",
+			Handler:    _ApprovalService_CreateApproval_Handler,
+		},
+		{
 			MethodName: "DecideApproval",
 			Handler:    _ApprovalService_DecideApproval_Handler,
 		},
 		{
-			MethodName: "ListPendingApprovals",
-			Handler:    _ApprovalService_ListPendingApprovals_Handler,
+			MethodName: "ListApprovals",
+			Handler:    _ApprovalService_ListApprovals_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

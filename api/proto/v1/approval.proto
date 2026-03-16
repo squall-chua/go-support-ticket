@@ -7,6 +7,7 @@ option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
 import "google/protobuf/timestamp.proto";
 import "api/proto/v1/common.proto";
 import "google/api/annotations.proto";
+import "api/proto/v1/options.proto";
 
 message ApprovalConfig {
   string action = 1;
@@ -15,16 +16,24 @@ message ApprovalConfig {
   repeated string eligible_roles = 4;
 }
 
+enum ApprovalStatus {
+  APPROVAL_STATUS_UNSPECIFIED = 0;
+  APPROVAL_STATUS_PENDING = 1;
+  APPROVAL_STATUS_APPROVED = 2;
+  APPROVAL_STATUS_REJECTED = 3;
+}
+
 message ApprovalRequestData {
   string id = 1;
   string ticket_id = 2;
   string action = 3;
-  string requester = 4;
-  string status = 5; // PENDING, APPROVED, REJECTED
-  int32 required_approvals = 6;
-  repeated ApprovalDecision decisions = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
+  string execution_id = 4;
+  string requester = 5;
+  ApprovalStatus status = 6;
+  int32 required_approvals = 7;
+  repeated ApprovalDecision decisions = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
 }
 
 message ApprovalDecision {
@@ -44,25 +53,61 @@ message DecideApprovalResponse {
   ApprovalRequestData request = 1;
 }
 
-message ListPendingApprovalsRequest {
-  PaginationRequest pagination = 1;
+message CreateApprovalRequest {
+  string ticket_id = 1;
+  string action = 2;
+  string execution_id = 3;
 }
 
-message ListPendingApprovalsResponse {
+message CreateApprovalResponse {
+  ApprovalRequestData request = 1;
+}
+
+message ListApprovalsRequest {
+  repeated string ticket_ids = 1;
+  repeated string actions = 2;
+  repeated string requesters = 3;
+  repeated ApprovalStatus statuses = 4;
+  repeated string execution_ids = 5;
+  repeated int32 required_approvals = 6;
+  repeated string approvers = 7;
+  TimeRange time_range = 8;
+  PageRequest pagination = 9;
+}
+
+message ListApprovalsResponse {
   repeated ApprovalRequestData requests = 1;
-  PaginationResponse pagination = 2;
+  PageInfo pagination = 2;
 }
 
 service ApprovalService {
-  rpc DecideApproval(DecideApprovalRequest) returns (DecideApprovalResponse) {
+  rpc CreateApproval(CreateApprovalRequest) returns (CreateApprovalResponse) {
     option (google.api.http) = {
-      post: "/v1/approvals/{approval_request_id}/decide"
+      post: "/api/v1/approvals"
       body: "*"
     };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:approvals"]
+      required_roles: ["admin", "agent", "system"]
+    };
   }
-  rpc ListPendingApprovals(ListPendingApprovalsRequest) returns (ListPendingApprovalsResponse) {
+  rpc DecideApproval(DecideApprovalRequest) returns (DecideApprovalResponse) {
     option (google.api.http) = {
-      get: "/v1/approvals/pending"
+      post: "/api/v1/approvals/{approval_request_id}/decide"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:approvals"]
+      required_roles: ["admin", "approver"]
+    };
+  }
+  rpc ListApprovals(ListApprovalsRequest) returns (ListApprovalsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approvals"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:approvals"]
+      required_roles: ["admin", "approver", "agent"]
     };
   }
 }

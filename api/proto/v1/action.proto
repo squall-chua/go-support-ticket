@@ -5,17 +5,30 @@ package api.v1;
 option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 import "api/proto/v1/common.proto";
 import "google/api/annotations.proto";
+import "api/proto/v1/options.proto";
 
 enum FieldType {
   FIELD_TYPE_UNSPECIFIED = 0;
   FIELD_TYPE_STRING = 1;
-  FIELD_TYPE_NUMBER = 2;
-  FIELD_TYPE_BOOLEAN = 3;
-  FIELD_TYPE_ENUM = 4;
-  FIELD_TYPE_OBJECT = 5;
-  FIELD_TYPE_ARRAY = 6;
+  FIELD_TYPE_INTEGER = 2;
+  FIELD_TYPE_FLOAT = 3;
+  FIELD_TYPE_BOOLEAN = 4;
+  FIELD_TYPE_ENUM = 5;
+  FIELD_TYPE_OBJECT = 6;
+  FIELD_TYPE_ARRAY = 7;
+}
+
+enum ActionStatus {
+  ACTION_STATUS_UNSPECIFIED = 0;
+  ACTION_STATUS_PENDING_APPROVAL = 1;
+  ACTION_STATUS_PENDING = 2;
+  ACTION_STATUS_IN_PROGRESS = 3;
+  ACTION_STATUS_COMPLETED = 4;
+  ACTION_STATUS_FAILED = 5;
+  ACTION_STATUS_REJECTED = 6;
 }
 
 message ActionParameter {
@@ -24,7 +37,7 @@ message ActionParameter {
   bool required = 3;
   repeated string enum_values = 4;
   string description = 5;
-  string default_value = 6;
+  google.protobuf.Value default_value = 6;
 }
 
 message ActionResultField {
@@ -42,61 +55,98 @@ message ActionSchema {
   repeated ActionParameter parameters = 5;
   repeated ActionResultField result_schema = 6;
   bool require_approval = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
 }
 
 message ActionExecution {
   string id = 1;
   string ticket_id = 2;
   string action_type = 3;
-  string status = 4; // PENDING_APPROVAL, PENDING, IN_PROGRESS, COMPLETED, FAILED, REJECTED
-  map<string, string> parameters = 5;
-  map<string, string> result_metadata = 6;
-  string executing_user = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
+  ActionStatus status = 4;
+  map<string, google.protobuf.Value> parameters = 5;
+  map<string, google.protobuf.Value> result_metadata = 6;
+  string error = 7;
+  string logs = 8;
+  string executing_user = 9;
+  google.protobuf.Timestamp execute_at = 10;
+  google.protobuf.Timestamp completed_at = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
 }
 
-message ListActionSchemasRequest {}
+message ListAvailableActionsRequest {
+  repeated string ids = 1;
+  repeated string action_types = 2;
+  string display_name = 3;
+  optional bool require_approval = 4;
+  TimeRange time_range = 5;
+  PageRequest pagination = 6;
+}
 
-message ListActionSchemasResponse {
+message ListAvailableActionsResponse {
   repeated ActionSchema schemas = 1;
+  PageInfo pagination = 2;
 }
 
-message SubmitActionRequest {
+message ExecuteActionRequest {
   string ticket_id = 1;
   string action_type = 2;
-  map<string, string> parameters = 3;
+  map<string, google.protobuf.Value> parameters = 3;
 }
 
-message SubmitActionResponse {
-  ActionExecution execution = 1;
+message GetActionExecutionRequest {
+  string execution_id = 1;
 }
 
-message ListActionExecutionsRequest {
-  string ticket_id = 1;
-  PaginationRequest pagination = 2;
+message UpdateActionSchemaRequest {
+  string action_type = 1;
+  optional string display_name = 2;
+  optional string description = 3;
+  repeated ActionParameter parameters = 4;
+  repeated ActionResultField result_schema = 5;
+  optional bool require_approval = 6;
 }
 
-message ListActionExecutionsResponse {
-  repeated ActionExecution executions = 1;
-  PaginationResponse pagination = 2;
+message UpdateActionSchemaResponse {
+  ActionSchema schema = 1;
 }
 
 service ActionService {
-  rpc ListActionSchemas(ListActionSchemasRequest) returns (ListActionSchemasResponse) {
+  rpc ListAvailableActions(ListAvailableActionsRequest) returns (ListAvailableActionsResponse) {
     option (google.api.http) = {
-      get: "/v1/action-schemas"
+      get: "/api/v1/actions"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:actions"]
     };
   }
-  rpc SubmitAction(SubmitActionRequest) returns (SubmitActionResponse) {
+  rpc ExecuteAction(ExecuteActionRequest) returns (ActionExecution) {
     option (google.api.http) = {
-      post: "/v1/actions"
+      post: "/api/v1/actions"
       body: "*"
     };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:actions"]
+      required_roles: ["admin", "agent"]
+    };
   }
-  rpc ListActionExecutions(ListActionExecutionsRequest) returns (ListActionExecutionsResponse) {
+  rpc GetActionExecution(GetActionExecutionRequest) returns (ActionExecution) {
     option (google.api.http) = {
-      get: "/v1/tickets/{ticket_id}/action-executions"
+      get: "/api/v1/action-executions/{execution_id}"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:actions"]
+    };
+  }
+  rpc UpdateActionSchema(UpdateActionSchemaRequest) returns (UpdateActionSchemaResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/action-schemas/{action_type}"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:actions"]
+      required_roles: ["admin"]
     };
   }
 }

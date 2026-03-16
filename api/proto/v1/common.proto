@@ -6,12 +6,23 @@ option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
 
 import "google/protobuf/timestamp.proto";
 
-message PaginationRequest {
+message PageRequest {
   int32 page_size = 1;
-  string page_token = 2;
+  int32 page_number = 2;
 }
 
-message PaginationResponse {
-  string next_page_token = 1;
-  int32 total_size = 2;
+message PageInfo {
+  int32 total_size = 1;
+  int32 page_number = 2;
+}
+
+message TimeRange {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time = 2;
+}
+
+enum SortOrder {
+  SORT_ORDER_UNSPECIFIED = 0;
+  SORT_ORDER_ASC = 1;
+  SORT_ORDER_DESC = 2;
 }

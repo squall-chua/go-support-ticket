@@ -1,21 +1,17 @@
 package repository
 
-// Repositories is a container for all domain repositories.
-type Repositories struct {
-	Tickets       TicketRepository
-	Audit         AuditRepository
-	Approvals     ApprovalRepository
-	ActionSchemas ActionSchemaRepository
-	Executions    ActionExecutionRepository
-}
+import (
+	"go.mongodb.org/mongo-driver/v2/mongo"
+)
 
-// NewRepositories creates and wires up all the necessary repositories.
-func NewRepositories(connector DBConnector) *Repositories {
+// NewRepositories initializes and returns all domain repositories using MongoDB.
+func NewRepositories(db *mongo.Database) *Repositories {
 	return &Repositories{
-		Tickets:       NewTicketRepository(connector),
-		Audit:         NewAuditRepository(connector),
-		Approvals:     NewApprovalRepository(connector),
-		ActionSchemas: NewActionSchemaRepository(connector),
-		Executions:    NewActionExecutionRepository(connector),
+		Tickets:       NewTicketRepo(db.Collection("tickets")),
+		TicketTypes:   NewTicketTypeRepo(db.Collection("ticket_types")),
+		Audit:         NewAuditRepo(db.Collection("audit_logs")),
+		Approvals:     NewApprovalRepo(db.Collection("approvals")),
+		ActionSchemas: NewActionSchemaRepo(db.Collection("action_schemas")),
+		Executions:    NewActionExecutionRepo(db.Collection("action_executions")),
 	}
 }

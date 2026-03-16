@@ -25,14 +25,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/action-schemas": {
+    "/api/v1/action-executions/{executionId}": {
       "get": {
-        "operationId": "ActionService_ListActionSchemas",
+        "operationId": "ActionService_GetActionExecution",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ListActionSchemasResponse"
+              "$ref": "#/definitions/v1ActionExecution"
             }
           },
           "default": {
@@ -42,19 +42,147 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "tags": [
           "ActionService"
         ]
       }
     },
-    "/v1/actions": {
-      "post": {
-        "operationId": "ActionService_SubmitAction",
+    "/api/v1/action-schemas/{actionType}": {
+      "put": {
+        "operationId": "ActionService_UpdateActionSchema",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1SubmitActionResponse"
+              "$ref": "#/definitions/v1UpdateActionSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "actionType",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ActionServiceUpdateActionSchemaBody"
+            }
+          }
+        ],
+        "tags": [
+          "ActionService"
+        ]
+      }
+    },
+    "/api/v1/actions": {
+      "get": {
+        "operationId": "ActionService_ListAvailableActions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListAvailableActionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "actionTypes",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "displayName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "requireApproval",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "timeRange.startTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "timeRange.endTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "pagination.pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pagination.pageNumber",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "ActionService"
+        ]
+      },
+      "post": {
+        "operationId": "ActionService_ExecuteAction",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ActionExecution"
             }
           },
           "default": {
@@ -70,7 +198,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1SubmitActionRequest"
+              "$ref": "#/definitions/v1ExecuteActionRequest"
             }
           }
         ],
@@ -79,14 +207,14 @@
         ]
       }
     },
-    "/v1/approvals/pending": {
+    "/api/v1/approvals": {
       "get": {
-        "operationId": "ApprovalService_ListPendingApprovals",
+        "operationId": "ApprovalService_ListApprovals",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ListPendingApprovalsResponse"
+              "$ref": "#/definitions/v1ListApprovalsResponse"
             }
           },
           "default": {
@@ -98,6 +226,97 @@
         },
         "parameters": [
           {
+            "name": "ticketIds",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "actions",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "requesters",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "APPROVAL_STATUS_UNSPECIFIED",
+                "APPROVAL_STATUS_PENDING",
+                "APPROVAL_STATUS_APPROVED",
+                "APPROVAL_STATUS_REJECTED"
+              ]
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "executionIds",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "requiredApprovals",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "approvers",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "timeRange.startTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "timeRange.endTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
             "name": "pagination.pageSize",
             "in": "query",
             "required": false,
@@ -105,10 +324,41 @@
             "format": "int32"
           },
           {
-            "name": "pagination.pageToken",
+            "name": "pagination.pageNumber",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "ApprovalService"
+        ]
+      },
+      "post": {
+        "operationId": "ApprovalService_CreateApproval",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateApprovalResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateApprovalRequest"
+            }
           }
         ],
         "tags": [
@@ -116,7 +366,7 @@
         ]
       }
     },
-    "/v1/approvals/{approvalRequestId}/decide": {
+    "/api/v1/approvals/{approvalRequestId}/decide": {
       "post": {
         "operationId": "ApprovalService_DecideApproval",
         "responses": {
@@ -154,7 +404,7 @@
         ]
       }
     },
-    "/v1/ticket-types": {
+    "/api/v1/ticket-types": {
       "get": {
         "operationId": "TicketService_ListTicketTypes",
         "responses": {
@@ -171,11 +421,70 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "displayName",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "requireApproval",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "autoVisible",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "activated",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "pagination.pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pagination.pageNumber",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
         "tags": [
           "TicketService"
         ]
       },
       "post": {
+        "summary": "Ticket Type",
         "operationId": "TicketService_CreateTicketType",
         "responses": {
           "200": {
@@ -206,7 +515,73 @@
         ]
       }
     },
-    "/v1/tickets": {
+    "/api/v1/ticket-types/{id}": {
+      "delete": {
+        "operationId": "TicketService_DeleteTicketType",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteTicketTypeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TicketService"
+        ]
+      },
+      "put": {
+        "operationId": "TicketService_UpdateTicketType",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateTicketTypeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TicketServiceUpdateTicketTypeBody"
+            }
+          }
+        ],
+        "tags": [
+          "TicketService"
+        ]
+      }
+    },
+    "/api/v1/tickets": {
       "get": {
         "operationId": "TicketService_ListTickets",
         "responses": {
@@ -225,16 +600,108 @@
         },
         "parameters": [
           {
-            "name": "status",
+            "name": "statuses",
+            "description": "Filtering",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TICKET_STATUS_UNSPECIFIED",
+                "TICKET_STATUS_OPEN",
+                "TICKET_STATUS_IN_PROGRESS",
+                "TICKET_STATUS_PENDING_APPROVAL",
+                "TICKET_STATUS_RESOLVED",
+                "TICKET_STATUS_CLOSED",
+                "TICKET_STATUS_MERGED"
+              ]
+            },
+            "collectionFormat": "multi"
           },
           {
             "name": "assignedTo",
             "in": "query",
             "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "titleContains",
+            "in": "query",
+            "required": false,
             "type": "string"
+          },
+          {
+            "name": "descriptionContains",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ticketType",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TICKET_PRIORITY_UNSPECIFIED",
+                "TICKET_PRIORITY_LOW",
+                "TICKET_PRIORITY_MEDIUM",
+                "TICKET_PRIORITY_HIGH",
+                "TICKET_PRIORITY_URGENT"
+              ]
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "customerId",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "createdBy",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "mergedInto",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "metadata",
+            "in": "query",
+            "required": false
           },
           {
             "name": "pagination.pageSize",
@@ -244,10 +711,17 @@
             "format": "int32"
           },
           {
-            "name": "pagination.pageToken",
+            "name": "pagination.pageNumber",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
@@ -255,6 +729,7 @@
         ]
       },
       "post": {
+        "summary": "Ticket",
         "operationId": "TicketService_CreateTicket",
         "responses": {
           "200": {
@@ -285,7 +760,7 @@
         ]
       }
     },
-    "/v1/tickets/distribute": {
+    "/api/v1/tickets/distribute": {
       "post": {
         "operationId": "TicketService_DistributeTickets",
         "responses": {
@@ -317,7 +792,7 @@
         ]
       }
     },
-    "/v1/tickets/merge": {
+    "/api/v1/tickets/merge": {
       "post": {
         "operationId": "TicketService_MergeTickets",
         "responses": {
@@ -349,7 +824,7 @@
         ]
       }
     },
-    "/v1/tickets/{ticketId}": {
+    "/api/v1/tickets/{ticketId}": {
       "get": {
         "operationId": "TicketService_GetTicket",
         "responses": {
@@ -357,6 +832,34 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/v1GetTicketResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "TicketService"
+        ]
+      },
+      "delete": {
+        "operationId": "TicketService_DeleteTicket",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteTicketResponse"
             }
           },
           "default": {
@@ -415,50 +918,7 @@
         ]
       }
     },
-    "/v1/tickets/{ticketId}/action-executions": {
-      "get": {
-        "operationId": "ActionService_ListActionExecutions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1ListActionExecutionsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "ticketId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "pagination.pageSize",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "pagination.pageToken",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "ActionService"
-        ]
-      }
-    },
-    "/v1/tickets/{ticketId}/assign": {
+    "/api/v1/tickets/{ticketId}/assign": {
       "post": {
         "operationId": "TicketService_AssignTicket",
         "responses": {
@@ -496,7 +956,7 @@
         ]
       }
     },
-    "/v1/tickets/{ticketId}/audit-trail": {
+    "/api/v1/tickets/{ticketId}/audit-trail": {
       "get": {
         "operationId": "AuditService_ListAuditTrail",
         "responses": {
@@ -528,10 +988,11 @@
             "format": "int32"
           },
           {
-            "name": "pagination.pageToken",
+            "name": "pagination.pageNumber",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -539,14 +1000,14 @@
         ]
       }
     },
-    "/v1/tickets/{ticketId}/status": {
+    "/api/v1/tickets/{ticketId}/comments": {
       "post": {
-        "operationId": "TicketService_TransitionStatus",
+        "operationId": "TicketService_AddComment",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1TransitionStatusResponse"
+              "$ref": "#/definitions/v1AddCommentResponse"
             }
           },
           "default": {
@@ -568,7 +1029,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/TicketServiceTransitionStatusBody"
+              "$ref": "#/definitions/TicketServiceAddCommentBody"
             }
           }
         ],
@@ -579,6 +1040,34 @@
     }
   },
   "definitions": {
+    "ActionServiceUpdateActionSchemaBody": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ActionParameter"
+          }
+        },
+        "resultSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ActionResultField"
+          }
+        },
+        "requireApproval": {
+          "type": "boolean"
+        }
+      }
+    },
     "ApprovalServiceDecideApprovalBody": {
       "type": "object",
       "properties": {
@@ -590,18 +1079,25 @@
         }
       }
     },
+    "TicketServiceAddCommentBody": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
     "TicketServiceAssignTicketBody": {
       "type": "object",
       "properties": {
         "assignTo": {
-          "type": "string"
-        }
-      }
-    },
-    "TicketServiceTransitionStatusBody": {
-      "type": "object",
-      "properties": {
-        "newStatus": {
           "type": "string"
         }
       }
@@ -616,7 +1112,37 @@
           "type": "string"
         },
         "priority": {
+          "$ref": "#/definitions/v1TicketPriority"
+        },
+        "ticketType": {
           "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/v1TicketStatus"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "TicketServiceUpdateTicketTypeBody": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "requireApproval": {
+          "type": "boolean"
+        },
+        "autoVisible": {
+          "type": "boolean"
+        },
+        "activated": {
+          "type": "boolean"
         }
       }
     },
@@ -628,6 +1154,14 @@
         }
       },
       "additionalProperties": {}
+    },
+    "protobufNullValue": {
+      "type": "string",
+      "enum": [
+        "NULL_VALUE"
+      ],
+      "default": "NULL_VALUE",
+      "description": "`NullValue` is a singleton enumeration to represent the null value for the\n`Value` type union.\n\nThe JSON representation for `NullValue` is JSON `null`.\n\n - NULL_VALUE: Null value."
     },
     "rpcStatus": {
       "type": "object",
@@ -661,23 +1195,32 @@
           "type": "string"
         },
         "status": {
-          "type": "string",
-          "title": "PENDING_APPROVAL, PENDING, IN_PROGRESS, COMPLETED, FAILED, REJECTED"
+          "$ref": "#/definitions/v1ActionStatus"
         },
         "parameters": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "additionalProperties": {}
         },
         "resultMetadata": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "additionalProperties": {}
+        },
+        "error": {
+          "type": "string"
+        },
+        "logs": {
+          "type": "string"
         },
         "executingUser": {
           "type": "string"
+        },
+        "executeAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
         },
         "createdAt": {
           "type": "string",
@@ -710,9 +1253,7 @@
         "description": {
           "type": "string"
         },
-        "defaultValue": {
-          "type": "string"
-        }
+        "defaultValue": {}
       }
     },
     "v1ActionResultField": {
@@ -767,6 +1308,35 @@
         },
         "requireApproval": {
           "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1ActionStatus": {
+      "type": "string",
+      "enum": [
+        "ACTION_STATUS_UNSPECIFIED",
+        "ACTION_STATUS_PENDING_APPROVAL",
+        "ACTION_STATUS_PENDING",
+        "ACTION_STATUS_IN_PROGRESS",
+        "ACTION_STATUS_COMPLETED",
+        "ACTION_STATUS_FAILED",
+        "ACTION_STATUS_REJECTED"
+      ],
+      "default": "ACTION_STATUS_UNSPECIFIED"
+    },
+    "v1AddCommentResponse": {
+      "type": "object",
+      "properties": {
+        "comment": {
+          "$ref": "#/definitions/v1Comment"
         }
       }
     },
@@ -800,12 +1370,14 @@
         "action": {
           "type": "string"
         },
+        "executionId": {
+          "type": "string"
+        },
         "requester": {
           "type": "string"
         },
         "status": {
-          "type": "string",
-          "title": "PENDING, APPROVED, REJECTED"
+          "$ref": "#/definitions/v1ApprovalStatus"
         },
         "requiredApprovals": {
           "type": "integer",
@@ -828,6 +1400,16 @@
         }
       }
     },
+    "v1ApprovalStatus": {
+      "type": "string",
+      "enum": [
+        "APPROVAL_STATUS_UNSPECIFIED",
+        "APPROVAL_STATUS_PENDING",
+        "APPROVAL_STATUS_APPROVED",
+        "APPROVAL_STATUS_REJECTED"
+      ],
+      "default": "APPROVAL_STATUS_UNSPECIFIED"
+    },
     "v1AssignTicketResponse": {
       "type": "object",
       "properties": {
@@ -845,21 +1427,66 @@
         "ticketId": {
           "type": "string"
         },
-        "actor": {
+        "userId": {
           "type": "string"
         },
         "action": {
           "type": "string"
         },
+        "details": {
+          "type": "string"
+        },
         "metadata": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "additionalProperties": {}
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "v1Comment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "v1CreateApprovalRequest": {
+      "type": "object",
+      "properties": {
+        "ticketId": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "executionId": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateApprovalResponse": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/definitions/v1ApprovalRequestData"
         }
       }
     },
@@ -876,10 +1503,14 @@
           "type": "string"
         },
         "priority": {
-          "type": "string"
+          "$ref": "#/definitions/v1TicketPriority"
         },
         "customerId": {
           "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
         }
       }
     },
@@ -908,6 +1539,9 @@
         },
         "autoVisible": {
           "type": "boolean"
+        },
+        "activated": {
+          "type": "boolean"
         }
       }
     },
@@ -927,6 +1561,17 @@
         }
       }
     },
+    "v1DeleteTicketResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1DeleteTicketTypeResponse": {
+      "type": "object"
+    },
     "v1DistributeTicketsRequest": {
       "type": "object",
       "properties": {
@@ -942,12 +1587,24 @@
     "v1DistributeTicketsResponse": {
       "type": "object",
       "properties": {
-        "results": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1TicketAssignmentResult"
-          }
+        "modifiedCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1ExecuteActionRequest": {
+      "type": "object",
+      "properties": {
+        "ticketId": {
+          "type": "string"
+        },
+        "actionType": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {}
         }
       }
     },
@@ -956,7 +1613,8 @@
       "enum": [
         "FIELD_TYPE_UNSPECIFIED",
         "FIELD_TYPE_STRING",
-        "FIELD_TYPE_NUMBER",
+        "FIELD_TYPE_INTEGER",
+        "FIELD_TYPE_FLOAT",
         "FIELD_TYPE_BOOLEAN",
         "FIELD_TYPE_ENUM",
         "FIELD_TYPE_OBJECT",
@@ -972,30 +1630,18 @@
         }
       }
     },
-    "v1ListActionExecutionsResponse": {
+    "v1ListApprovalsResponse": {
       "type": "object",
       "properties": {
-        "executions": {
+        "requests": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1ActionExecution"
+            "$ref": "#/definitions/v1ApprovalRequestData"
           }
         },
         "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
-        }
-      }
-    },
-    "v1ListActionSchemasResponse": {
-      "type": "object",
-      "properties": {
-        "schemas": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1ActionSchema"
-          }
+          "$ref": "#/definitions/v1PageInfo"
         }
       }
     },
@@ -1010,22 +1656,22 @@
           }
         },
         "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
+          "$ref": "#/definitions/v1PageInfo"
         }
       }
     },
-    "v1ListPendingApprovalsResponse": {
+    "v1ListAvailableActionsResponse": {
       "type": "object",
       "properties": {
-        "requests": {
+        "schemas": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1ApprovalRequestData"
+            "$ref": "#/definitions/v1ActionSchema"
           }
         },
         "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
+          "$ref": "#/definitions/v1PageInfo"
         }
       }
     },
@@ -1038,6 +1684,9 @@
             "type": "object",
             "$ref": "#/definitions/v1TicketType"
           }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1PageInfo"
         }
       }
     },
@@ -1052,7 +1701,7 @@
           }
         },
         "pagination": {
-          "$ref": "#/definitions/v1PaginationResponse"
+          "$ref": "#/definitions/v1PageInfo"
         }
       }
     },
@@ -1079,54 +1728,40 @@
         }
       }
     },
-    "v1PaginationRequest": {
+    "v1PageInfo": {
+      "type": "object",
+      "properties": {
+        "totalSize": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pageNumber": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1PageRequest": {
       "type": "object",
       "properties": {
         "pageSize": {
           "type": "integer",
           "format": "int32"
         },
-        "pageToken": {
-          "type": "string"
-        }
-      }
-    },
-    "v1PaginationResponse": {
-      "type": "object",
-      "properties": {
-        "nextPageToken": {
-          "type": "string"
-        },
-        "totalSize": {
+        "pageNumber": {
           "type": "integer",
           "format": "int32"
         }
       }
     },
-    "v1SubmitActionRequest": {
-      "type": "object",
-      "properties": {
-        "ticketId": {
-          "type": "string"
-        },
-        "actionType": {
-          "type": "string"
-        },
-        "parameters": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "v1SubmitActionResponse": {
-      "type": "object",
-      "properties": {
-        "execution": {
-          "$ref": "#/definitions/v1ActionExecution"
-        }
-      }
+    "v1SortOrder": {
+      "type": "string",
+      "enum": [
+        "SORT_ORDER_UNSPECIFIED",
+        "SORT_ORDER_ASC",
+        "SORT_ORDER_DESC"
+      ],
+      "default": "SORT_ORDER_UNSPECIFIED"
     },
     "v1Ticket": {
       "type": "object",
@@ -1144,12 +1779,10 @@
           "type": "string"
         },
         "status": {
-          "type": "string",
-          "title": "OPEN, IN_PROGRESS, PENDING_APPROVAL, RESOLVED, CLOSED, MERGED"
+          "$ref": "#/definitions/v1TicketStatus"
         },
         "priority": {
-          "type": "string",
-          "title": "LOW, MEDIUM, HIGH, URGENT"
+          "$ref": "#/definitions/v1TicketPriority"
         },
         "customerId": {
           "type": "string"
@@ -1163,11 +1796,26 @@
         "mergedInto": {
           "type": "string"
         },
+        "comments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Comment"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
         },
         "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
           "type": "string",
           "format": "date-time"
         }
@@ -1184,19 +1832,50 @@
         }
       }
     },
-    "v1TicketAssignmentResult": {
+    "v1TicketPriority": {
+      "type": "string",
+      "enum": [
+        "TICKET_PRIORITY_UNSPECIFIED",
+        "TICKET_PRIORITY_LOW",
+        "TICKET_PRIORITY_MEDIUM",
+        "TICKET_PRIORITY_HIGH",
+        "TICKET_PRIORITY_URGENT"
+      ],
+      "default": "TICKET_PRIORITY_UNSPECIFIED"
+    },
+    "v1TicketSort": {
       "type": "object",
       "properties": {
-        "ticketId": {
-          "type": "string"
+        "field": {
+          "$ref": "#/definitions/v1TicketSortField"
         },
-        "success": {
-          "type": "boolean"
-        },
-        "error": {
-          "type": "string"
+        "order": {
+          "$ref": "#/definitions/v1SortOrder"
         }
       }
+    },
+    "v1TicketSortField": {
+      "type": "string",
+      "enum": [
+        "FIELD_UNSPECIFIED",
+        "FIELD_PRIORITY",
+        "FIELD_CREATED_AT",
+        "FIELD_UPDATED_AT"
+      ],
+      "default": "FIELD_UNSPECIFIED"
+    },
+    "v1TicketStatus": {
+      "type": "string",
+      "enum": [
+        "TICKET_STATUS_UNSPECIFIED",
+        "TICKET_STATUS_OPEN",
+        "TICKET_STATUS_IN_PROGRESS",
+        "TICKET_STATUS_PENDING_APPROVAL",
+        "TICKET_STATUS_RESOLVED",
+        "TICKET_STATUS_CLOSED",
+        "TICKET_STATUS_MERGED"
+      ],
+      "default": "TICKET_STATUS_UNSPECIFIED"
     },
     "v1TicketType": {
       "type": "object",
@@ -1218,14 +1897,63 @@
         },
         "autoVisible": {
           "type": "boolean"
+        },
+        "activated": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
-    "v1TransitionStatusResponse": {
+    "v1TicketTypeSort": {
       "type": "object",
       "properties": {
-        "ticket": {
-          "$ref": "#/definitions/v1Ticket"
+        "field": {
+          "$ref": "#/definitions/v1TicketTypeSortField"
+        },
+        "order": {
+          "$ref": "#/definitions/v1SortOrder"
+        }
+      }
+    },
+    "v1TicketTypeSortField": {
+      "type": "string",
+      "enum": [
+        "FIELD_UNSPECIFIED",
+        "FIELD_CREATED_AT",
+        "FIELD_UPDATED_AT",
+        "FIELD_NAME"
+      ],
+      "default": "FIELD_UNSPECIFIED"
+    },
+    "v1TimeRange": {
+      "type": "object",
+      "properties": {
+        "startTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1UpdateActionSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "$ref": "#/definitions/v1ActionSchema"
         }
       }
     },
@@ -1234,6 +1962,14 @@
       "properties": {
         "ticket": {
           "$ref": "#/definitions/v1Ticket"
+        }
+      }
+    },
+    "v1UpdateTicketTypeResponse": {
+      "type": "object",
+      "properties": {
+        "ticketType": {
+          "$ref": "#/definitions/v1TicketType"
         }
       }
     }

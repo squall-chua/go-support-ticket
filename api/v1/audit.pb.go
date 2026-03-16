@@ -10,6 +10,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -24,13 +25,14 @@ const (
 )
 
 type AuditEntry struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TicketId      string                 `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	Actor         string                 `protobuf:"bytes,3,opt,name=actor,proto3" json:"actor,omitempty"`
-	Action        string                 `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`
-	Metadata      map[string]string      `protobuf:"bytes,5,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Id            string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TicketId      string                     `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	UserId        string                     `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Action        string                     `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`
+	Details       string                     `protobuf:"bytes,5,opt,name=details,proto3" json:"details,omitempty"`
+	Metadata      map[string]*structpb.Value `protobuf:"bytes,6,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	CreatedAt     *timestamppb.Timestamp     `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -79,9 +81,9 @@ func (x *AuditEntry) GetTicketId() string {
 	return ""
 }
 
-func (x *AuditEntry) GetActor() string {
+func (x *AuditEntry) GetUserId() string {
 	if x != nil {
-		return x.Actor
+		return x.UserId
 	}
 	return ""
 }
@@ -93,7 +95,14 @@ func (x *AuditEntry) GetAction() string {
 	return ""
 }
 
-func (x *AuditEntry) GetMetadata() map[string]string {
+func (x *AuditEntry) GetDetails() string {
+	if x != nil {
+		return x.Details
+	}
+	return ""
+}
+
+func (x *AuditEntry) GetMetadata() map[string]*structpb.Value {
 	if x != nil {
 		return x.Metadata
 	}
@@ -110,7 +119,7 @@ func (x *AuditEntry) GetCreatedAt() *timestamppb.Timestamp {
 type ListAuditTrailRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TicketId      string                 `protobuf:"bytes,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	Pagination    *PaginationRequest     `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Pagination    *PageRequest           `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -152,7 +161,7 @@ func (x *ListAuditTrailRequest) GetTicketId() string {
 	return ""
 }
 
-func (x *ListAuditTrailRequest) GetPagination() *PaginationRequest {
+func (x *ListAuditTrailRequest) GetPagination() *PageRequest {
 	if x != nil {
 		return x.Pagination
 	}
@@ -162,7 +171,7 @@ func (x *ListAuditTrailRequest) GetPagination() *PaginationRequest {
 type ListAuditTrailResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Entries       []*AuditEntry          `protobuf:"bytes,1,rep,name=entries,proto3" json:"entries,omitempty"`
-	Pagination    *PaginationResponse    `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Pagination    *PageInfo              `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -204,7 +213,7 @@ func (x *ListAuditTrailResponse) GetEntries() []*AuditEntry {
 	return nil
 }
 
-func (x *ListAuditTrailResponse) GetPagination() *PaginationResponse {
+func (x *ListAuditTrailResponse) GetPagination() *PageInfo {
 	if x != nil {
 		return x.Pagination
 	}
@@ -215,31 +224,34 @@ var File_api_proto_v1_audit_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_audit_proto_rawDesc = "" +
 	"\n" +
-	"\x18api/proto/v1/audit.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19api/proto/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\"\x9d\x02\n" +
+	"\x18api/proto/v1/audit.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x19api/proto/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1aapi/proto/v1/options.proto\"\xd2\x02\n" +
 	"\n" +
 	"AuditEntry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
-	"\tticket_id\x18\x02 \x01(\tR\bticketId\x12\x14\n" +
-	"\x05actor\x18\x03 \x01(\tR\x05actor\x12\x16\n" +
-	"\x06action\x18\x04 \x01(\tR\x06action\x12<\n" +
-	"\bmetadata\x18\x05 \x03(\v2 .api.v1.AuditEntry.MetadataEntryR\bmetadata\x129\n" +
+	"\tticket_id\x18\x02 \x01(\tR\bticketId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06action\x18\x04 \x01(\tR\x06action\x12\x18\n" +
+	"\adetails\x18\x05 \x01(\tR\adetails\x12<\n" +
+	"\bmetadata\x18\x06 \x03(\v2 .api.v1.AuditEntry.MetadataEntryR\bmetadata\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x1a;\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x1aS\n" +
 	"\rMetadataEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"o\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"i\n" +
 	"\x15ListAuditTrailRequest\x12\x1b\n" +
-	"\tticket_id\x18\x01 \x01(\tR\bticketId\x129\n" +
+	"\tticket_id\x18\x01 \x01(\tR\bticketId\x123\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x19.api.v1.PaginationRequestR\n" +
-	"pagination\"\x82\x01\n" +
+	"pagination\x18\x02 \x01(\v2\x13.api.v1.PageRequestR\n" +
+	"pagination\"x\n" +
 	"\x16ListAuditTrailResponse\x12,\n" +
-	"\aentries\x18\x01 \x03(\v2\x12.api.v1.AuditEntryR\aentries\x12:\n" +
+	"\aentries\x18\x01 \x03(\v2\x12.api.v1.AuditEntryR\aentries\x120\n" +
 	"\n" +
-	"pagination\x18\x02 \x01(\v2\x1a.api.v1.PaginationResponseR\n" +
-	"pagination2\x8c\x01\n" +
-	"\fAuditService\x12|\n" +
-	"\x0eListAuditTrail\x12\x1d.api.v1.ListAuditTrailRequest\x1a\x1e.api.v1.ListAuditTrailResponse\"+\x82\xd3\xe4\x93\x02%\x12#/v1/tickets/{ticket_id}/audit-trailB7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
+	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
+	"pagination2\xa8\x01\n" +
+	"\fAuditService\x12\x97\x01\n" +
+	"\x0eListAuditTrail\x12\x1d.api.v1.ListAuditTrailRequest\x1a\x1e.api.v1.ListAuditTrailResponse\"F\x82\xb5\x18\x13\n" +
+	"\n" +
+	"read:audit\x12\x05admin\x82\xd3\xe4\x93\x02)\x12'/api/v1/tickets/{ticket_id}/audit-trailB7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
 
 var (
 	file_api_proto_v1_audit_proto_rawDescOnce sync.Once
@@ -260,22 +272,24 @@ var file_api_proto_v1_audit_proto_goTypes = []any{
 	(*ListAuditTrailResponse)(nil), // 2: api.v1.ListAuditTrailResponse
 	nil,                            // 3: api.v1.AuditEntry.MetadataEntry
 	(*timestamppb.Timestamp)(nil),  // 4: google.protobuf.Timestamp
-	(*PaginationRequest)(nil),      // 5: api.v1.PaginationRequest
-	(*PaginationResponse)(nil),     // 6: api.v1.PaginationResponse
+	(*PageRequest)(nil),            // 5: api.v1.PageRequest
+	(*PageInfo)(nil),               // 6: api.v1.PageInfo
+	(*structpb.Value)(nil),         // 7: google.protobuf.Value
 }
 var file_api_proto_v1_audit_proto_depIdxs = []int32{
 	3, // 0: api.v1.AuditEntry.metadata:type_name -> api.v1.AuditEntry.MetadataEntry
 	4, // 1: api.v1.AuditEntry.created_at:type_name -> google.protobuf.Timestamp
-	5, // 2: api.v1.ListAuditTrailRequest.pagination:type_name -> api.v1.PaginationRequest
+	5, // 2: api.v1.ListAuditTrailRequest.pagination:type_name -> api.v1.PageRequest
 	0, // 3: api.v1.ListAuditTrailResponse.entries:type_name -> api.v1.AuditEntry
-	6, // 4: api.v1.ListAuditTrailResponse.pagination:type_name -> api.v1.PaginationResponse
-	1, // 5: api.v1.AuditService.ListAuditTrail:input_type -> api.v1.ListAuditTrailRequest
-	2, // 6: api.v1.AuditService.ListAuditTrail:output_type -> api.v1.ListAuditTrailResponse
-	6, // [6:7] is the sub-list for method output_type
-	5, // [5:6] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	6, // 4: api.v1.ListAuditTrailResponse.pagination:type_name -> api.v1.PageInfo
+	7, // 5: api.v1.AuditEntry.MetadataEntry.value:type_name -> google.protobuf.Value
+	1, // 6: api.v1.AuditService.ListAuditTrail:input_type -> api.v1.ListAuditTrailRequest
+	2, // 7: api.v1.AuditService.ListAuditTrail:output_type -> api.v1.ListAuditTrailResponse
+	7, // [7:8] is the sub-list for method output_type
+	6, // [6:7] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_audit_proto_init() }
@@ -284,6 +298,7 @@ func file_api_proto_v1_audit_proto_init() {
 		return
 	}
 	file_api_proto_v1_common_proto_init()
+	file_api_proto_v1_options_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -2,34 +2,33 @@ package service
 
 import (
 	"context"
-	"strconv"
 
 	apiv1 "github.com/squall-chua/go-support-ticket/api/v1"
 	"github.com/squall-chua/go-support-ticket/internal/repository"
-	"github.com/squall-chua/go-support-ticket/pkg/event"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type AuditServiceServer struct {
 	apiv1.UnimplementedAuditServiceServer
-	repo      repository.AuditRepository
-	publisher event.Publisher
+	repo repository.AuditRepository
 }
 
-func NewAuditServiceServer(repo repository.AuditRepository, publisher event.Publisher) apiv1.AuditServiceServer {
+func NewAuditServiceServer(repo repository.AuditRepository) apiv1.AuditServiceServer {
 	return &AuditServiceServer{
-		repo:      repo,
-		publisher: publisher,
+		repo: repo,
 	}
 }
 
 func (s *AuditServiceServer) ListAuditTrail(ctx context.Context, req *apiv1.ListAuditTrailRequest) (*apiv1.ListAuditTrailResponse, error) {
-	var limit, offset int32 = 100, 0
+	var limit, offset, pageNumber int32 = 100, 0, 1
 	if req.Pagination != nil {
 		limit = req.Pagination.PageSize
-		if parsedOffset, err := strconv.Atoi(req.Pagination.PageToken); err == nil {
-			offset = int32(parsedOffset)
+		pageNumber = req.Pagination.PageNumber
+		if pageNumber > 1 {
+			offset = (pageNumber - 1) * limit
+		} else {
+			pageNumber = 1
 		}
 	}
 	logs, total, err := s.repo.ListLogs(ctx, req.TicketId, "", limit, offset)
@@ -37,10 +36,16 @@ func (s *AuditServiceServer) ListAuditTrail(ctx context.Context, req *apiv1.List
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	pbEntries := make([]*apiv1.AuditEntry, 0, len(logs))
+	for _, l := range logs {
+		pbEntries = append(pbEntries, l.ToProto())
+	}
+
 	return &apiv1.ListAuditTrailResponse{
-		Entries: logs,
-		Pagination: &apiv1.PaginationResponse{
-			TotalSize: total,
+		Entries: pbEntries,
+		Pagination: &apiv1.PageInfo{
+			TotalSize:  total,
+			PageNumber: pageNumber,
 		},
 	}, nil
 }

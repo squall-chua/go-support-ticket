@@ -5,8 +5,47 @@ package api.v1;
 option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 import "api/proto/v1/common.proto";
 import "google/api/annotations.proto";
+import "api/proto/v1/options.proto";
+
+enum TicketStatus {
+  TICKET_STATUS_UNSPECIFIED = 0;
+  TICKET_STATUS_OPEN = 1;
+  TICKET_STATUS_IN_PROGRESS = 2;
+  TICKET_STATUS_PENDING_APPROVAL = 3;
+  TICKET_STATUS_RESOLVED = 4;
+  TICKET_STATUS_CLOSED = 5;
+  TICKET_STATUS_MERGED = 6;
+}
+
+enum TicketPriority {
+  TICKET_PRIORITY_UNSPECIFIED = 0;
+  TICKET_PRIORITY_LOW = 1;
+  TICKET_PRIORITY_MEDIUM = 2;
+  TICKET_PRIORITY_HIGH = 3;
+  TICKET_PRIORITY_URGENT = 4;
+}
+
+message Comment {
+  string id = 1;
+  string author = 2;
+  string content = 3;
+  google.protobuf.Timestamp created_at = 4;
+  map<string, google.protobuf.Value> metadata = 5;
+}
+
+message AddCommentRequest {
+  string ticket_id = 1;
+  string author = 2;
+  string content = 3;
+  map<string, google.protobuf.Value> metadata = 4;
+}
+
+message AddCommentResponse {
+  Comment comment = 1;
+}
 
 message TicketType {
   string id = 1;
@@ -15,6 +54,10 @@ message TicketType {
   string description = 4;
   bool require_approval = 5;
   bool auto_visible = 6;
+  bool activated = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  optional google.protobuf.Timestamp deleted_at = 10;
 }
 
 message Ticket {
@@ -22,14 +65,17 @@ message Ticket {
   string title = 2;
   string description = 3;
   string ticket_type = 4;
-  string status = 5; // OPEN, IN_PROGRESS, PENDING_APPROVAL, RESOLVED, CLOSED, MERGED
-  string priority = 6; // LOW, MEDIUM, HIGH, URGENT
+  TicketStatus status = 5;
+  TicketPriority priority = 6;
   string customer_id = 7;
   string created_by = 8;
   string assigned_to = 9;
   string merged_into = 10;
-  google.protobuf.Timestamp created_at = 11;
-  google.protobuf.Timestamp updated_at = 12;
+  repeated Comment comments = 11;
+  map<string, google.protobuf.Value> metadata = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+  optional google.protobuf.Timestamp deleted_at = 15;
 }
 
 message CreateTicketTypeRequest {
@@ -38,24 +84,69 @@ message CreateTicketTypeRequest {
   string description = 3;
   bool require_approval = 4;
   bool auto_visible = 5;
+  bool activated = 6;
 }
 
 message CreateTicketTypeResponse {
   TicketType ticket_type = 1;
 }
 
-message ListTicketTypesRequest {}
+message TicketTypeSort {
+  enum Field {
+    FIELD_UNSPECIFIED = 0;
+    FIELD_CREATED_AT = 1;
+    FIELD_UPDATED_AT = 2;
+    FIELD_NAME = 3;
+  }
+  Field field = 1;
+  SortOrder order = 2;
+}
+
+message ListTicketTypesRequest {
+  optional string name = 1;
+  optional string display_name = 2;
+  optional string description = 3;
+  optional bool require_approval = 4;
+  optional bool auto_visible = 5;
+  optional bool activated = 6;
+  
+  repeated TicketTypeSort sorts = 10;
+  PageRequest pagination = 11;
+  
+  bool include_deleted = 12;
+}
 
 message ListTicketTypesResponse {
   repeated TicketType ticket_types = 1;
+  PageInfo pagination = 2;
 }
+
+message UpdateTicketTypeRequest {
+  string id = 1;
+  optional string display_name = 2;
+  optional string description = 3;
+  optional bool require_approval = 4;
+  optional bool auto_visible = 5;
+  optional bool activated = 6;
+}
+
+message UpdateTicketTypeResponse {
+  TicketType ticket_type = 1;
+}
+
+message DeleteTicketTypeRequest {
+  string id = 1;
+}
+
+message DeleteTicketTypeResponse {}
 
 message CreateTicketRequest {
   string title = 1;
   string description = 2;
   string ticket_type = 3;
-  string priority = 4;
+  TicketPriority priority = 4;
   string customer_id = 5;
+  map<string, google.protobuf.Value> metadata = 6;
 }
 
 message CreateTicketResponse {
@@ -72,21 +163,15 @@ message GetTicketResponse {
 
 message UpdateTicketRequest {
   string ticket_id = 1;
-  string title = 2;
-  string description = 3;
-  string priority = 4;
+  optional string title = 2;
+  optional string description = 3;
+  optional TicketPriority priority = 4;
+  optional string ticket_type = 5;
+  optional TicketStatus status = 6;
+  map<string, google.protobuf.Value> metadata = 7;
 }
 
 message UpdateTicketResponse {
-  Ticket ticket = 1;
-}
-
-message TransitionStatusRequest {
-  string ticket_id = 1;
-  string new_status = 2;
-}
-
-message TransitionStatusResponse {
   Ticket ticket = 1;
 }
 
@@ -109,13 +194,7 @@ message TicketAssignment {
 }
 
 message DistributeTicketsResponse {
-  repeated TicketAssignmentResult results = 1;
-}
-
-message TicketAssignmentResult {
-  string ticket_id = 1;
-  bool success = 2;
-  string error = 3;
+  int32 modified_count = 1;
 }
 
 message MergeTicketsRequest {
@@ -128,73 +207,173 @@ message MergeTicketsResponse {
   Ticket target_ticket = 2;
 }
 
+message TicketSort {
+  enum Field {
+    FIELD_UNSPECIFIED = 0;
+    FIELD_PRIORITY = 1;
+    FIELD_CREATED_AT = 2;
+    FIELD_UPDATED_AT = 3;
+  }
+  Field field = 1;
+  SortOrder order = 2;
+}
+
 message ListTicketsRequest {
-  string status = 1;
-  string assigned_to = 2;
-  PaginationRequest pagination = 3;
+  // Filtering
+  repeated TicketStatus statuses = 1;
+  repeated string assigned_to = 2;
+  optional string title_contains = 3;
+  optional string description_contains = 4;
+  repeated string ticket_type = 5;
+  repeated TicketPriority priority = 6;
+  repeated string customer_id = 7;
+  repeated string created_by = 8;
+  repeated string merged_into = 9;
+  map<string, google.protobuf.Value> metadata = 10;
+
+  // Sorting
+  repeated TicketSort sort = 11;
+
+  // Pagination
+  PageRequest pagination = 12;
+
+  bool include_deleted = 13;
 }
 
 message ListTicketsResponse {
   repeated Ticket tickets = 1;
-  PaginationResponse pagination = 2;
+  PageInfo pagination = 2;
+}
+
+message DeleteTicketRequest {
+  string ticket_id = 1;
+}
+
+message DeleteTicketResponse {
+  bool success = 1;
 }
 
 service TicketService {
+  // Ticket Type
   rpc CreateTicketType(CreateTicketTypeRequest) returns (CreateTicketTypeResponse) {
     option (google.api.http) = {
-      post: "/v1/ticket-types"
+      post: "/api/v1/ticket-types"
       body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["admin:ticket-types"]
+      required_roles: ["admin"]
     };
   }
   rpc ListTicketTypes(ListTicketTypesRequest) returns (ListTicketTypesResponse) {
     option (google.api.http) = {
-      get: "/v1/ticket-types"
+      get: "/api/v1/ticket-types"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:tickets"]
     };
   }
+  rpc UpdateTicketType(UpdateTicketTypeRequest) returns (UpdateTicketTypeResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/ticket-types/{id}"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["admin:ticket-types"]
+      required_roles: ["admin"]
+    };
+  }
+  rpc DeleteTicketType(DeleteTicketTypeRequest) returns (DeleteTicketTypeResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/ticket-types/{id}"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["admin:ticket-types"]
+      required_roles: ["admin"]
+    };
+  }
+
+  // Ticket
   rpc CreateTicket(CreateTicketRequest) returns (CreateTicketResponse) {
     option (google.api.http) = {
-      post: "/v1/tickets"
+      post: "/api/v1/tickets"
       body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:tickets"]
     };
   }
   rpc GetTicket(GetTicketRequest) returns (GetTicketResponse) {
     option (google.api.http) = {
-      get: "/v1/tickets/{ticket_id}"
+      get: "/api/v1/tickets/{ticket_id}"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:tickets"]
     };
   }
   rpc UpdateTicket(UpdateTicketRequest) returns (UpdateTicketResponse) {
     option (google.api.http) = {
-      put: "/v1/tickets/{ticket_id}"
+      put: "/api/v1/tickets/{ticket_id}"
       body: "*"
     };
-  }
-  rpc TransitionStatus(TransitionStatusRequest) returns (TransitionStatusResponse) {
-    option (google.api.http) = {
-      post: "/v1/tickets/{ticket_id}/status"
-      body: "*"
+    option (auth.v1.rule) = {
+      required_scopes: ["write:tickets"]
     };
   }
   rpc AssignTicket(AssignTicketRequest) returns (AssignTicketResponse) {
     option (google.api.http) = {
-      post: "/v1/tickets/{ticket_id}/assign"
+      post: "/api/v1/tickets/{ticket_id}/assign"
       body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:tickets"]
+      required_roles: ["admin", "agent"]
     };
   }
   rpc DistributeTickets(DistributeTicketsRequest) returns (DistributeTicketsResponse) {
     option (google.api.http) = {
-      post: "/v1/tickets/distribute"
+      post: "/api/v1/tickets/distribute"
       body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:tickets"]
+      required_roles: ["admin"]
     };
   }
   rpc MergeTickets(MergeTicketsRequest) returns (MergeTicketsResponse) {
     option (google.api.http) = {
-      post: "/v1/tickets/merge"
+      post: "/api/v1/tickets/merge"
       body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:tickets"]
+      required_roles: ["admin", "agent"]
     };
   }
   rpc ListTickets(ListTicketsRequest) returns (ListTicketsResponse) {
     option (google.api.http) = {
-      get: "/v1/tickets"
+      get: "/api/v1/tickets"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:tickets"]
+    };
+  }
+  rpc AddComment(AddCommentRequest) returns (AddCommentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/tickets/{ticket_id}/comments"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:tickets"]
+    };
+  }
+  rpc DeleteTicket(DeleteTicketRequest) returns (DeleteTicketResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/tickets/{ticket_id}"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:tickets"]
+      required_roles: ["admin"]
     };
   }
 }

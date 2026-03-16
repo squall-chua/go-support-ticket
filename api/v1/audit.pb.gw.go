@@ -100,7 +100,7 @@ func RegisterAuditServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.AuditService/ListAuditTrail", runtime.WithHTTPPathPattern("/v1/tickets/{ticket_id}/audit-trail"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.AuditService/ListAuditTrail", runtime.WithHTTPPathPattern("/api/v1/tickets/{ticket_id}/audit-trail"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -158,7 +158,7 @@ func RegisterAuditServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.AuditService/ListAuditTrail", runtime.WithHTTPPathPattern("/v1/tickets/{ticket_id}/audit-trail"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.AuditService/ListAuditTrail", runtime.WithHTTPPathPattern("/api/v1/tickets/{ticket_id}/audit-trail"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -175,7 +175,7 @@ func RegisterAuditServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 }
 
 var (
-	pattern_AuditService_ListAuditTrail_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "tickets", "ticket_id", "audit-trail"}, ""))
+	pattern_AuditService_ListAuditTrail_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "tickets", "ticket_id", "audit-trail"}, ""))
 )
 
 var (
