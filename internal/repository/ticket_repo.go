@@ -27,15 +27,47 @@ func (r *TicketRepo) CreateTicket(ctx context.Context, ticket *model.Ticket) err
 	return err
 }
 
-func (r *TicketRepo) GetTicket(ctx context.Context, id string) (*model.Ticket, error) {
+func (r *TicketRepo) GetTicket(ctx context.Context, id string, userID string, roles []string) (*model.Ticket, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
-	return r.coll.FindOne(ctx, gmqb.And(
-		gmqb.Eq("_id", oid),
-		gmqb.Eq("deleted_at", nil),
-	))
+	f := gmqb.Field[model.Ticket]
+
+	query := gmqb.And(
+		gmqb.Eq(f("ID"), oid),
+		gmqb.Eq(f("DeletedAt"), nil),
+		r.buildVisibilityFilter(userID, roles),
+	)
+
+	return r.coll.FindOne(ctx, query)
+}
+
+func (r *TicketRepo) buildVisibilityFilter(userID string, roles []string) gmqb.Filter {
+	f := gmqb.Field[model.Ticket]
+	var roleFilter gmqb.Filter
+	if len(roles) == 0 {
+		roleFilter = gmqb.Or(
+			gmqb.Eq(f("VisibleRoles"), nil),
+			gmqb.Size(f("VisibleRoles"), 0),
+		)
+	} else {
+		roleFilter = gmqb.Or(
+			gmqb.Eq(f("VisibleRoles"), nil),
+			gmqb.Size(f("VisibleRoles"), 0),
+			gmqb.In(f("VisibleRoles"), toInterfaceSlice(roles)...),
+		)
+	}
+
+	if userID != "" {
+		return gmqb.Or(
+			roleFilter,
+			gmqb.Eq(f("CustomerID"), userID),
+			gmqb.Eq(f("CreatedBy"), userID),
+			gmqb.Eq(f("AssignedTo"), userID),
+		)
+	}
+	return roleFilter
 }
 
 func (r *TicketRepo) buildTicketUpdate(update model.TicketUpdate) gmqb.Updater {
@@ -50,6 +82,12 @@ func (r *TicketRepo) buildTicketUpdate(update model.TicketUpdate) gmqb.Updater {
 	}
 	if update.TicketType != nil {
 		u = u.Set(f("TicketType"), *update.TicketType)
+	}
+	if update.RequireApproval != nil {
+		u = u.Set(f("RequireApproval"), *update.RequireApproval)
+	}
+	if update.VisibleRoles != nil {
+		u = u.Set(f("VisibleRoles"), update.VisibleRoles)
 	}
 	if update.Status != nil {
 		u = u.Set(f("Status"), *update.Status)
@@ -80,7 +118,7 @@ func (r *TicketRepo) buildTicketUpdate(update model.TicketUpdate) gmqb.Updater {
 	return u
 }
 
-func (r *TicketRepo) UpdateTicket(ctx context.Context, id string, update model.TicketUpdate) (*model.Ticket, error) {
+func (r *TicketRepo) UpdateTicket(ctx context.Context, id string, update model.TicketUpdate, userID string, roles []string) (*model.Ticket, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -88,17 +126,20 @@ func (r *TicketRepo) UpdateTicket(ctx context.Context, id string, update model.T
 
 	u := r.buildTicketUpdate(update)
 	if u.IsEmpty() {
-		return r.GetTicket(ctx, id)
+		return r.GetTicket(ctx, id, userID, roles)
 	}
 
-	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq("_id", oid), u, gmqb.WithReturnDocument(options.After))
+	f := gmqb.Field[model.Ticket]
+	query := gmqb.And(gmqb.Eq(f("ID"), oid), r.buildVisibilityFilter(userID, roles))
+	return r.coll.FindOneAndUpdate(ctx, query, u, gmqb.WithReturnDocument(options.After))
 }
 
-func (r *TicketRepo) UpdateTickets(ctx context.Context, updates map[string]model.TicketUpdate) ([]*model.Ticket, error) {
+func (r *TicketRepo) UpdateTickets(ctx context.Context, updates map[string]model.TicketUpdate, userID string, roles []string) ([]*model.Ticket, error) {
 	if len(updates) == 0 {
 		return nil, nil
 	}
 
+	f := gmqb.Field[model.Ticket]
 	var models []gmqb.WriteModel[model.Ticket]
 	oids := make([]bson.ObjectID, 0, len(updates))
 
@@ -114,8 +155,10 @@ func (r *TicketRepo) UpdateTickets(ctx context.Context, updates map[string]model
 			continue
 		}
 
+		filter := gmqb.And(gmqb.Eq(f("ID"), oid), r.buildVisibilityFilter(userID, roles))
+
 		m := gmqb.NewUpdateOneModel[model.Ticket]().
-			SetFilter(gmqb.Eq("_id", oid)).
+			SetFilter(filter).
 			SetUpdate(u)
 		models = append(models, m)
 	}
@@ -127,7 +170,8 @@ func (r *TicketRepo) UpdateTickets(ctx context.Context, updates map[string]model
 	}
 
 	// Fetch updated tickets
-	tickets, err := r.coll.Find(ctx, gmqb.In("_id", oids))
+	query := gmqb.And(gmqb.In(f("ID"), oids), r.buildVisibilityFilter(userID, roles))
+	tickets, err := r.coll.Find(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +183,7 @@ func (r *TicketRepo) UpdateTickets(ctx context.Context, updates map[string]model
 	return res, nil
 }
 
-func (r *TicketRepo) ListTickets(ctx context.Context, filter model.TicketFilter, sorts []model.TicketSort, limit, offset int32) ([]*model.Ticket, int32, error) {
+func (r *TicketRepo) ListTickets(ctx context.Context, filter model.TicketFilter, sorts []model.TicketSort, userID string, roles []string, limit, offset int32) ([]*model.Ticket, int32, error) {
 	f := gmqb.Field[model.Ticket]
 	q := gmqb.NewFilter()
 	if !filter.IncludeDeleted {
@@ -186,6 +230,10 @@ func (r *TicketRepo) ListTickets(ctx context.Context, filter model.TicketFilter,
 		q.Eq(f("Metadata")+"."+k, v)
 	}
 
+	visibilityFilter := r.buildVisibilityFilter(userID, roles)
+
+	finalFilter := gmqb.And(q, visibilityFilter)
+
 	var sortFields []gmqb.SortField
 	if len(sorts) > 0 {
 		for _, s := range sorts {
@@ -199,10 +247,10 @@ func (r *TicketRepo) ListTickets(ctx context.Context, filter model.TicketFilter,
 	}
 	sortSpec := gmqb.SortSpec(sortFields...)
 
-	return listPaginated(ctx, r.coll, q, sortSpec, limit, offset)
+	return listPaginated(ctx, r.coll, finalFilter, sortSpec, limit, offset)
 }
 
-func (r *TicketRepo) AddComment(ctx context.Context, ticketID string, comment *model.Comment) error {
+func (r *TicketRepo) AddComment(ctx context.Context, ticketID string, comment *model.Comment, userID string, roles []string) error {
 	oid, err := bson.ObjectIDFromHex(ticketID)
 	if err != nil {
 		return err
@@ -210,9 +258,12 @@ func (r *TicketRepo) AddComment(ctx context.Context, ticketID string, comment *m
 	if comment.CreatedAt.IsZero() {
 		comment.CreatedAt = time.Now().UTC()
 	}
+
 	f := gmqb.Field[model.Ticket]
+	query := gmqb.And(gmqb.Eq(f("ID"), oid), r.buildVisibilityFilter(userID, roles))
+
 	_, err = r.coll.UpdateOne(ctx,
-		gmqb.Eq("_id", oid),
+		query,
 		gmqb.NewUpdate().
 			Push(f("Comments"), comment).
 			Set(f("UpdatedAt"), time.Now().UTC()),
@@ -220,13 +271,15 @@ func (r *TicketRepo) AddComment(ctx context.Context, ticketID string, comment *m
 	return err
 }
 
-func (r *TicketRepo) DeleteTicket(ctx context.Context, id string) error {
+func (r *TicketRepo) DeleteTicket(ctx context.Context, id string, userID string, roles []string) error {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 	f := gmqb.Field[model.Ticket]
+	query := gmqb.And(gmqb.Eq(f("ID"), oid), r.buildVisibilityFilter(userID, roles))
+
 	update := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
-	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), update)
+	_, err = r.coll.UpdateOne(ctx, query, update)
 	return err
 }

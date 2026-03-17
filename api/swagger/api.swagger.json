@@ -877,10 +877,14 @@
             "type": "boolean"
           },
           {
-            "name": "autoVisible",
+            "name": "visibleRoles",
             "in": "query",
             "required": false,
-            "type": "boolean"
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
           },
           {
             "name": "activated",
@@ -1589,8 +1593,11 @@
         "requireApproval": {
           "type": "boolean"
         },
-        "autoVisible": {
-          "type": "boolean"
+        "visibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "activated": {
           "type": "boolean"
@@ -2118,8 +2125,11 @@
         "requireApproval": {
           "type": "boolean"
         },
-        "autoVisible": {
-          "type": "boolean"
+        "visibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "activated": {
           "type": "boolean"
@@ -2390,6 +2400,15 @@
         "ticketType": {
           "type": "string"
         },
+        "requireApproval": {
+          "type": "boolean"
+        },
+        "visibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "status": {
           "$ref": "#/definitions/v1TicketStatus"
         },
@@ -2507,8 +2526,11 @@
         "requireApproval": {
           "type": "boolean"
         },
-        "autoVisible": {
-          "type": "boolean"
+        "visibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "activated": {
           "type": "boolean"

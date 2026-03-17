@@ -53,7 +53,7 @@ message TicketType {
   string display_name = 3;
   string description = 4;
   bool require_approval = 5;
-  bool auto_visible = 6;
+  repeated string visible_roles = 6;
   bool activated = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
@@ -65,17 +65,19 @@ message Ticket {
   string title = 2;
   string description = 3;
   string ticket_type = 4;
-  TicketStatus status = 5;
-  TicketPriority priority = 6;
-  string customer_id = 7;
-  string created_by = 8;
-  string assigned_to = 9;
-  string merged_into = 10;
-  repeated Comment comments = 11;
-  map<string, google.protobuf.Value> metadata = 12;
-  google.protobuf.Timestamp created_at = 13;
-  google.protobuf.Timestamp updated_at = 14;
-  optional google.protobuf.Timestamp deleted_at = 15;
+  bool require_approval = 5;
+  repeated string visible_roles = 6;
+  TicketStatus status = 7;
+  TicketPriority priority = 8;
+  string customer_id = 9;
+  string created_by = 10;
+  string assigned_to = 11;
+  string merged_into = 12;
+  repeated Comment comments = 13;
+  map<string, google.protobuf.Value> metadata = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp updated_at = 16;
+  optional google.protobuf.Timestamp deleted_at = 17;
 }
 
 message CreateTicketTypeRequest {
@@ -83,7 +85,7 @@ message CreateTicketTypeRequest {
   string display_name = 2;
   string description = 3;
   bool require_approval = 4;
-  bool auto_visible = 5;
+  repeated string visible_roles = 5;
   bool activated = 6;
 }
 
@@ -107,13 +109,13 @@ message ListTicketTypesRequest {
   optional string display_name = 2;
   optional string description = 3;
   optional bool require_approval = 4;
-  optional bool auto_visible = 5;
+  repeated string visible_roles = 5;
   optional bool activated = 6;
   
-  repeated TicketTypeSort sorts = 10;
-  PageRequest pagination = 11;
+  repeated TicketTypeSort sorts = 7;
+  PageRequest pagination = 8;
   
-  bool include_deleted = 12;
+  bool include_deleted = 9;
 }
 
 message ListTicketTypesResponse {
@@ -126,7 +128,7 @@ message UpdateTicketTypeRequest {
   optional string display_name = 2;
   optional string description = 3;
   optional bool require_approval = 4;
-  optional bool auto_visible = 5;
+  repeated string visible_roles = 5;
   optional bool activated = 6;
 }
 
@@ -316,6 +318,7 @@ service TicketService {
     };
     option (auth.v1.rule) = {
       required_scopes: ["write:tickets"]
+      required_roles: ["admin", "agent"]
     };
   }
   rpc AssignTicket(AssignTicketRequest) returns (AssignTicketResponse) {

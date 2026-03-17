@@ -26,6 +26,31 @@ type TicketServiceServer struct {
 	publisher event.Publisher
 }
 
+func (s *TicketServiceServer) getUserRoles(ctx context.Context) []string {
+	tokenInfo, ok := middleware.TokenInfoFromContext(ctx)
+	if !ok || tokenInfo == nil {
+		return []string{}
+	}
+	return tokenInfo.Roles
+}
+
+func (s *TicketServiceServer) getUserID(ctx context.Context) string {
+	tokenInfo, ok := middleware.TokenInfoFromContext(ctx)
+	if !ok || tokenInfo == nil {
+		return ""
+	}
+	return tokenInfo.UserID
+}
+
+func (s *TicketServiceServer) isInternal(roles []string) bool {
+	for _, r := range roles {
+		if r == "admin" || r == "agent" {
+			return true
+		}
+	}
+	return false
+}
+
 func NewTicketServiceServer(repo repository.TicketRepository, typeRepo repository.TicketTypeRepository, publisher event.Publisher) apiv1.TicketServiceServer {
 	return &TicketServiceServer{
 		repo:      repo,
@@ -41,7 +66,7 @@ func (s *TicketServiceServer) CreateTicketType(ctx context.Context, req *apiv1.C
 		DisplayName:     req.DisplayName,
 		Description:     req.Description,
 		RequireApproval: req.RequireApproval,
-		AutoVisible:     req.AutoVisible,
+		VisibleRoles:    req.VisibleRoles,
 		Activated:       req.Activated,
 	}
 
@@ -68,13 +93,19 @@ func (s *TicketServiceServer) CreateTicketType(ctx context.Context, req *apiv1.C
 }
 
 func (s *TicketServiceServer) ListTicketTypes(ctx context.Context, req *apiv1.ListTicketTypesRequest) (*apiv1.ListTicketTypesResponse, error) {
+	activated := req.Activated
+	if activated == nil {
+		active := true
+		activated = &active
+	}
+
 	filter := model.TicketTypeFilter{
 		Name:            req.Name,
 		DisplayName:     req.DisplayName,
 		Description:     req.Description,
 		RequireApproval: req.RequireApproval,
-		AutoVisible:     req.AutoVisible,
-		Activated:       req.Activated,
+		VisibleRoles:    req.VisibleRoles,
+		Activated:       activated,
 		IncludeDeleted:  req.IncludeDeleted,
 	}
 
@@ -124,7 +155,7 @@ func (s *TicketServiceServer) UpdateTicketType(ctx context.Context, req *apiv1.U
 		DisplayName:     req.DisplayName,
 		Description:     req.Description,
 		RequireApproval: req.RequireApproval,
-		AutoVisible:     req.AutoVisible,
+		VisibleRoles:    req.VisibleRoles,
 		Activated:       req.Activated,
 	}
 
@@ -182,6 +213,23 @@ func (s *TicketServiceServer) CreateTicket(ctx context.Context, req *apiv1.Creat
 		CustomerID:  req.CustomerId,
 	}
 
+	userID := s.getUserID(ctx)
+
+	if !s.isInternal(s.getUserRoles(ctx)) || ticket.CustomerID == "" {
+		ticket.CustomerID = userID
+	}
+	ticket.CreatedBy = userID
+
+	// Fetch TicketType to cache visibility and approval settings
+	// Not checking for empty ticket type because empty ticket type is considered as default ticket type
+	if tt, err := s.typeRepo.GetType(ctx, req.TicketType); err == nil && tt != nil {
+		if !tt.Activated {
+			return nil, status.Error(codes.FailedPrecondition, "ticket type is not activated")
+		}
+		ticket.RequireApproval = tt.RequireApproval
+		ticket.VisibleRoles = tt.VisibleRoles
+	}
+
 	if err := s.repo.CreateTicket(ctx, ticket); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -203,13 +251,15 @@ func (s *TicketServiceServer) CreateTicket(ctx context.Context, req *apiv1.Creat
 	}
 	_ = s.publisher.Publish(ctx, &evt)
 
-	return &apiv1.CreateTicketResponse{
+	resp := &apiv1.CreateTicketResponse{
 		Ticket: pb,
-	}, nil
+	}
+
+	return resp, nil
 }
 
 func (s *TicketServiceServer) GetTicket(ctx context.Context, req *apiv1.GetTicketRequest) (*apiv1.GetTicketResponse, error) {
-	ticket, err := s.repo.GetTicket(ctx, req.TicketId)
+	ticket, err := s.repo.GetTicket(ctx, req.TicketId, s.getUserID(ctx), s.getUserRoles(ctx))
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -228,6 +278,9 @@ func (s *TicketServiceServer) GetTicket(ctx context.Context, req *apiv1.GetTicke
 }
 
 func (s *TicketServiceServer) UpdateTicket(ctx context.Context, req *apiv1.UpdateTicketRequest) (*apiv1.UpdateTicketResponse, error) {
+	userID := s.getUserID(ctx)
+	roles := s.getUserRoles(ctx)
+
 	update := model.TicketUpdate{
 		Title:       req.Title,
 		Description: req.Description,
@@ -250,7 +303,17 @@ func (s *TicketServiceServer) UpdateTicket(ctx context.Context, req *apiv1.Updat
 		}
 	}
 
-	ticket, err := s.repo.UpdateTicket(ctx, req.TicketId, update)
+	if req.TicketType != nil {
+		if tt, err := s.typeRepo.GetType(ctx, *req.TicketType); err == nil && tt != nil {
+			if !tt.Activated {
+				return nil, status.Error(codes.FailedPrecondition, "ticket type is not activated")
+			}
+			update.RequireApproval = &tt.RequireApproval
+			update.VisibleRoles = tt.VisibleRoles
+		}
+	}
+
+	ticket, err := s.repo.UpdateTicket(ctx, req.TicketId, update, userID, roles)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -315,11 +378,14 @@ func (s *TicketServiceServer) publishTicketMerged(ctx context.Context, source *m
 }
 
 func (s *TicketServiceServer) AssignTicket(ctx context.Context, req *apiv1.AssignTicketRequest) (*apiv1.AssignTicketResponse, error) {
+	userID := s.getUserID(ctx)
+	roles := s.getUserRoles(ctx)
+
 	update := model.TicketUpdate{
 		AssignedTo: &req.AssignTo,
 	}
 
-	ticket, err := s.repo.UpdateTicket(ctx, req.TicketId, update)
+	ticket, err := s.repo.UpdateTicket(ctx, req.TicketId, update, userID, roles)
 	if err != nil || ticket == nil {
 		return nil, status.Error(codes.Internal, "failed to update ticket")
 	}
@@ -340,7 +406,7 @@ func (s *TicketServiceServer) DistributeTickets(ctx context.Context, req *apiv1.
 		}
 	}
 
-	tickets, err := s.repo.UpdateTickets(ctx, updates)
+	tickets, err := s.repo.UpdateTickets(ctx, updates, s.getUserID(ctx), s.getUserRoles(ctx))
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to distribute tickets")
 	}
@@ -357,7 +423,9 @@ func (s *TicketServiceServer) DistributeTickets(ctx context.Context, req *apiv1.
 }
 
 func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.MergeTicketsRequest) (*apiv1.MergeTicketsResponse, error) {
-	source, err := s.repo.GetTicket(ctx, req.SourceTicketId)
+	userID := s.getUserID(ctx)
+	roles := s.getUserRoles(ctx)
+	source, err := s.repo.GetTicket(ctx, req.SourceTicketId, userID, roles)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -365,7 +433,7 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 		return nil, status.Error(codes.NotFound, "source ticket not found")
 	}
 
-	target, err := s.repo.GetTicket(ctx, req.TargetTicketId)
+	target, err := s.repo.GetTicket(ctx, req.TargetTicketId, userID, roles)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -379,7 +447,7 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 		MergedInto: &target.ID,
 	}
 
-	source, err = s.repo.UpdateTicket(ctx, req.SourceTicketId, updateSource)
+	source, err = s.repo.UpdateTicket(ctx, req.SourceTicketId, updateSource, userID, roles)
 	if err != nil || source == nil {
 		return nil, status.Error(codes.Internal, "failed to update source ticket status")
 	}
@@ -390,10 +458,10 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 		Author:  SystemAuthor,
 		Content: "Ticket " + source.ID.Hex() + " merged into this ticket.",
 	}
-	_ = s.repo.AddComment(ctx, req.TargetTicketId, comment)
+	_ = s.repo.AddComment(ctx, req.TargetTicketId, comment, userID, roles)
 
 	// Fetch updated target ticket to return
-	target, _ = s.repo.GetTicket(ctx, target.ID.Hex())
+	target, _ = s.repo.GetTicket(ctx, target.ID.Hex(), userID, roles)
 
 	s.publishTicketMerged(ctx, source, target)
 
@@ -431,6 +499,10 @@ func (s *TicketServiceServer) ListTickets(ctx context.Context, req *apiv1.ListTi
 		MergedInto:          req.MergedInto,
 		IncludeDeleted:      req.IncludeDeleted,
 	}
+
+	if tokenInfo, ok := middleware.TokenInfoFromContext(ctx); ok && tokenInfo != nil {
+		filter.UserRoles = tokenInfo.Roles
+	}
 	if len(req.Metadata) > 0 {
 		filter.Metadata = make(model.Metadata)
 		for k, v := range req.Metadata {
@@ -458,7 +530,7 @@ func (s *TicketServiceServer) ListTickets(ctx context.Context, req *apiv1.ListTi
 		}
 	}
 
-	tickets, total, err := s.repo.ListTickets(ctx, filter, sorts, limit, offset)
+	tickets, total, err := s.repo.ListTickets(ctx, filter, sorts, s.getUserID(ctx), s.getUserRoles(ctx), limit, offset)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -487,7 +559,7 @@ func (s *TicketServiceServer) AddComment(ctx context.Context, req *apiv1.AddComm
 		Content: req.Content,
 	}
 
-	if err := s.repo.AddComment(ctx, req.TicketId, comment); err != nil {
+	if err := s.repo.AddComment(ctx, req.TicketId, comment, s.getUserID(ctx), s.getUserRoles(ctx)); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -513,7 +585,9 @@ func (s *TicketServiceServer) AddComment(ctx context.Context, req *apiv1.AddComm
 }
 
 func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.DeleteTicketRequest) (*apiv1.DeleteTicketResponse, error) {
-	if err := s.repo.DeleteTicket(ctx, req.TicketId); err != nil {
+	userID := s.getUserID(ctx)
+	roles := s.getUserRoles(ctx)
+	if err := s.repo.DeleteTicket(ctx, req.TicketId, userID, roles); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

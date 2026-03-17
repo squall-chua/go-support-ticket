@@ -439,7 +439,7 @@ type TicketType struct {
 	DisplayName     string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	Description     string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	RequireApproval bool                   `protobuf:"varint,5,opt,name=require_approval,json=requireApproval,proto3" json:"require_approval,omitempty"`
-	AutoVisible     bool                   `protobuf:"varint,6,opt,name=auto_visible,json=autoVisible,proto3" json:"auto_visible,omitempty"`
+	VisibleRoles    []string               `protobuf:"bytes,6,rep,name=visible_roles,json=visibleRoles,proto3" json:"visible_roles,omitempty"`
 	Activated       bool                   `protobuf:"varint,7,opt,name=activated,proto3" json:"activated,omitempty"`
 	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
@@ -513,11 +513,11 @@ func (x *TicketType) GetRequireApproval() bool {
 	return false
 }
 
-func (x *TicketType) GetAutoVisible() bool {
+func (x *TicketType) GetVisibleRoles() []string {
 	if x != nil {
-		return x.AutoVisible
+		return x.VisibleRoles
 	}
-	return false
+	return nil
 }
 
 func (x *TicketType) GetActivated() bool {
@@ -549,24 +549,26 @@ func (x *TicketType) GetDeletedAt() *timestamppb.Timestamp {
 }
 
 type Ticket struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	Id            string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title         string                     `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                     `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	TicketType    string                     `protobuf:"bytes,4,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
-	Status        TicketStatus               `protobuf:"varint,5,opt,name=status,proto3,enum=api.v1.TicketStatus" json:"status,omitempty"`
-	Priority      TicketPriority             `protobuf:"varint,6,opt,name=priority,proto3,enum=api.v1.TicketPriority" json:"priority,omitempty"`
-	CustomerId    string                     `protobuf:"bytes,7,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	CreatedBy     string                     `protobuf:"bytes,8,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	AssignedTo    string                     `protobuf:"bytes,9,opt,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
-	MergedInto    string                     `protobuf:"bytes,10,opt,name=merged_into,json=mergedInto,proto3" json:"merged_into,omitempty"`
-	Comments      []*Comment                 `protobuf:"bytes,11,rep,name=comments,proto3" json:"comments,omitempty"`
-	Metadata      map[string]*structpb.Value `protobuf:"bytes,12,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	CreatedAt     *timestamppb.Timestamp     `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp     `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     *timestamppb.Timestamp     `protobuf:"bytes,15,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState     `protogen:"open.v1"`
+	Id              string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title           string                     `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description     string                     `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	TicketType      string                     `protobuf:"bytes,4,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	RequireApproval bool                       `protobuf:"varint,5,opt,name=require_approval,json=requireApproval,proto3" json:"require_approval,omitempty"`
+	VisibleRoles    []string                   `protobuf:"bytes,6,rep,name=visible_roles,json=visibleRoles,proto3" json:"visible_roles,omitempty"`
+	Status          TicketStatus               `protobuf:"varint,7,opt,name=status,proto3,enum=api.v1.TicketStatus" json:"status,omitempty"`
+	Priority        TicketPriority             `protobuf:"varint,8,opt,name=priority,proto3,enum=api.v1.TicketPriority" json:"priority,omitempty"`
+	CustomerId      string                     `protobuf:"bytes,9,opt,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	CreatedBy       string                     `protobuf:"bytes,10,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	AssignedTo      string                     `protobuf:"bytes,11,opt,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
+	MergedInto      string                     `protobuf:"bytes,12,opt,name=merged_into,json=mergedInto,proto3" json:"merged_into,omitempty"`
+	Comments        []*Comment                 `protobuf:"bytes,13,rep,name=comments,proto3" json:"comments,omitempty"`
+	Metadata        map[string]*structpb.Value `protobuf:"bytes,14,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	CreatedAt       *timestamppb.Timestamp     `protobuf:"bytes,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt       *timestamppb.Timestamp     `protobuf:"bytes,16,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt       *timestamppb.Timestamp     `protobuf:"bytes,17,opt,name=deleted_at,json=deletedAt,proto3,oneof" json:"deleted_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *Ticket) Reset() {
@@ -625,6 +627,20 @@ func (x *Ticket) GetTicketType() string {
 		return x.TicketType
 	}
 	return ""
+}
+
+func (x *Ticket) GetRequireApproval() bool {
+	if x != nil {
+		return x.RequireApproval
+	}
+	return false
+}
+
+func (x *Ticket) GetVisibleRoles() []string {
+	if x != nil {
+		return x.VisibleRoles
+	}
+	return nil
 }
 
 func (x *Ticket) GetStatus() TicketStatus {
@@ -710,7 +726,7 @@ type CreateTicketTypeRequest struct {
 	DisplayName     string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	Description     string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	RequireApproval bool                   `protobuf:"varint,4,opt,name=require_approval,json=requireApproval,proto3" json:"require_approval,omitempty"`
-	AutoVisible     bool                   `protobuf:"varint,5,opt,name=auto_visible,json=autoVisible,proto3" json:"auto_visible,omitempty"`
+	VisibleRoles    []string               `protobuf:"bytes,5,rep,name=visible_roles,json=visibleRoles,proto3" json:"visible_roles,omitempty"`
 	Activated       bool                   `protobuf:"varint,6,opt,name=activated,proto3" json:"activated,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -774,11 +790,11 @@ func (x *CreateTicketTypeRequest) GetRequireApproval() bool {
 	return false
 }
 
-func (x *CreateTicketTypeRequest) GetAutoVisible() bool {
+func (x *CreateTicketTypeRequest) GetVisibleRoles() []string {
 	if x != nil {
-		return x.AutoVisible
+		return x.VisibleRoles
 	}
-	return false
+	return nil
 }
 
 func (x *CreateTicketTypeRequest) GetActivated() bool {
@@ -890,11 +906,11 @@ type ListTicketTypesRequest struct {
 	DisplayName     *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
 	Description     *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	RequireApproval *bool                  `protobuf:"varint,4,opt,name=require_approval,json=requireApproval,proto3,oneof" json:"require_approval,omitempty"`
-	AutoVisible     *bool                  `protobuf:"varint,5,opt,name=auto_visible,json=autoVisible,proto3,oneof" json:"auto_visible,omitempty"`
+	VisibleRoles    []string               `protobuf:"bytes,5,rep,name=visible_roles,json=visibleRoles,proto3" json:"visible_roles,omitempty"`
 	Activated       *bool                  `protobuf:"varint,6,opt,name=activated,proto3,oneof" json:"activated,omitempty"`
-	Sorts           []*TicketTypeSort      `protobuf:"bytes,10,rep,name=sorts,proto3" json:"sorts,omitempty"`
-	Pagination      *PageRequest           `protobuf:"bytes,11,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	IncludeDeleted  bool                   `protobuf:"varint,12,opt,name=include_deleted,json=includeDeleted,proto3" json:"include_deleted,omitempty"`
+	Sorts           []*TicketTypeSort      `protobuf:"bytes,7,rep,name=sorts,proto3" json:"sorts,omitempty"`
+	Pagination      *PageRequest           `protobuf:"bytes,8,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	IncludeDeleted  bool                   `protobuf:"varint,9,opt,name=include_deleted,json=includeDeleted,proto3" json:"include_deleted,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -957,11 +973,11 @@ func (x *ListTicketTypesRequest) GetRequireApproval() bool {
 	return false
 }
 
-func (x *ListTicketTypesRequest) GetAutoVisible() bool {
-	if x != nil && x.AutoVisible != nil {
-		return *x.AutoVisible
+func (x *ListTicketTypesRequest) GetVisibleRoles() []string {
+	if x != nil {
+		return x.VisibleRoles
 	}
-	return false
+	return nil
 }
 
 func (x *ListTicketTypesRequest) GetActivated() bool {
@@ -1050,7 +1066,7 @@ type UpdateTicketTypeRequest struct {
 	DisplayName     *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
 	Description     *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	RequireApproval *bool                  `protobuf:"varint,4,opt,name=require_approval,json=requireApproval,proto3,oneof" json:"require_approval,omitempty"`
-	AutoVisible     *bool                  `protobuf:"varint,5,opt,name=auto_visible,json=autoVisible,proto3,oneof" json:"auto_visible,omitempty"`
+	VisibleRoles    []string               `protobuf:"bytes,5,rep,name=visible_roles,json=visibleRoles,proto3" json:"visible_roles,omitempty"`
 	Activated       *bool                  `protobuf:"varint,6,opt,name=activated,proto3,oneof" json:"activated,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -1114,11 +1130,11 @@ func (x *UpdateTicketTypeRequest) GetRequireApproval() bool {
 	return false
 }
 
-func (x *UpdateTicketTypeRequest) GetAutoVisible() bool {
-	if x != nil && x.AutoVisible != nil {
-		return *x.AutoVisible
+func (x *UpdateTicketTypeRequest) GetVisibleRoles() []string {
+	if x != nil {
+		return x.VisibleRoles
 	}
-	return false
+	return nil
 }
 
 func (x *UpdateTicketTypeRequest) GetActivated() bool {
@@ -2295,15 +2311,15 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
 	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"?\n" +
 	"\x12AddCommentResponse\x12)\n" +
-	"\acomment\x18\x01 \x01(\v2\x0f.api.v1.CommentR\acomment\"\xa6\x03\n" +
+	"\acomment\x18\x01 \x01(\v2\x0f.api.v1.CommentR\acomment\"\xa8\x03\n" +
 	"\n" +
 	"TicketType\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12)\n" +
-	"\x10require_approval\x18\x05 \x01(\bR\x0frequireApproval\x12!\n" +
-	"\fauto_visible\x18\x06 \x01(\bR\vautoVisible\x12\x1c\n" +
+	"\x10require_approval\x18\x05 \x01(\bR\x0frequireApproval\x12#\n" +
+	"\rvisible_roles\x18\x06 \x03(\tR\fvisibleRoles\x12\x1c\n" +
 	"\tactivated\x18\a \x01(\bR\tactivated\x129\n" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
@@ -2312,42 +2328,44 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"\n" +
 	"deleted_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01B\r\n" +
-	"\v_deleted_at\"\xd6\x05\n" +
+	"\v_deleted_at\"\xa6\x06\n" +
 	"\x06Ticket\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1f\n" +
 	"\vticket_type\x18\x04 \x01(\tR\n" +
-	"ticketType\x12,\n" +
-	"\x06status\x18\x05 \x01(\x0e2\x14.api.v1.TicketStatusR\x06status\x122\n" +
-	"\bpriority\x18\x06 \x01(\x0e2\x16.api.v1.TicketPriorityR\bpriority\x12\x1f\n" +
-	"\vcustomer_id\x18\a \x01(\tR\n" +
+	"ticketType\x12)\n" +
+	"\x10require_approval\x18\x05 \x01(\bR\x0frequireApproval\x12#\n" +
+	"\rvisible_roles\x18\x06 \x03(\tR\fvisibleRoles\x12,\n" +
+	"\x06status\x18\a \x01(\x0e2\x14.api.v1.TicketStatusR\x06status\x122\n" +
+	"\bpriority\x18\b \x01(\x0e2\x16.api.v1.TicketPriorityR\bpriority\x12\x1f\n" +
+	"\vcustomer_id\x18\t \x01(\tR\n" +
 	"customerId\x12\x1d\n" +
 	"\n" +
-	"created_by\x18\b \x01(\tR\tcreatedBy\x12\x1f\n" +
-	"\vassigned_to\x18\t \x01(\tR\n" +
+	"created_by\x18\n" +
+	" \x01(\tR\tcreatedBy\x12\x1f\n" +
+	"\vassigned_to\x18\v \x01(\tR\n" +
 	"assignedTo\x12\x1f\n" +
-	"\vmerged_into\x18\n" +
-	" \x01(\tR\n" +
+	"\vmerged_into\x18\f \x01(\tR\n" +
 	"mergedInto\x12+\n" +
-	"\bcomments\x18\v \x03(\v2\x0f.api.v1.CommentR\bcomments\x128\n" +
-	"\bmetadata\x18\f \x03(\v2\x1c.api.v1.Ticket.MetadataEntryR\bmetadata\x129\n" +
+	"\bcomments\x18\r \x03(\v2\x0f.api.v1.CommentR\bcomments\x128\n" +
+	"\bmetadata\x18\x0e \x03(\v2\x1c.api.v1.Ticket.MetadataEntryR\bmetadata\x129\n" +
 	"\n" +
-	"created_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
+	"updated_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12>\n" +
 	"\n" +
-	"deleted_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01\x1aS\n" +
+	"deleted_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\tdeletedAt\x88\x01\x01\x1aS\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
 	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01B\r\n" +
-	"\v_deleted_at\"\xde\x01\n" +
+	"\v_deleted_at\"\xe0\x01\n" +
 	"\x17CreateTicketTypeRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12)\n" +
-	"\x10require_approval\x18\x04 \x01(\bR\x0frequireApproval\x12!\n" +
-	"\fauto_visible\x18\x05 \x01(\bR\vautoVisible\x12\x1c\n" +
+	"\x10require_approval\x18\x04 \x01(\bR\x0frequireApproval\x12#\n" +
+	"\rvisible_roles\x18\x05 \x03(\tR\fvisibleRoles\x12\x1c\n" +
 	"\tactivated\x18\x06 \x01(\bR\tactivated\"O\n" +
 	"\x18CreateTicketTypeResponse\x123\n" +
 	"\vticket_type\x18\x01 \x01(\v2\x12.api.v1.TicketTypeR\n" +
@@ -2360,43 +2378,40 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"\x10FIELD_CREATED_AT\x10\x01\x12\x14\n" +
 	"\x10FIELD_UPDATED_AT\x10\x02\x12\x0e\n" +
 	"\n" +
-	"FIELD_NAME\x10\x03\"\xe5\x03\n" +
+	"FIELD_NAME\x10\x03\"\xd1\x03\n" +
 	"\x16ListTicketTypesRequest\x12\x17\n" +
 	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x88\x01\x01\x12&\n" +
 	"\fdisplay_name\x18\x02 \x01(\tH\x01R\vdisplayName\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x02R\vdescription\x88\x01\x01\x12.\n" +
-	"\x10require_approval\x18\x04 \x01(\bH\x03R\x0frequireApproval\x88\x01\x01\x12&\n" +
-	"\fauto_visible\x18\x05 \x01(\bH\x04R\vautoVisible\x88\x01\x01\x12!\n" +
-	"\tactivated\x18\x06 \x01(\bH\x05R\tactivated\x88\x01\x01\x12,\n" +
-	"\x05sorts\x18\n" +
-	" \x03(\v2\x16.api.v1.TicketTypeSortR\x05sorts\x123\n" +
+	"\x10require_approval\x18\x04 \x01(\bH\x03R\x0frequireApproval\x88\x01\x01\x12#\n" +
+	"\rvisible_roles\x18\x05 \x03(\tR\fvisibleRoles\x12!\n" +
+	"\tactivated\x18\x06 \x01(\bH\x04R\tactivated\x88\x01\x01\x12,\n" +
+	"\x05sorts\x18\a \x03(\v2\x16.api.v1.TicketTypeSortR\x05sorts\x123\n" +
 	"\n" +
-	"pagination\x18\v \x01(\v2\x13.api.v1.PageRequestR\n" +
+	"pagination\x18\b \x01(\v2\x13.api.v1.PageRequestR\n" +
 	"pagination\x12'\n" +
-	"\x0finclude_deleted\x18\f \x01(\bR\x0eincludeDeletedB\a\n" +
+	"\x0finclude_deleted\x18\t \x01(\bR\x0eincludeDeletedB\a\n" +
 	"\x05_nameB\x0f\n" +
 	"\r_display_nameB\x0e\n" +
 	"\f_descriptionB\x13\n" +
-	"\x11_require_approvalB\x0f\n" +
-	"\r_auto_visibleB\f\n" +
+	"\x11_require_approvalB\f\n" +
 	"\n" +
 	"_activated\"\x82\x01\n" +
 	"\x17ListTicketTypesResponse\x125\n" +
 	"\fticket_types\x18\x01 \x03(\v2\x12.api.v1.TicketTypeR\vticketTypes\x120\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
-	"pagination\"\xc8\x02\n" +
+	"pagination\"\xb4\x02\n" +
 	"\x17UpdateTicketTypeRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12&\n" +
 	"\fdisplay_name\x18\x02 \x01(\tH\x00R\vdisplayName\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01\x12.\n" +
-	"\x10require_approval\x18\x04 \x01(\bH\x02R\x0frequireApproval\x88\x01\x01\x12&\n" +
-	"\fauto_visible\x18\x05 \x01(\bH\x03R\vautoVisible\x88\x01\x01\x12!\n" +
-	"\tactivated\x18\x06 \x01(\bH\x04R\tactivated\x88\x01\x01B\x0f\n" +
+	"\x10require_approval\x18\x04 \x01(\bH\x02R\x0frequireApproval\x88\x01\x01\x12#\n" +
+	"\rvisible_roles\x18\x05 \x03(\tR\fvisibleRoles\x12!\n" +
+	"\tactivated\x18\x06 \x01(\bH\x03R\tactivated\x88\x01\x01B\x0f\n" +
 	"\r_display_nameB\x0e\n" +
 	"\f_descriptionB\x13\n" +
-	"\x11_require_approvalB\x0f\n" +
-	"\r_auto_visibleB\f\n" +
+	"\x11_require_approvalB\f\n" +
 	"\n" +
 	"_activated\"O\n" +
 	"\x18UpdateTicketTypeResponse\x123\n" +
@@ -2517,7 +2532,7 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"\x13TICKET_PRIORITY_LOW\x10\x01\x12\x1a\n" +
 	"\x16TICKET_PRIORITY_MEDIUM\x10\x02\x12\x18\n" +
 	"\x14TICKET_PRIORITY_HIGH\x10\x03\x12\x1a\n" +
-	"\x16TICKET_PRIORITY_URGENT\x10\x042\xac\x0e\n" +
+	"\x16TICKET_PRIORITY_URGENT\x10\x042\xba\x0e\n" +
 	"\rTicketService\x12\x95\x01\n" +
 	"\x10CreateTicketType\x12\x1f.api.v1.CreateTicketTypeRequest\x1a .api.v1.CreateTicketTypeResponse\">\x82\xb5\x18\x1b\n" +
 	"\x12admin:ticket-types\x12\x05admin\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/api/v1/ticket-types\x12\x82\x01\n" +
@@ -2530,9 +2545,9 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"\fCreateTicket\x12\x1b.api.v1.CreateTicketRequest\x1a\x1c.api.v1.CreateTicketResponse\"-\x82\xb5\x18\x0f\n" +
 	"\rwrite:tickets\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/tickets\x12w\n" +
 	"\tGetTicket\x12\x18.api.v1.GetTicketRequest\x1a\x19.api.v1.GetTicketResponse\"5\x82\xb5\x18\x0e\n" +
-	"\fread:tickets\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/tickets/{ticket_id}\x12\x84\x01\n" +
-	"\fUpdateTicket\x12\x1b.api.v1.UpdateTicketRequest\x1a\x1c.api.v1.UpdateTicketResponse\"9\x82\xb5\x18\x0f\n" +
-	"\rwrite:tickets\x82\xd3\xe4\x93\x02 :\x01*\x1a\x1b/api/v1/tickets/{ticket_id}\x12\x99\x01\n" +
+	"\fread:tickets\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/tickets/{ticket_id}\x12\x92\x01\n" +
+	"\fUpdateTicket\x12\x1b.api.v1.UpdateTicketRequest\x1a\x1c.api.v1.UpdateTicketResponse\"G\x82\xb5\x18\x1d\n" +
+	"\rwrite:tickets\x12\x05admin\x12\x05agent\x82\xd3\xe4\x93\x02 :\x01*\x1a\x1b/api/v1/tickets/{ticket_id}\x12\x99\x01\n" +
 	"\fAssignTicket\x12\x1b.api.v1.AssignTicketRequest\x1a\x1c.api.v1.AssignTicketResponse\"N\x82\xb5\x18\x1d\n" +
 	"\rwrite:tickets\x12\x05admin\x12\x05agent\x82\xd3\xe4\x93\x02':\x01*\"\"/api/v1/tickets/{ticket_id}/assign\x12\x99\x01\n" +
 	"\x11DistributeTickets\x12 .api.v1.DistributeTicketsRequest\x1a!.api.v1.DistributeTicketsResponse\"?\x82\xb5\x18\x16\n" +

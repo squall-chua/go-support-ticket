@@ -8,17 +8,17 @@ import (
 
 type TicketRepository interface {
 	CreateTicket(ctx context.Context, ticket *model.Ticket) error
-	GetTicket(ctx context.Context, id string) (*model.Ticket, error)
-	UpdateTicket(ctx context.Context, id string, update model.TicketUpdate) (*model.Ticket, error)
-	UpdateTickets(ctx context.Context, updates map[string]model.TicketUpdate) ([]*model.Ticket, error)
-	ListTickets(ctx context.Context, filter model.TicketFilter, sorts []model.TicketSort, limit, offset int32) ([]*model.Ticket, int32, error)
-	AddComment(ctx context.Context, ticketID string, comment *model.Comment) error
-	DeleteTicket(ctx context.Context, id string) error
+	GetTicket(ctx context.Context, id string, userID string, roles []string) (*model.Ticket, error)
+	UpdateTicket(ctx context.Context, id string, update model.TicketUpdate, userID string, roles []string) (*model.Ticket, error)
+	UpdateTickets(ctx context.Context, updates map[string]model.TicketUpdate, userID string, roles []string) ([]*model.Ticket, error)
+	ListTickets(ctx context.Context, filter model.TicketFilter, sorts []model.TicketSort, userID string, roles []string, limit, offset int32) ([]*model.Ticket, int32, error)
+	AddComment(ctx context.Context, ticketID string, comment *model.Comment, userID string, roles []string) error
+	DeleteTicket(ctx context.Context, id string, userID string, roles []string) error
 }
 
 type TicketTypeRepository interface {
 	CreateType(ctx context.Context, tType *model.TicketType) error
-	GetType(ctx context.Context, id string) (*model.TicketType, error)
+	GetType(ctx context.Context, idOrName string) (*model.TicketType, error)
 	ListTypes(ctx context.Context, filter model.TicketTypeFilter, sorts []model.TicketTypeSort, limit, offset int32) ([]*model.TicketType, int32, error)
 	UpdateType(ctx context.Context, id string, update model.TicketTypeUpdate) (*model.TicketType, error)
 	DeleteType(ctx context.Context, id string) error

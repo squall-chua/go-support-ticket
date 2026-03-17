@@ -31,7 +31,8 @@ func (r *ApprovalRepo) GetApproval(ctx context.Context, id string) (*model.Appro
 	if err != nil {
 		return nil, err
 	}
-	return r.coll.FindOne(ctx, gmqb.Eq("_id", oid))
+	f := gmqb.Field[model.Approval]
+	return r.coll.FindOne(ctx, gmqb.Eq(f("ID"), oid))
 }
 
 func (r *ApprovalRepo) UpdateApproval(ctx context.Context, id string, update model.ApprovalUpdate) error {
@@ -56,7 +57,7 @@ func (r *ApprovalRepo) UpdateApproval(ctx context.Context, id string, update mod
 
 	u = u.Set(f("UpdatedAt"), time.Now().UTC())
 
-	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), u)
+	_, err = r.coll.UpdateOne(ctx, gmqb.Eq(f("ID"), oid), u)
 	return err
 }
 
@@ -85,7 +86,7 @@ func (r *ApprovalRepo) ListApprovals(ctx context.Context, filter model.ApprovalF
 		q.In(f("RequiredApprovals"), filter.RequiredApprovals)
 	}
 	if len(filter.Approvers) > 0 {
-		q.In("decisions.approver", filter.Approvers)
+		q.In(f("Decisions")+".approver", filter.Approvers)
 	}
 	if filter.StartTime != nil {
 		q.Gte(f("CreatedAt"), *filter.StartTime)

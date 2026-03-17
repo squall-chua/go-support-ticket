@@ -27,15 +27,17 @@ func (r *TicketTypeRepo) CreateType(ctx context.Context, tType *model.TicketType
 	return err
 }
 
-func (r *TicketTypeRepo) GetType(ctx context.Context, id string) (*model.TicketType, error) {
-	oid, err := bson.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
+func (r *TicketTypeRepo) GetType(ctx context.Context, idOrName string) (*model.TicketType, error) {
+	f := gmqb.Field[model.TicketType]
+	filter := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
+
+	if oid, err := bson.ObjectIDFromHex(idOrName); err == nil {
+		filter.Eq(f("ID"), oid)
+	} else {
+		filter.Eq(f("Name"), idOrName)
 	}
-	return r.coll.FindOne(ctx, gmqb.And(
-		gmqb.Eq("_id", oid),
-		gmqb.Eq("deleted_at", nil),
-	))
+
+	return r.coll.FindOne(ctx, filter)
 }
 
 func (r *TicketTypeRepo) ListTypes(ctx context.Context, filter model.TicketTypeFilter, sorts []model.TicketTypeSort, limit, offset int32) ([]*model.TicketType, int32, error) {
@@ -57,8 +59,8 @@ func (r *TicketTypeRepo) ListTypes(ctx context.Context, filter model.TicketTypeF
 	if filter.RequireApproval != nil {
 		q.Eq(f("RequireApproval"), *filter.RequireApproval)
 	}
-	if filter.AutoVisible != nil {
-		q.Eq(f("AutoVisible"), *filter.AutoVisible)
+	if len(filter.VisibleRoles) > 0 {
+		q.In(f("VisibleRoles"), filter.VisibleRoles)
 	}
 	if filter.Activated != nil {
 		q.Eq(f("Activated"), *filter.Activated)
@@ -94,8 +96,8 @@ func (r *TicketTypeRepo) UpdateType(ctx context.Context, id string, update model
 	if update.RequireApproval != nil {
 		u = u.Set(f("RequireApproval"), *update.RequireApproval)
 	}
-	if update.AutoVisible != nil {
-		u = u.Set(f("AutoVisible"), *update.AutoVisible)
+	if update.VisibleRoles != nil {
+		u = u.Set(f("VisibleRoles"), update.VisibleRoles)
 	}
 	if update.Activated != nil {
 		u = u.Set(f("Activated"), *update.Activated)
@@ -107,7 +109,7 @@ func (r *TicketTypeRepo) UpdateType(ctx context.Context, id string, update model
 
 	u = u.Set(f("UpdatedAt"), time.Now().UTC())
 
-	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq("_id", oid), u, gmqb.WithReturnDocument(options.After))
+	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq(f("ID"), oid), u, gmqb.WithReturnDocument(options.After))
 }
 
 func (r *TicketTypeRepo) DeleteType(ctx context.Context, id string) error {
@@ -117,6 +119,6 @@ func (r *TicketTypeRepo) DeleteType(ctx context.Context, id string) error {
 	}
 	f := gmqb.Field[model.TicketType]
 	update := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
-	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), update)
+	_, err = r.coll.UpdateOne(ctx, gmqb.Eq(f("ID"), oid), update)
 	return err
 }

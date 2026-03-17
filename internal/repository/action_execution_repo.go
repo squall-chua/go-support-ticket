@@ -31,7 +31,8 @@ func (r *ActionExecutionRepo) GetExecution(ctx context.Context, id string) (*mod
 	if err != nil {
 		return nil, err
 	}
-	return r.coll.FindOne(ctx, gmqb.Eq("_id", oid))
+	f := gmqb.Field[model.ActionExecution]
+	return r.coll.FindOne(ctx, gmqb.Eq(f("ID"), oid))
 }
 
 func (r *ActionExecutionRepo) UpdateExecution(ctx context.Context, id string, update model.ActionExecutionUpdate) error {
@@ -57,7 +58,7 @@ func (r *ActionExecutionRepo) UpdateExecution(ctx context.Context, id string, up
 	}
 	u.Set(f("UpdatedAt"), time.Now().UTC())
 
-	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), u)
+	_, err = r.coll.UpdateOne(ctx, gmqb.Eq(f("ID"), oid), u)
 	return err
 }
 
@@ -67,7 +68,7 @@ func (r *ActionExecutionRepo) ListExecutions(ctx context.Context, filter model.A
 	mqbFilter := gmqb.NewFilter()
 
 	if len(filter.IDs) > 0 {
-		mqbFilter.In("_id", filter.IDs)
+		mqbFilter.In(f("ID"), filter.IDs)
 	}
 	if len(filter.TicketIDs) > 0 {
 		mqbFilter.In(f("TicketID"), filter.TicketIDs)

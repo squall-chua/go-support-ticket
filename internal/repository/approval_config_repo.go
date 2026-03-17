@@ -34,7 +34,7 @@ func (r *ApprovalConfigRepo) GetConfig(ctx context.Context, id, actionType, tick
 		if err != nil {
 			return nil, err
 		}
-		q.Eq("_id", oid)
+		q.Eq(f("ID"), oid)
 	} else if actionType != "" {
 		q.Eq(f("ActionType"), actionType)
 	} else if ticketType != "" {
@@ -53,7 +53,7 @@ func (r *ApprovalConfigRepo) UpdateConfig(ctx context.Context, id, actionType, t
 		if err != nil {
 			return nil, err
 		}
-		q.Eq("_id", oid)
+		q.Eq(f("ID"), oid)
 	} else if actionType != "" {
 		q.Eq(f("ActionType"), actionType)
 	} else if ticketType != "" {
@@ -81,7 +81,7 @@ func (r *ApprovalConfigRepo) DeleteConfig(ctx context.Context, id, actionType, t
 		if err != nil {
 			return nil, err
 		}
-		q.Eq("_id", oid)
+		q.Eq(f("ID"), oid)
 	} else if actionType != "" {
 		q.Eq(f("ActionType"), actionType)
 	} else if ticketType != "" {
@@ -109,7 +109,7 @@ func (r *ApprovalConfigRepo) ListConfigs(ctx context.Context, filter model.Appro
 			}
 		}
 		if len(oids) > 0 {
-			q.In("_id", oids)
+			q.In(f("ID"), oids)
 		}
 	}
 
