@@ -57,6 +57,7 @@ message ActionSchema {
   bool require_approval = 7;
   google.protobuf.Timestamp created_at = 8;
   google.protobuf.Timestamp updated_at = 9;
+  google.protobuf.Timestamp deleted_at = 10;
 }
 
 message ActionExecution {
@@ -65,26 +66,39 @@ message ActionExecution {
   string action_type = 3;
   ActionStatus status = 4;
   map<string, google.protobuf.Value> parameters = 5;
-  map<string, google.protobuf.Value> result_metadata = 6;
-  string error = 7;
-  string logs = 8;
-  string executing_user = 9;
+  ActionExecutionResult result = 6;
+  string executing_user = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
   google.protobuf.Timestamp execute_at = 10;
-  google.protobuf.Timestamp completed_at = 11;
-  google.protobuf.Timestamp created_at = 12;
-  google.protobuf.Timestamp updated_at = 13;
 }
 
-message ListAvailableActionsRequest {
+enum ActionExecutionStatus {
+  ACTION_EXECUTION_STATUS_UNSPECIFIED = 0;
+  ACTION_EXECUTION_STATUS_COMPLETED = 1;
+  ACTION_EXECUTION_STATUS_FAILED = 2;
+}
+
+message ActionExecutionResult {
+  string execution_id = 1;
+  ActionExecutionStatus status = 2;
+  string error = 3;
+  string logs = 4;
+  google.protobuf.Timestamp completed_at = 5;
+  map<string, google.protobuf.Value> results = 6;
+}
+
+message ListActionSchemasRequest {
   repeated string ids = 1;
   repeated string action_types = 2;
   string display_name = 3;
   optional bool require_approval = 4;
   TimeRange time_range = 5;
   PageRequest pagination = 6;
+  bool include_deleted = 7;
 }
 
-message ListAvailableActionsResponse {
+message ListActionSchemasResponse {
   repeated ActionSchema schemas = 1;
   PageInfo pagination = 2;
 }
@@ -97,6 +111,21 @@ message ExecuteActionRequest {
 
 message GetActionExecutionRequest {
   string execution_id = 1;
+}
+
+message ListActionExecutionsRequest {
+  repeated string ids = 1;
+  repeated string ticket_ids = 2;
+  repeated string action_types = 3;
+  repeated ActionStatus statuses = 4;
+  repeated string executing_users = 5;
+  TimeRange time_range = 6;
+  PageRequest pagination = 7;
+}
+
+message ListActionExecutionsResponse {
+  repeated ActionExecution executions = 1;
+  PageInfo pagination = 2;
 }
 
 message UpdateActionSchemaRequest {
@@ -112,15 +141,26 @@ message UpdateActionSchemaResponse {
   ActionSchema schema = 1;
 }
 
+message CreateActionSchemaRequest {
+  string action_type = 1;
+  string display_name = 2;
+  string description = 3;
+  repeated ActionParameter parameters = 4;
+  repeated ActionResultField result_schema = 5;
+  bool require_approval = 6;
+}
+
+message CreateActionSchemaResponse {
+  ActionSchema schema = 1;
+}
+
+message DeleteActionSchemaRequest {
+  string action_type = 1;
+}
+
+message DeleteActionSchemaResponse {}
+
 service ActionService {
-  rpc ListAvailableActions(ListAvailableActionsRequest) returns (ListAvailableActionsResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/actions"
-    };
-    option (auth.v1.rule) = {
-      required_scopes: ["read:actions"]
-    };
-  }
   rpc ExecuteAction(ExecuteActionRequest) returns (ActionExecution) {
     option (google.api.http) = {
       post: "/api/v1/actions"
@@ -139,10 +179,45 @@ service ActionService {
       required_scopes: ["read:actions"]
     };
   }
+  rpc ListActionExecutions(ListActionExecutionsRequest) returns (ListActionExecutionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/action-executions"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:actions"]
+    };
+  }
+  rpc CreateActionSchema(CreateActionSchemaRequest) returns (CreateActionSchemaResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/action-schemas"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:actions"]
+      required_roles: ["admin"]
+    };
+  }
+  rpc ListActionSchemas(ListActionSchemasRequest) returns (ListActionSchemasResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/action-schemas"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:actions"]
+    };
+  }
   rpc UpdateActionSchema(UpdateActionSchemaRequest) returns (UpdateActionSchemaResponse) {
     option (google.api.http) = {
       put: "/api/v1/action-schemas/{action_type}"
       body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:actions"]
+      required_roles: ["admin"]
+    };
+  }
+  rpc DeleteActionSchema(DeleteActionSchemaRequest) returns (DeleteActionSchemaResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/action-schemas/{action_type}"
     };
     option (auth.v1.rule) = {
       required_scopes: ["write:actions"]

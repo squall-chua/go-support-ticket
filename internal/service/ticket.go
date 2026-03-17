@@ -43,8 +43,6 @@ func (s *TicketServiceServer) CreateTicketType(ctx context.Context, req *apiv1.C
 		RequireApproval: req.RequireApproval,
 		AutoVisible:     req.AutoVisible,
 		Activated:       req.Activated,
-		CreatedAt:       time.Now().UTC(),
-		UpdatedAt:       time.Now().UTC(),
 	}
 
 	if err := s.typeRepo.CreateType(ctx, tType); err != nil {
@@ -100,16 +98,7 @@ func (s *TicketServiceServer) ListTicketTypes(ctx context.Context, req *apiv1.Li
 		}
 	}
 
-	limit := int32(10)
-	offset := int32(0)
-	if req.Pagination != nil {
-		if req.Pagination.PageSize > 0 {
-			limit = req.Pagination.PageSize
-		}
-		if req.Pagination.PageNumber > 1 {
-			offset = (req.Pagination.PageNumber - 1) * limit
-		}
-	}
+	limit, offset, pageNumber := getPaginationParams(req.Pagination)
 
 	types, total, err := s.typeRepo.ListTypes(ctx, filter, sorts, limit, offset)
 	if err != nil {
@@ -125,7 +114,7 @@ func (s *TicketServiceServer) ListTicketTypes(ctx context.Context, req *apiv1.Li
 		TicketTypes: pbTypes,
 		Pagination: &apiv1.PageInfo{
 			TotalSize:  total,
-			PageNumber: offset/limit + 1,
+			PageNumber: pageNumber,
 		},
 	}, nil
 }
@@ -137,7 +126,6 @@ func (s *TicketServiceServer) UpdateTicketType(ctx context.Context, req *apiv1.U
 		RequireApproval: req.RequireApproval,
 		AutoVisible:     req.AutoVisible,
 		Activated:       req.Activated,
-		UpdatedAt:       time.Now().UTC(),
 	}
 
 	tType, err := s.typeRepo.UpdateType(ctx, req.Id, update)
@@ -167,7 +155,7 @@ func (s *TicketServiceServer) UpdateTicketType(ctx context.Context, req *apiv1.U
 }
 
 func (s *TicketServiceServer) DeleteTicketType(ctx context.Context, req *apiv1.DeleteTicketTypeRequest) (*apiv1.DeleteTicketTypeResponse, error) {
-	if err := s.typeRepo.DeleteType(ctx, req.Id, time.Now().UTC()); err != nil {
+	if err := s.typeRepo.DeleteType(ctx, req.Id); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	evt := event.Event{
@@ -192,8 +180,6 @@ func (s *TicketServiceServer) CreateTicket(ctx context.Context, req *apiv1.Creat
 		Status:      int32(apiv1.TicketStatus_TICKET_STATUS_OPEN),
 		TicketType:  req.TicketType,
 		CustomerID:  req.CustomerId,
-		CreatedAt:   time.Now().UTC(),
-		UpdatedAt:   time.Now().UTC(),
 	}
 
 	if err := s.repo.CreateTicket(ctx, ticket); err != nil {
@@ -246,7 +232,6 @@ func (s *TicketServiceServer) UpdateTicket(ctx context.Context, req *apiv1.Updat
 		Title:       req.Title,
 		Description: req.Description,
 		TicketType:  req.TicketType,
-		UpdatedAt:   time.Now().UTC(),
 	}
 
 	if req.Priority != nil {
@@ -332,7 +317,6 @@ func (s *TicketServiceServer) publishTicketMerged(ctx context.Context, source *m
 func (s *TicketServiceServer) AssignTicket(ctx context.Context, req *apiv1.AssignTicketRequest) (*apiv1.AssignTicketResponse, error) {
 	update := model.TicketUpdate{
 		AssignedTo: &req.AssignTo,
-		UpdatedAt:  time.Now().UTC(),
 	}
 
 	ticket, err := s.repo.UpdateTicket(ctx, req.TicketId, update)
@@ -353,7 +337,6 @@ func (s *TicketServiceServer) DistributeTickets(ctx context.Context, req *apiv1.
 	for _, assignment := range req.Assignments {
 		updates[assignment.TicketId] = model.TicketUpdate{
 			AssignedTo: &assignment.AssignTo,
-			UpdatedAt:  time.Now().UTC(),
 		}
 	}
 
@@ -394,7 +377,6 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 	updateSource := model.TicketUpdate{
 		Status:     &mergedStatus,
 		MergedInto: &target.ID,
-		UpdatedAt:  time.Now().UTC(),
 	}
 
 	source, err = s.repo.UpdateTicket(ctx, req.SourceTicketId, updateSource)
@@ -404,10 +386,9 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 
 	// Optionally add a comment to target ticket about the merge
 	comment := &model.Comment{
-		ID:        bson.NewObjectID(),
-		Author:    SystemAuthor,
-		Content:   "Ticket " + source.ID.Hex() + " merged into this ticket.",
-		CreatedAt: time.Now().UTC(),
+		ID:      bson.NewObjectID(),
+		Author:  SystemAuthor,
+		Content: "Ticket " + source.ID.Hex() + " merged into this ticket.",
 	}
 	_ = s.repo.AddComment(ctx, req.TargetTicketId, comment)
 
@@ -426,16 +407,7 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 }
 
 func (s *TicketServiceServer) ListTickets(ctx context.Context, req *apiv1.ListTicketsRequest) (*apiv1.ListTicketsResponse, error) {
-	var limit, offset, pageNumber int32 = 10, 0, 1
-	if req.Pagination != nil {
-		limit = req.Pagination.PageSize
-		pageNumber = req.Pagination.PageNumber
-		if pageNumber > 1 {
-			offset = (pageNumber - 1) * limit
-		} else {
-			pageNumber = 1
-		}
-	}
+	limit, offset, pageNumber := getPaginationParams(req.Pagination)
 
 	statuses := make([]int32, len(req.Statuses))
 	for i, st := range req.Statuses {
@@ -510,10 +482,9 @@ func (s *TicketServiceServer) AddComment(ctx context.Context, req *apiv1.AddComm
 	author, _ := middleware.UserFromContext(ctx)
 
 	comment := &model.Comment{
-		ID:        bson.NewObjectID(),
-		Author:    author,
-		Content:   req.Content,
-		CreatedAt: time.Now().UTC(),
+		ID:      bson.NewObjectID(),
+		Author:  author,
+		Content: req.Content,
 	}
 
 	if err := s.repo.AddComment(ctx, req.TicketId, comment); err != nil {
@@ -542,7 +513,7 @@ func (s *TicketServiceServer) AddComment(ctx context.Context, req *apiv1.AddComm
 }
 
 func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.DeleteTicketRequest) (*apiv1.DeleteTicketResponse, error) {
-	if err := s.repo.DeleteTicket(ctx, req.TicketId, time.Now().UTC()); err != nil {
+	if err := s.repo.DeleteTicket(ctx, req.TicketId); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -559,7 +530,5 @@ func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.Delet
 	}
 	_ = s.publisher.Publish(ctx, &evt)
 
-	return &apiv1.DeleteTicketResponse{
-		Success: true,
-	}, nil
+	return &apiv1.DeleteTicketResponse{}, nil
 }

@@ -19,9 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ApprovalService_CreateApproval_FullMethodName = "/api.v1.ApprovalService/CreateApproval"
-	ApprovalService_DecideApproval_FullMethodName = "/api.v1.ApprovalService/DecideApproval"
-	ApprovalService_ListApprovals_FullMethodName  = "/api.v1.ApprovalService/ListApprovals"
+	ApprovalService_CreateApproval_FullMethodName       = "/api.v1.ApprovalService/CreateApproval"
+	ApprovalService_DecideApproval_FullMethodName       = "/api.v1.ApprovalService/DecideApproval"
+	ApprovalService_ListApprovals_FullMethodName        = "/api.v1.ApprovalService/ListApprovals"
+	ApprovalService_CreateApprovalConfig_FullMethodName = "/api.v1.ApprovalService/CreateApprovalConfig"
+	ApprovalService_GetApprovalConfig_FullMethodName    = "/api.v1.ApprovalService/GetApprovalConfig"
+	ApprovalService_UpdateApprovalConfig_FullMethodName = "/api.v1.ApprovalService/UpdateApprovalConfig"
+	ApprovalService_DeleteApprovalConfig_FullMethodName = "/api.v1.ApprovalService/DeleteApprovalConfig"
+	ApprovalService_ListApprovalConfigs_FullMethodName  = "/api.v1.ApprovalService/ListApprovalConfigs"
 )
 
 // ApprovalServiceClient is the client API for ApprovalService service.
@@ -31,6 +36,11 @@ type ApprovalServiceClient interface {
 	CreateApproval(ctx context.Context, in *CreateApprovalRequest, opts ...grpc.CallOption) (*CreateApprovalResponse, error)
 	DecideApproval(ctx context.Context, in *DecideApprovalRequest, opts ...grpc.CallOption) (*DecideApprovalResponse, error)
 	ListApprovals(ctx context.Context, in *ListApprovalsRequest, opts ...grpc.CallOption) (*ListApprovalsResponse, error)
+	CreateApprovalConfig(ctx context.Context, in *CreateApprovalConfigRequest, opts ...grpc.CallOption) (*CreateApprovalConfigResponse, error)
+	GetApprovalConfig(ctx context.Context, in *GetApprovalConfigRequest, opts ...grpc.CallOption) (*ApprovalConfig, error)
+	UpdateApprovalConfig(ctx context.Context, in *UpdateApprovalConfigRequest, opts ...grpc.CallOption) (*UpdateApprovalConfigResponse, error)
+	DeleteApprovalConfig(ctx context.Context, in *DeleteApprovalConfigRequest, opts ...grpc.CallOption) (*DeleteApprovalConfigResponse, error)
+	ListApprovalConfigs(ctx context.Context, in *ListApprovalConfigsRequest, opts ...grpc.CallOption) (*ListApprovalConfigsResponse, error)
 }
 
 type approvalServiceClient struct {
@@ -71,6 +81,56 @@ func (c *approvalServiceClient) ListApprovals(ctx context.Context, in *ListAppro
 	return out, nil
 }
 
+func (c *approvalServiceClient) CreateApprovalConfig(ctx context.Context, in *CreateApprovalConfigRequest, opts ...grpc.CallOption) (*CreateApprovalConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateApprovalConfigResponse)
+	err := c.cc.Invoke(ctx, ApprovalService_CreateApprovalConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *approvalServiceClient) GetApprovalConfig(ctx context.Context, in *GetApprovalConfigRequest, opts ...grpc.CallOption) (*ApprovalConfig, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ApprovalConfig)
+	err := c.cc.Invoke(ctx, ApprovalService_GetApprovalConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *approvalServiceClient) UpdateApprovalConfig(ctx context.Context, in *UpdateApprovalConfigRequest, opts ...grpc.CallOption) (*UpdateApprovalConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateApprovalConfigResponse)
+	err := c.cc.Invoke(ctx, ApprovalService_UpdateApprovalConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *approvalServiceClient) DeleteApprovalConfig(ctx context.Context, in *DeleteApprovalConfigRequest, opts ...grpc.CallOption) (*DeleteApprovalConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteApprovalConfigResponse)
+	err := c.cc.Invoke(ctx, ApprovalService_DeleteApprovalConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *approvalServiceClient) ListApprovalConfigs(ctx context.Context, in *ListApprovalConfigsRequest, opts ...grpc.CallOption) (*ListApprovalConfigsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListApprovalConfigsResponse)
+	err := c.cc.Invoke(ctx, ApprovalService_ListApprovalConfigs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ApprovalServiceServer is the server API for ApprovalService service.
 // All implementations should embed UnimplementedApprovalServiceServer
 // for forward compatibility.
@@ -78,6 +138,11 @@ type ApprovalServiceServer interface {
 	CreateApproval(context.Context, *CreateApprovalRequest) (*CreateApprovalResponse, error)
 	DecideApproval(context.Context, *DecideApprovalRequest) (*DecideApprovalResponse, error)
 	ListApprovals(context.Context, *ListApprovalsRequest) (*ListApprovalsResponse, error)
+	CreateApprovalConfig(context.Context, *CreateApprovalConfigRequest) (*CreateApprovalConfigResponse, error)
+	GetApprovalConfig(context.Context, *GetApprovalConfigRequest) (*ApprovalConfig, error)
+	UpdateApprovalConfig(context.Context, *UpdateApprovalConfigRequest) (*UpdateApprovalConfigResponse, error)
+	DeleteApprovalConfig(context.Context, *DeleteApprovalConfigRequest) (*DeleteApprovalConfigResponse, error)
+	ListApprovalConfigs(context.Context, *ListApprovalConfigsRequest) (*ListApprovalConfigsResponse, error)
 }
 
 // UnimplementedApprovalServiceServer should be embedded to have
@@ -95,6 +160,21 @@ func (UnimplementedApprovalServiceServer) DecideApproval(context.Context, *Decid
 }
 func (UnimplementedApprovalServiceServer) ListApprovals(context.Context, *ListApprovalsRequest) (*ListApprovalsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListApprovals not implemented")
+}
+func (UnimplementedApprovalServiceServer) CreateApprovalConfig(context.Context, *CreateApprovalConfigRequest) (*CreateApprovalConfigResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateApprovalConfig not implemented")
+}
+func (UnimplementedApprovalServiceServer) GetApprovalConfig(context.Context, *GetApprovalConfigRequest) (*ApprovalConfig, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetApprovalConfig not implemented")
+}
+func (UnimplementedApprovalServiceServer) UpdateApprovalConfig(context.Context, *UpdateApprovalConfigRequest) (*UpdateApprovalConfigResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateApprovalConfig not implemented")
+}
+func (UnimplementedApprovalServiceServer) DeleteApprovalConfig(context.Context, *DeleteApprovalConfigRequest) (*DeleteApprovalConfigResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteApprovalConfig not implemented")
+}
+func (UnimplementedApprovalServiceServer) ListApprovalConfigs(context.Context, *ListApprovalConfigsRequest) (*ListApprovalConfigsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListApprovalConfigs not implemented")
 }
 func (UnimplementedApprovalServiceServer) testEmbeddedByValue() {}
 
@@ -170,6 +250,96 @@ func _ApprovalService_ListApprovals_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ApprovalService_CreateApprovalConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateApprovalConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApprovalServiceServer).CreateApprovalConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ApprovalService_CreateApprovalConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApprovalServiceServer).CreateApprovalConfig(ctx, req.(*CreateApprovalConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ApprovalService_GetApprovalConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetApprovalConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApprovalServiceServer).GetApprovalConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ApprovalService_GetApprovalConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApprovalServiceServer).GetApprovalConfig(ctx, req.(*GetApprovalConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ApprovalService_UpdateApprovalConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateApprovalConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApprovalServiceServer).UpdateApprovalConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ApprovalService_UpdateApprovalConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApprovalServiceServer).UpdateApprovalConfig(ctx, req.(*UpdateApprovalConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ApprovalService_DeleteApprovalConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteApprovalConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApprovalServiceServer).DeleteApprovalConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ApprovalService_DeleteApprovalConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApprovalServiceServer).DeleteApprovalConfig(ctx, req.(*DeleteApprovalConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ApprovalService_ListApprovalConfigs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListApprovalConfigsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ApprovalServiceServer).ListApprovalConfigs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ApprovalService_ListApprovalConfigs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ApprovalServiceServer).ListApprovalConfigs(ctx, req.(*ListApprovalConfigsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ApprovalService_ServiceDesc is the grpc.ServiceDesc for ApprovalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -188,6 +358,26 @@ var ApprovalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListApprovals",
 			Handler:    _ApprovalService_ListApprovals_Handler,
+		},
+		{
+			MethodName: "CreateApprovalConfig",
+			Handler:    _ApprovalService_CreateApprovalConfig_Handler,
+		},
+		{
+			MethodName: "GetApprovalConfig",
+			Handler:    _ApprovalService_GetApprovalConfig_Handler,
+		},
+		{
+			MethodName: "UpdateApprovalConfig",
+			Handler:    _ApprovalService_UpdateApprovalConfig_Handler,
+		},
+		{
+			MethodName: "DeleteApprovalConfig",
+			Handler:    _ApprovalService_DeleteApprovalConfig_Handler,
+		},
+		{
+			MethodName: "ListApprovalConfigs",
+			Handler:    _ApprovalService_ListApprovalConfigs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/squall-chua/gmqb"
 	"github.com/squall-chua/go-support-ticket/internal/model"
@@ -17,6 +18,9 @@ func NewAuditRepo(col *mongo.Collection) *AuditRepo {
 }
 
 func (r *AuditRepo) CreateLog(ctx context.Context, log *model.AuditLog) error {
+	if log.CreatedAt.IsZero() {
+		log.CreatedAt = time.Now().UTC()
+	}
 	_, err := r.coll.InsertOne(ctx, log)
 	return err
 }

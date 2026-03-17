@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/squall-chua/gmqb"
 	"github.com/squall-chua/go-support-ticket/internal/model"
@@ -17,18 +18,28 @@ func NewActionSchemaRepo(col *mongo.Collection) *ActionSchemaRepo {
 }
 
 func (r *ActionSchemaRepo) CreateSchema(ctx context.Context, schema *model.ActionSchema) error {
+	now := time.Now().UTC()
+	schema.CreatedAt = now
+	schema.UpdatedAt = now
 	_, err := r.coll.InsertOne(ctx, schema)
 	return err
 }
 
 func (r *ActionSchemaRepo) GetSchema(ctx context.Context, actionType string) (*model.ActionSchema, error) {
 	f := gmqb.Field[model.ActionSchema]
-	return r.coll.FindOne(ctx, gmqb.Eq(f("ActionType"), actionType))
+	return r.coll.FindOne(ctx, gmqb.And(
+		gmqb.Eq(f("ActionType"), actionType),
+		gmqb.Eq(f("DeletedAt"), nil),
+	))
 }
 
 func (r *ActionSchemaRepo) ListSchemas(ctx context.Context, filter model.ActionSchemaFilter, limit, offset int32) ([]*model.ActionSchema, int32, error) {
 	f := gmqb.Field[model.ActionSchema]
 	q := gmqb.NewFilter()
+
+	if !filter.IncludeDeleted {
+		q.Eq(f("DeletedAt"), nil)
+	}
 
 	if len(filter.IDs) > 0 {
 		q = q.In(f("ID"), toInterfaceSlice(filter.IDs)...)
@@ -76,8 +87,21 @@ func (r *ActionSchemaRepo) UpdateSchema(ctx context.Context, actionType string, 
 		return nil
 	}
 
-	u = u.Set(f("UpdatedAt"), update.UpdatedAt)
+	u = u.Set(f("UpdatedAt"), time.Now().UTC())
 
-	_, err := r.coll.UpdateOne(ctx, gmqb.Eq(f("ActionType"), actionType), u)
+	_, err := r.coll.UpdateOne(ctx, gmqb.And(
+		gmqb.Eq(f("ActionType"), actionType),
+		gmqb.Eq(f("DeletedAt"), nil),
+	), u)
+	return err
+}
+
+func (r *ActionSchemaRepo) DeleteSchema(ctx context.Context, actionType string) error {
+	f := gmqb.Field[model.ActionSchema]
+	u := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
+	_, err := r.coll.UpdateOne(ctx, gmqb.And(
+		gmqb.Eq(f("ActionType"), actionType),
+		gmqb.Eq(f("DeletedAt"), nil),
+	), u)
 	return err
 }

@@ -25,6 +25,117 @@
     "application/json"
   ],
   "paths": {
+    "/api/v1/action-executions": {
+      "get": {
+        "operationId": "ActionService_ListActionExecutions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListActionExecutionsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "ticketIds",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "actionTypes",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "statuses",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ACTION_STATUS_UNSPECIFIED",
+                "ACTION_STATUS_PENDING_APPROVAL",
+                "ACTION_STATUS_PENDING",
+                "ACTION_STATUS_IN_PROGRESS",
+                "ACTION_STATUS_COMPLETED",
+                "ACTION_STATUS_FAILED",
+                "ACTION_STATUS_REJECTED"
+              ]
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "executingUsers",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "timeRange.startTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "timeRange.endTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "pagination.pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pagination.pageNumber",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "ActionService"
+        ]
+      }
+    },
     "/api/v1/action-executions/{executionId}": {
       "get": {
         "operationId": "ActionService_GetActionExecution",
@@ -55,52 +166,14 @@
         ]
       }
     },
-    "/api/v1/action-schemas/{actionType}": {
-      "put": {
-        "operationId": "ActionService_UpdateActionSchema",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1UpdateActionSchemaResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "actionType",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ActionServiceUpdateActionSchemaBody"
-            }
-          }
-        ],
-        "tags": [
-          "ActionService"
-        ]
-      }
-    },
-    "/api/v1/actions": {
+    "/api/v1/action-schemas": {
       "get": {
-        "operationId": "ActionService_ListAvailableActions",
+        "operationId": "ActionService_ListActionSchemas",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ListAvailableActionsResponse"
+              "$ref": "#/definitions/v1ListActionSchemasResponse"
             }
           },
           "default": {
@@ -170,12 +243,116 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "tags": [
           "ActionService"
         ]
       },
+      "post": {
+        "operationId": "ActionService_CreateActionSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateActionSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateActionSchemaRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ActionService"
+        ]
+      }
+    },
+    "/api/v1/action-schemas/{actionType}": {
+      "delete": {
+        "operationId": "ActionService_DeleteActionSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteActionSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "actionType",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ActionService"
+        ]
+      },
+      "put": {
+        "operationId": "ActionService_UpdateActionSchema",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateActionSchemaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "actionType",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ActionServiceUpdateActionSchemaBody"
+            }
+          }
+        ],
+        "tags": [
+          "ActionService"
+        ]
+      }
+    },
+    "/api/v1/actions": {
       "post": {
         "operationId": "ActionService_ExecuteAction",
         "responses": {
@@ -204,6 +381,259 @@
         ],
         "tags": [
           "ActionService"
+        ]
+      }
+    },
+    "/api/v1/approval-configs": {
+      "get": {
+        "operationId": "ApprovalService_ListApprovalConfigs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListApprovalConfigsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "actionTypes",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "ticketTypes",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "requiredApprovals",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "eligibleRoles",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "timeRange.startTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "timeRange.endTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "includeDeleted",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "pagination.pageSize",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "pagination.pageNumber",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "ApprovalService"
+        ]
+      },
+      "post": {
+        "operationId": "ApprovalService_CreateApprovalConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateApprovalConfigResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateApprovalConfigRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ApprovalService"
+        ]
+      }
+    },
+    "/api/v1/approval-configs/{id}": {
+      "get": {
+        "operationId": "ApprovalService_GetApprovalConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ApprovalConfig"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "actionType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ticketType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ApprovalService"
+        ]
+      },
+      "delete": {
+        "operationId": "ApprovalService_DeleteApprovalConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteApprovalConfigResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "actionType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ticketType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ApprovalService"
+        ]
+      },
+      "put": {
+        "operationId": "ApprovalService_UpdateApprovalConfig",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateApprovalConfigResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ApprovalServiceUpdateApprovalConfigBody"
+            }
+          }
+        ],
+        "tags": [
+          "ApprovalService"
         ]
       }
     },
@@ -236,7 +666,7 @@
             "collectionFormat": "multi"
           },
           {
-            "name": "actions",
+            "name": "actionTypes",
             "in": "query",
             "required": false,
             "type": "array",
@@ -1079,6 +1509,27 @@
         }
       }
     },
+    "ApprovalServiceUpdateApprovalConfigBody": {
+      "type": "object",
+      "properties": {
+        "actionType": {
+          "type": "string"
+        },
+        "ticketType": {
+          "type": "string"
+        },
+        "requiredApprovals": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "eligibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "TicketServiceAddCommentBody": {
       "type": "object",
       "properties": {
@@ -1201,26 +1652,11 @@
           "type": "object",
           "additionalProperties": {}
         },
-        "resultMetadata": {
-          "type": "object",
-          "additionalProperties": {}
-        },
-        "error": {
-          "type": "string"
-        },
-        "logs": {
-          "type": "string"
+        "result": {
+          "$ref": "#/definitions/v1ActionExecutionResult"
         },
         "executingUser": {
           "type": "string"
-        },
-        "executeAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "completedAt": {
-          "type": "string",
-          "format": "date-time"
         },
         "createdAt": {
           "type": "string",
@@ -1229,8 +1665,46 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "executeAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
+    },
+    "v1ActionExecutionResult": {
+      "type": "object",
+      "properties": {
+        "executionId": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/v1ActionExecutionStatus"
+        },
+        "error": {
+          "type": "string"
+        },
+        "logs": {
+          "type": "string"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "results": {
+          "type": "object",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "v1ActionExecutionStatus": {
+      "type": "string",
+      "enum": [
+        "ACTION_EXECUTION_STATUS_UNSPECIFIED",
+        "ACTION_EXECUTION_STATUS_COMPLETED",
+        "ACTION_EXECUTION_STATUS_FAILED"
+      ],
+      "default": "ACTION_EXECUTION_STATUS_UNSPECIFIED"
     },
     "v1ActionParameter": {
       "type": "object",
@@ -1316,6 +1790,10 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1337,6 +1815,42 @@
       "properties": {
         "comment": {
           "$ref": "#/definitions/v1Comment"
+        }
+      }
+    },
+    "v1ApprovalConfig": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "actionType": {
+          "type": "string"
+        },
+        "ticketType": {
+          "type": "string"
+        },
+        "requiredApprovals": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "eligibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -1367,7 +1881,7 @@
         "ticketId": {
           "type": "string"
         },
-        "action": {
+        "actionType": {
           "type": "string"
         },
         "executionId": {
@@ -1382,6 +1896,12 @@
         "requiredApprovals": {
           "type": "integer",
           "format": "int32"
+        },
+        "eligibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "decisions": {
           "type": "array",
@@ -1468,16 +1988,77 @@
         }
       }
     },
+    "v1CreateActionSchemaRequest": {
+      "type": "object",
+      "properties": {
+        "actionType": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ActionParameter"
+          }
+        },
+        "resultSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ActionResultField"
+          }
+        },
+        "requireApproval": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1CreateActionSchemaResponse": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "$ref": "#/definitions/v1ActionSchema"
+        }
+      }
+    },
+    "v1CreateApprovalConfigRequest": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/v1ApprovalConfig"
+        }
+      }
+    },
+    "v1CreateApprovalConfigResponse": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/v1ApprovalConfig"
+        }
+      }
+    },
     "v1CreateApprovalRequest": {
       "type": "object",
       "properties": {
         "ticketId": {
           "type": "string"
         },
-        "action": {
+        "executionId": {
           "type": "string"
         },
-        "executionId": {
+        "id": {
+          "type": "string"
+        },
+        "actionType": {
+          "type": "string"
+        },
+        "ticketType": {
           "type": "string"
         }
       }
@@ -1561,13 +2142,14 @@
         }
       }
     },
+    "v1DeleteActionSchemaResponse": {
+      "type": "object"
+    },
+    "v1DeleteApprovalConfigResponse": {
+      "type": "object"
+    },
     "v1DeleteTicketResponse": {
-      "type": "object",
-      "properties": {
-        "success": {
-          "type": "boolean"
-        }
-      }
+      "type": "object"
     },
     "v1DeleteTicketTypeResponse": {
       "type": "object"
@@ -1630,6 +2212,51 @@
         }
       }
     },
+    "v1ListActionExecutionsResponse": {
+      "type": "object",
+      "properties": {
+        "executions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ActionExecution"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1PageInfo"
+        }
+      }
+    },
+    "v1ListActionSchemasResponse": {
+      "type": "object",
+      "properties": {
+        "schemas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ActionSchema"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1PageInfo"
+        }
+      }
+    },
+    "v1ListApprovalConfigsResponse": {
+      "type": "object",
+      "properties": {
+        "configs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1ApprovalConfig"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1PageInfo"
+        }
+      }
+    },
     "v1ListApprovalsResponse": {
       "type": "object",
       "properties": {
@@ -1653,21 +2280,6 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1AuditEntry"
-          }
-        },
-        "pagination": {
-          "$ref": "#/definitions/v1PageInfo"
-        }
-      }
-    },
-    "v1ListAvailableActionsResponse": {
-      "type": "object",
-      "properties": {
-        "schemas": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1ActionSchema"
           }
         },
         "pagination": {
@@ -1954,6 +2566,14 @@
       "properties": {
         "schema": {
           "$ref": "#/definitions/v1ActionSchema"
+        }
+      }
+    },
+    "v1UpdateApprovalConfigResponse": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "$ref": "#/definitions/v1ApprovalConfig"
         }
       }
     },

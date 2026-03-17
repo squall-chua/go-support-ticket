@@ -36,7 +36,27 @@ action:
     destinations:
       - action-events
     dlq_postfix: .failed
+  action.schema.updated:
+    queue_type: kafka
+    destinations:
+      - action-events
+    dlq_postfix: .failed
+  action.schema.deleted:
+    queue_type: kafka
+    destinations:
+      - action-events
+    dlq_postfix: .failed
   action.execution.status.updated:
+    queue_type: kafka
+    destinations:
+      - action-events
+    dlq_postfix: .failed
+  action.execution.triggered:
+    queue_type: kafka
+    destinations:
+      - action-events
+    dlq_postfix: .failed
+  action.execution.completed:
     queue_type: kafka
     destinations:
       - action-events
@@ -45,12 +65,6 @@ action:
     queue_type: kafka
     destinations:
       - action-events
-    dlq_postfix: .failed
-audit:
-  audit.log.created:
-    queue_type: kafka
-    destinations:
-      - audit-events
     dlq_postfix: .failed
 ticket_type:
   ticket_type.created:
@@ -67,4 +81,20 @@ ticket_type:
     queue_type: kafka
     destinations:
       - ticket-type-events
+    dlq_postfix: .failed
+approval_config:
+  approval_config.created:
+    queue_type: kafka
+    destinations:
+      - approval-events
+    dlq_postfix: .failed
+  approval_config.updated:
+    queue_type: kafka
+    destinations:
+      - approval-events
+    dlq_postfix: .failed
+  approval_config.deleted:
+    queue_type: kafka
+    destinations:
+      - approval-events
     dlq_postfix: .failed

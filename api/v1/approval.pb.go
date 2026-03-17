@@ -76,11 +76,18 @@ func (ApprovalStatus) EnumDescriptor() ([]byte, []int) {
 }
 
 type ApprovalConfig struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	Action            string                 `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
-	TicketType        string                 `protobuf:"bytes,2,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
-	RequiredApprovals int32                  `protobuf:"varint,3,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	EligibleRoles     []string               `protobuf:"bytes,4,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Types that are valid to be assigned to Target:
+	//
+	//	*ApprovalConfig_ActionType
+	//	*ApprovalConfig_TicketType
+	Target            isApprovalConfig_Target `protobuf_oneof:"target"`
+	RequiredApprovals int32                   `protobuf:"varint,4,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	EligibleRoles     []string                `protobuf:"bytes,5,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	CreatedAt         *timestamppb.Timestamp  `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt         *timestamppb.Timestamp  `protobuf:"bytes,8,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -115,16 +122,34 @@ func (*ApprovalConfig) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ApprovalConfig) GetAction() string {
+func (x *ApprovalConfig) GetId() string {
 	if x != nil {
-		return x.Action
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ApprovalConfig) GetTarget() isApprovalConfig_Target {
+	if x != nil {
+		return x.Target
+	}
+	return nil
+}
+
+func (x *ApprovalConfig) GetActionType() string {
+	if x != nil {
+		if x, ok := x.Target.(*ApprovalConfig_ActionType); ok {
+			return x.ActionType
+		}
 	}
 	return ""
 }
 
 func (x *ApprovalConfig) GetTicketType() string {
 	if x != nil {
-		return x.TicketType
+		if x, ok := x.Target.(*ApprovalConfig_TicketType); ok {
+			return x.TicketType
+		}
 	}
 	return ""
 }
@@ -143,25 +168,693 @@ func (x *ApprovalConfig) GetEligibleRoles() []string {
 	return nil
 }
 
+func (x *ApprovalConfig) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *ApprovalConfig) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+func (x *ApprovalConfig) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
+type isApprovalConfig_Target interface {
+	isApprovalConfig_Target()
+}
+
+type ApprovalConfig_ActionType struct {
+	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
+}
+
+type ApprovalConfig_TicketType struct {
+	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
+}
+
+func (*ApprovalConfig_ActionType) isApprovalConfig_Target() {}
+
+func (*ApprovalConfig_TicketType) isApprovalConfig_Target() {}
+
+type CreateApprovalConfigRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *ApprovalConfig        `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateApprovalConfigRequest) Reset() {
+	*x = CreateApprovalConfigRequest{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateApprovalConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateApprovalConfigRequest) ProtoMessage() {}
+
+func (x *CreateApprovalConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateApprovalConfigRequest.ProtoReflect.Descriptor instead.
+func (*CreateApprovalConfigRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CreateApprovalConfigRequest) GetConfig() *ApprovalConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type CreateApprovalConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *ApprovalConfig        `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateApprovalConfigResponse) Reset() {
+	*x = CreateApprovalConfigResponse{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateApprovalConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateApprovalConfigResponse) ProtoMessage() {}
+
+func (x *CreateApprovalConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateApprovalConfigResponse.ProtoReflect.Descriptor instead.
+func (*CreateApprovalConfigResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CreateApprovalConfigResponse) GetConfig() *ApprovalConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type GetApprovalConfigRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Target:
+	//
+	//	*GetApprovalConfigRequest_Id
+	//	*GetApprovalConfigRequest_ActionType
+	//	*GetApprovalConfigRequest_TicketType
+	Target        isGetApprovalConfigRequest_Target `protobuf_oneof:"target"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetApprovalConfigRequest) Reset() {
+	*x = GetApprovalConfigRequest{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetApprovalConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetApprovalConfigRequest) ProtoMessage() {}
+
+func (x *GetApprovalConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetApprovalConfigRequest.ProtoReflect.Descriptor instead.
+func (*GetApprovalConfigRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetApprovalConfigRequest) GetTarget() isGetApprovalConfigRequest_Target {
+	if x != nil {
+		return x.Target
+	}
+	return nil
+}
+
+func (x *GetApprovalConfigRequest) GetId() string {
+	if x != nil {
+		if x, ok := x.Target.(*GetApprovalConfigRequest_Id); ok {
+			return x.Id
+		}
+	}
+	return ""
+}
+
+func (x *GetApprovalConfigRequest) GetActionType() string {
+	if x != nil {
+		if x, ok := x.Target.(*GetApprovalConfigRequest_ActionType); ok {
+			return x.ActionType
+		}
+	}
+	return ""
+}
+
+func (x *GetApprovalConfigRequest) GetTicketType() string {
+	if x != nil {
+		if x, ok := x.Target.(*GetApprovalConfigRequest_TicketType); ok {
+			return x.TicketType
+		}
+	}
+	return ""
+}
+
+type isGetApprovalConfigRequest_Target interface {
+	isGetApprovalConfigRequest_Target()
+}
+
+type GetApprovalConfigRequest_Id struct {
+	Id string `protobuf:"bytes,1,opt,name=id,proto3,oneof"`
+}
+
+type GetApprovalConfigRequest_ActionType struct {
+	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
+}
+
+type GetApprovalConfigRequest_TicketType struct {
+	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
+}
+
+func (*GetApprovalConfigRequest_Id) isGetApprovalConfigRequest_Target() {}
+
+func (*GetApprovalConfigRequest_ActionType) isGetApprovalConfigRequest_Target() {}
+
+func (*GetApprovalConfigRequest_TicketType) isGetApprovalConfigRequest_Target() {}
+
+type UpdateApprovalConfigRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Target:
+	//
+	//	*UpdateApprovalConfigRequest_Id
+	//	*UpdateApprovalConfigRequest_ActionType
+	//	*UpdateApprovalConfigRequest_TicketType
+	Target            isUpdateApprovalConfigRequest_Target `protobuf_oneof:"target"`
+	RequiredApprovals int32                                `protobuf:"varint,4,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	EligibleRoles     []string                             `protobuf:"bytes,5,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UpdateApprovalConfigRequest) Reset() {
+	*x = UpdateApprovalConfigRequest{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateApprovalConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateApprovalConfigRequest) ProtoMessage() {}
+
+func (x *UpdateApprovalConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateApprovalConfigRequest.ProtoReflect.Descriptor instead.
+func (*UpdateApprovalConfigRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *UpdateApprovalConfigRequest) GetTarget() isUpdateApprovalConfigRequest_Target {
+	if x != nil {
+		return x.Target
+	}
+	return nil
+}
+
+func (x *UpdateApprovalConfigRequest) GetId() string {
+	if x != nil {
+		if x, ok := x.Target.(*UpdateApprovalConfigRequest_Id); ok {
+			return x.Id
+		}
+	}
+	return ""
+}
+
+func (x *UpdateApprovalConfigRequest) GetActionType() string {
+	if x != nil {
+		if x, ok := x.Target.(*UpdateApprovalConfigRequest_ActionType); ok {
+			return x.ActionType
+		}
+	}
+	return ""
+}
+
+func (x *UpdateApprovalConfigRequest) GetTicketType() string {
+	if x != nil {
+		if x, ok := x.Target.(*UpdateApprovalConfigRequest_TicketType); ok {
+			return x.TicketType
+		}
+	}
+	return ""
+}
+
+func (x *UpdateApprovalConfigRequest) GetRequiredApprovals() int32 {
+	if x != nil {
+		return x.RequiredApprovals
+	}
+	return 0
+}
+
+func (x *UpdateApprovalConfigRequest) GetEligibleRoles() []string {
+	if x != nil {
+		return x.EligibleRoles
+	}
+	return nil
+}
+
+type isUpdateApprovalConfigRequest_Target interface {
+	isUpdateApprovalConfigRequest_Target()
+}
+
+type UpdateApprovalConfigRequest_Id struct {
+	Id string `protobuf:"bytes,1,opt,name=id,proto3,oneof"`
+}
+
+type UpdateApprovalConfigRequest_ActionType struct {
+	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
+}
+
+type UpdateApprovalConfigRequest_TicketType struct {
+	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
+}
+
+func (*UpdateApprovalConfigRequest_Id) isUpdateApprovalConfigRequest_Target() {}
+
+func (*UpdateApprovalConfigRequest_ActionType) isUpdateApprovalConfigRequest_Target() {}
+
+func (*UpdateApprovalConfigRequest_TicketType) isUpdateApprovalConfigRequest_Target() {}
+
+type UpdateApprovalConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *ApprovalConfig        `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateApprovalConfigResponse) Reset() {
+	*x = UpdateApprovalConfigResponse{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateApprovalConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateApprovalConfigResponse) ProtoMessage() {}
+
+func (x *UpdateApprovalConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateApprovalConfigResponse.ProtoReflect.Descriptor instead.
+func (*UpdateApprovalConfigResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateApprovalConfigResponse) GetConfig() *ApprovalConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type DeleteApprovalConfigRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Target:
+	//
+	//	*DeleteApprovalConfigRequest_Id
+	//	*DeleteApprovalConfigRequest_ActionType
+	//	*DeleteApprovalConfigRequest_TicketType
+	Target        isDeleteApprovalConfigRequest_Target `protobuf_oneof:"target"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteApprovalConfigRequest) Reset() {
+	*x = DeleteApprovalConfigRequest{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteApprovalConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteApprovalConfigRequest) ProtoMessage() {}
+
+func (x *DeleteApprovalConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteApprovalConfigRequest.ProtoReflect.Descriptor instead.
+func (*DeleteApprovalConfigRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DeleteApprovalConfigRequest) GetTarget() isDeleteApprovalConfigRequest_Target {
+	if x != nil {
+		return x.Target
+	}
+	return nil
+}
+
+func (x *DeleteApprovalConfigRequest) GetId() string {
+	if x != nil {
+		if x, ok := x.Target.(*DeleteApprovalConfigRequest_Id); ok {
+			return x.Id
+		}
+	}
+	return ""
+}
+
+func (x *DeleteApprovalConfigRequest) GetActionType() string {
+	if x != nil {
+		if x, ok := x.Target.(*DeleteApprovalConfigRequest_ActionType); ok {
+			return x.ActionType
+		}
+	}
+	return ""
+}
+
+func (x *DeleteApprovalConfigRequest) GetTicketType() string {
+	if x != nil {
+		if x, ok := x.Target.(*DeleteApprovalConfigRequest_TicketType); ok {
+			return x.TicketType
+		}
+	}
+	return ""
+}
+
+type isDeleteApprovalConfigRequest_Target interface {
+	isDeleteApprovalConfigRequest_Target()
+}
+
+type DeleteApprovalConfigRequest_Id struct {
+	Id string `protobuf:"bytes,1,opt,name=id,proto3,oneof"`
+}
+
+type DeleteApprovalConfigRequest_ActionType struct {
+	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
+}
+
+type DeleteApprovalConfigRequest_TicketType struct {
+	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
+}
+
+func (*DeleteApprovalConfigRequest_Id) isDeleteApprovalConfigRequest_Target() {}
+
+func (*DeleteApprovalConfigRequest_ActionType) isDeleteApprovalConfigRequest_Target() {}
+
+func (*DeleteApprovalConfigRequest_TicketType) isDeleteApprovalConfigRequest_Target() {}
+
+type DeleteApprovalConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteApprovalConfigResponse) Reset() {
+	*x = DeleteApprovalConfigResponse{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteApprovalConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteApprovalConfigResponse) ProtoMessage() {}
+
+func (x *DeleteApprovalConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteApprovalConfigResponse.ProtoReflect.Descriptor instead.
+func (*DeleteApprovalConfigResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{7}
+}
+
+type ListApprovalConfigsRequest struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Ids               []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	ActionTypes       []string               `protobuf:"bytes,2,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
+	TicketTypes       []string               `protobuf:"bytes,3,rep,name=ticket_types,json=ticketTypes,proto3" json:"ticket_types,omitempty"`
+	RequiredApprovals int32                  `protobuf:"varint,4,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	EligibleRoles     []string               `protobuf:"bytes,5,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	TimeRange         *TimeRange             `protobuf:"bytes,6,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
+	IncludeDeleted    bool                   `protobuf:"varint,7,opt,name=include_deleted,json=includeDeleted,proto3" json:"include_deleted,omitempty"`
+	Pagination        *PageRequest           `protobuf:"bytes,8,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ListApprovalConfigsRequest) Reset() {
+	*x = ListApprovalConfigsRequest{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListApprovalConfigsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListApprovalConfigsRequest) ProtoMessage() {}
+
+func (x *ListApprovalConfigsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListApprovalConfigsRequest.ProtoReflect.Descriptor instead.
+func (*ListApprovalConfigsRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListApprovalConfigsRequest) GetIds() []string {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+func (x *ListApprovalConfigsRequest) GetActionTypes() []string {
+	if x != nil {
+		return x.ActionTypes
+	}
+	return nil
+}
+
+func (x *ListApprovalConfigsRequest) GetTicketTypes() []string {
+	if x != nil {
+		return x.TicketTypes
+	}
+	return nil
+}
+
+func (x *ListApprovalConfigsRequest) GetRequiredApprovals() int32 {
+	if x != nil {
+		return x.RequiredApprovals
+	}
+	return 0
+}
+
+func (x *ListApprovalConfigsRequest) GetEligibleRoles() []string {
+	if x != nil {
+		return x.EligibleRoles
+	}
+	return nil
+}
+
+func (x *ListApprovalConfigsRequest) GetTimeRange() *TimeRange {
+	if x != nil {
+		return x.TimeRange
+	}
+	return nil
+}
+
+func (x *ListApprovalConfigsRequest) GetIncludeDeleted() bool {
+	if x != nil {
+		return x.IncludeDeleted
+	}
+	return false
+}
+
+func (x *ListApprovalConfigsRequest) GetPagination() *PageRequest {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
+}
+
+type ListApprovalConfigsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Configs       []*ApprovalConfig      `protobuf:"bytes,1,rep,name=configs,proto3" json:"configs,omitempty"`
+	Pagination    *PageInfo              `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListApprovalConfigsResponse) Reset() {
+	*x = ListApprovalConfigsResponse{}
+	mi := &file_api_proto_v1_approval_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListApprovalConfigsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListApprovalConfigsResponse) ProtoMessage() {}
+
+func (x *ListApprovalConfigsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_approval_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListApprovalConfigsResponse.ProtoReflect.Descriptor instead.
+func (*ListApprovalConfigsResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListApprovalConfigsResponse) GetConfigs() []*ApprovalConfig {
+	if x != nil {
+		return x.Configs
+	}
+	return nil
+}
+
+func (x *ListApprovalConfigsResponse) GetPagination() *PageInfo {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
+}
+
 type ApprovalRequestData struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	TicketId          string                 `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	Action            string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
+	ActionType        string                 `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
 	ExecutionId       string                 `protobuf:"bytes,4,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
 	Requester         string                 `protobuf:"bytes,5,opt,name=requester,proto3" json:"requester,omitempty"`
 	Status            ApprovalStatus         `protobuf:"varint,6,opt,name=status,proto3,enum=api.v1.ApprovalStatus" json:"status,omitempty"`
 	RequiredApprovals int32                  `protobuf:"varint,7,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	Decisions         []*ApprovalDecision    `protobuf:"bytes,8,rep,name=decisions,proto3" json:"decisions,omitempty"`
-	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	EligibleRoles     []string               `protobuf:"bytes,8,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	Decisions         []*ApprovalDecision    `protobuf:"bytes,9,rep,name=decisions,proto3" json:"decisions,omitempty"`
+	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ApprovalRequestData) Reset() {
 	*x = ApprovalRequestData{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[1]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -173,7 +866,7 @@ func (x *ApprovalRequestData) String() string {
 func (*ApprovalRequestData) ProtoMessage() {}
 
 func (x *ApprovalRequestData) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[1]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -186,7 +879,7 @@ func (x *ApprovalRequestData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApprovalRequestData.ProtoReflect.Descriptor instead.
 func (*ApprovalRequestData) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{1}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ApprovalRequestData) GetId() string {
@@ -203,9 +896,9 @@ func (x *ApprovalRequestData) GetTicketId() string {
 	return ""
 }
 
-func (x *ApprovalRequestData) GetAction() string {
+func (x *ApprovalRequestData) GetActionType() string {
 	if x != nil {
-		return x.Action
+		return x.ActionType
 	}
 	return ""
 }
@@ -236,6 +929,13 @@ func (x *ApprovalRequestData) GetRequiredApprovals() int32 {
 		return x.RequiredApprovals
 	}
 	return 0
+}
+
+func (x *ApprovalRequestData) GetEligibleRoles() []string {
+	if x != nil {
+		return x.EligibleRoles
+	}
+	return nil
 }
 
 func (x *ApprovalRequestData) GetDecisions() []*ApprovalDecision {
@@ -271,7 +971,7 @@ type ApprovalDecision struct {
 
 func (x *ApprovalDecision) Reset() {
 	*x = ApprovalDecision{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[2]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -283,7 +983,7 @@ func (x *ApprovalDecision) String() string {
 func (*ApprovalDecision) ProtoMessage() {}
 
 func (x *ApprovalDecision) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[2]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -296,7 +996,7 @@ func (x *ApprovalDecision) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApprovalDecision.ProtoReflect.Descriptor instead.
 func (*ApprovalDecision) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{2}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ApprovalDecision) GetApprover() string {
@@ -338,7 +1038,7 @@ type DecideApprovalRequest struct {
 
 func (x *DecideApprovalRequest) Reset() {
 	*x = DecideApprovalRequest{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[3]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -350,7 +1050,7 @@ func (x *DecideApprovalRequest) String() string {
 func (*DecideApprovalRequest) ProtoMessage() {}
 
 func (x *DecideApprovalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[3]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -363,7 +1063,7 @@ func (x *DecideApprovalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideApprovalRequest.ProtoReflect.Descriptor instead.
 func (*DecideApprovalRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{3}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DecideApprovalRequest) GetApprovalRequestId() string {
@@ -396,7 +1096,7 @@ type DecideApprovalResponse struct {
 
 func (x *DecideApprovalResponse) Reset() {
 	*x = DecideApprovalResponse{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[4]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -408,7 +1108,7 @@ func (x *DecideApprovalResponse) String() string {
 func (*DecideApprovalResponse) ProtoMessage() {}
 
 func (x *DecideApprovalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[4]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -421,7 +1121,7 @@ func (x *DecideApprovalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideApprovalResponse.ProtoReflect.Descriptor instead.
 func (*DecideApprovalResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{4}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DecideApprovalResponse) GetRequest() *ApprovalRequestData {
@@ -432,17 +1132,22 @@ func (x *DecideApprovalResponse) GetRequest() *ApprovalRequestData {
 }
 
 type CreateApprovalRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TicketId      string                 `protobuf:"bytes,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	Action        string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
-	ExecutionId   string                 `protobuf:"bytes,3,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	TicketId    string                 `protobuf:"bytes,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	ExecutionId string                 `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	// Types that are valid to be assigned to Target:
+	//
+	//	*CreateApprovalRequest_Id
+	//	*CreateApprovalRequest_ActionType
+	//	*CreateApprovalRequest_TicketType
+	Target        isCreateApprovalRequest_Target `protobuf_oneof:"target"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateApprovalRequest) Reset() {
 	*x = CreateApprovalRequest{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[5]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -454,7 +1159,7 @@ func (x *CreateApprovalRequest) String() string {
 func (*CreateApprovalRequest) ProtoMessage() {}
 
 func (x *CreateApprovalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[5]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -467,19 +1172,12 @@ func (x *CreateApprovalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateApprovalRequest.ProtoReflect.Descriptor instead.
 func (*CreateApprovalRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{5}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *CreateApprovalRequest) GetTicketId() string {
 	if x != nil {
 		return x.TicketId
-	}
-	return ""
-}
-
-func (x *CreateApprovalRequest) GetAction() string {
-	if x != nil {
-		return x.Action
 	}
 	return ""
 }
@@ -491,6 +1189,62 @@ func (x *CreateApprovalRequest) GetExecutionId() string {
 	return ""
 }
 
+func (x *CreateApprovalRequest) GetTarget() isCreateApprovalRequest_Target {
+	if x != nil {
+		return x.Target
+	}
+	return nil
+}
+
+func (x *CreateApprovalRequest) GetId() string {
+	if x != nil {
+		if x, ok := x.Target.(*CreateApprovalRequest_Id); ok {
+			return x.Id
+		}
+	}
+	return ""
+}
+
+func (x *CreateApprovalRequest) GetActionType() string {
+	if x != nil {
+		if x, ok := x.Target.(*CreateApprovalRequest_ActionType); ok {
+			return x.ActionType
+		}
+	}
+	return ""
+}
+
+func (x *CreateApprovalRequest) GetTicketType() string {
+	if x != nil {
+		if x, ok := x.Target.(*CreateApprovalRequest_TicketType); ok {
+			return x.TicketType
+		}
+	}
+	return ""
+}
+
+type isCreateApprovalRequest_Target interface {
+	isCreateApprovalRequest_Target()
+}
+
+type CreateApprovalRequest_Id struct {
+	Id string `protobuf:"bytes,3,opt,name=id,proto3,oneof"`
+}
+
+type CreateApprovalRequest_ActionType struct {
+	ActionType string `protobuf:"bytes,4,opt,name=action_type,json=actionType,proto3,oneof"`
+}
+
+type CreateApprovalRequest_TicketType struct {
+	TicketType string `protobuf:"bytes,5,opt,name=ticket_type,json=ticketType,proto3,oneof"`
+}
+
+func (*CreateApprovalRequest_Id) isCreateApprovalRequest_Target() {}
+
+func (*CreateApprovalRequest_ActionType) isCreateApprovalRequest_Target() {}
+
+func (*CreateApprovalRequest_TicketType) isCreateApprovalRequest_Target() {}
+
 type CreateApprovalResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Request       *ApprovalRequestData   `protobuf:"bytes,1,opt,name=request,proto3" json:"request,omitempty"`
@@ -500,7 +1254,7 @@ type CreateApprovalResponse struct {
 
 func (x *CreateApprovalResponse) Reset() {
 	*x = CreateApprovalResponse{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[6]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -512,7 +1266,7 @@ func (x *CreateApprovalResponse) String() string {
 func (*CreateApprovalResponse) ProtoMessage() {}
 
 func (x *CreateApprovalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[6]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -525,7 +1279,7 @@ func (x *CreateApprovalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateApprovalResponse.ProtoReflect.Descriptor instead.
 func (*CreateApprovalResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{6}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CreateApprovalResponse) GetRequest() *ApprovalRequestData {
@@ -538,7 +1292,7 @@ func (x *CreateApprovalResponse) GetRequest() *ApprovalRequestData {
 type ListApprovalsRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	TicketIds         []string               `protobuf:"bytes,1,rep,name=ticket_ids,json=ticketIds,proto3" json:"ticket_ids,omitempty"`
-	Actions           []string               `protobuf:"bytes,2,rep,name=actions,proto3" json:"actions,omitempty"`
+	ActionTypes       []string               `protobuf:"bytes,2,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
 	Requesters        []string               `protobuf:"bytes,3,rep,name=requesters,proto3" json:"requesters,omitempty"`
 	Statuses          []ApprovalStatus       `protobuf:"varint,4,rep,packed,name=statuses,proto3,enum=api.v1.ApprovalStatus" json:"statuses,omitempty"`
 	ExecutionIds      []string               `protobuf:"bytes,5,rep,name=execution_ids,json=executionIds,proto3" json:"execution_ids,omitempty"`
@@ -552,7 +1306,7 @@ type ListApprovalsRequest struct {
 
 func (x *ListApprovalsRequest) Reset() {
 	*x = ListApprovalsRequest{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[7]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -564,7 +1318,7 @@ func (x *ListApprovalsRequest) String() string {
 func (*ListApprovalsRequest) ProtoMessage() {}
 
 func (x *ListApprovalsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[7]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -577,7 +1331,7 @@ func (x *ListApprovalsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListApprovalsRequest.ProtoReflect.Descriptor instead.
 func (*ListApprovalsRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{7}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ListApprovalsRequest) GetTicketIds() []string {
@@ -587,9 +1341,9 @@ func (x *ListApprovalsRequest) GetTicketIds() []string {
 	return nil
 }
 
-func (x *ListApprovalsRequest) GetActions() []string {
+func (x *ListApprovalsRequest) GetActionTypes() []string {
 	if x != nil {
-		return x.Actions
+		return x.ActionTypes
 	}
 	return nil
 }
@@ -653,7 +1407,7 @@ type ListApprovalsResponse struct {
 
 func (x *ListApprovalsResponse) Reset() {
 	*x = ListApprovalsResponse{}
-	mi := &file_api_proto_v1_approval_proto_msgTypes[8]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -665,7 +1419,7 @@ func (x *ListApprovalsResponse) String() string {
 func (*ListApprovalsResponse) ProtoMessage() {}
 
 func (x *ListApprovalsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_approval_proto_msgTypes[8]
+	mi := &file_api_proto_v1_approval_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -678,7 +1432,7 @@ func (x *ListApprovalsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListApprovalsResponse.ProtoReflect.Descriptor instead.
 func (*ListApprovalsResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{8}
+	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListApprovalsResponse) GetRequests() []*ApprovalRequestData {
@@ -699,27 +1453,85 @@ var File_api_proto_v1_approval_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\n" +
-	"\x1bapi/proto/v1/approval.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19api/proto/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1aapi/proto/v1/options.proto\"\x9f\x01\n" +
-	"\x0eApprovalConfig\x12\x16\n" +
-	"\x06action\x18\x01 \x01(\tR\x06action\x12\x1f\n" +
-	"\vticket_type\x18\x02 \x01(\tR\n" +
+	"\x1bapi/proto/v1/approval.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19api/proto/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1aapi/proto/v1/options.proto\"\xf7\x02\n" +
+	"\x0eApprovalConfig\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
+	"actionType\x12!\n" +
+	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
 	"ticketType\x12-\n" +
-	"\x12required_approvals\x18\x03 \x01(\x05R\x11requiredApprovals\x12%\n" +
-	"\x0eeligible_roles\x18\x04 \x03(\tR\religibleRoles\"\xa8\x03\n" +
+	"\x12required_approvals\x18\x04 \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\x05 \x03(\tR\religibleRoles\x129\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"\n" +
+	"deleted_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAtB\b\n" +
+	"\x06target\"M\n" +
+	"\x1bCreateApprovalConfigRequest\x12.\n" +
+	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"N\n" +
+	"\x1cCreateApprovalConfigResponse\x12.\n" +
+	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"|\n" +
+	"\x18GetApprovalConfigRequest\x12\x10\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x12!\n" +
+	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
+	"actionType\x12!\n" +
+	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
+	"ticketTypeB\b\n" +
+	"\x06target\"\xd5\x01\n" +
+	"\x1bUpdateApprovalConfigRequest\x12\x10\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x12!\n" +
+	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
+	"actionType\x12!\n" +
+	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
+	"ticketType\x12-\n" +
+	"\x12required_approvals\x18\x04 \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\x05 \x03(\tR\religibleRolesB\b\n" +
+	"\x06target\"N\n" +
+	"\x1cUpdateApprovalConfigResponse\x12.\n" +
+	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"\x7f\n" +
+	"\x1bDeleteApprovalConfigRequest\x12\x10\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x12!\n" +
+	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
+	"actionType\x12!\n" +
+	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
+	"ticketTypeB\b\n" +
+	"\x06target\"\x1e\n" +
+	"\x1cDeleteApprovalConfigResponse\"\xda\x02\n" +
+	"\x1aListApprovalConfigsRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\x12!\n" +
+	"\faction_types\x18\x02 \x03(\tR\vactionTypes\x12!\n" +
+	"\fticket_types\x18\x03 \x03(\tR\vticketTypes\x12-\n" +
+	"\x12required_approvals\x18\x04 \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\x05 \x03(\tR\religibleRoles\x120\n" +
+	"\n" +
+	"time_range\x18\x06 \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x12'\n" +
+	"\x0finclude_deleted\x18\a \x01(\bR\x0eincludeDeleted\x123\n" +
+	"\n" +
+	"pagination\x18\b \x01(\v2\x13.api.v1.PageRequestR\n" +
+	"pagination\"\x81\x01\n" +
+	"\x1bListApprovalConfigsResponse\x120\n" +
+	"\aconfigs\x18\x01 \x03(\v2\x16.api.v1.ApprovalConfigR\aconfigs\x120\n" +
+	"\n" +
+	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
+	"pagination\"\xd8\x03\n" +
 	"\x13ApprovalRequestData\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
-	"\tticket_id\x18\x02 \x01(\tR\bticketId\x12\x16\n" +
-	"\x06action\x18\x03 \x01(\tR\x06action\x12!\n" +
+	"\tticket_id\x18\x02 \x01(\tR\bticketId\x12\x1f\n" +
+	"\vaction_type\x18\x03 \x01(\tR\n" +
+	"actionType\x12!\n" +
 	"\fexecution_id\x18\x04 \x01(\tR\vexecutionId\x12\x1c\n" +
 	"\trequester\x18\x05 \x01(\tR\trequester\x12.\n" +
 	"\x06status\x18\x06 \x01(\x0e2\x16.api.v1.ApprovalStatusR\x06status\x12-\n" +
-	"\x12required_approvals\x18\a \x01(\x05R\x11requiredApprovals\x126\n" +
-	"\tdecisions\x18\b \x03(\v2\x18.api.v1.ApprovalDecisionR\tdecisions\x129\n" +
+	"\x12required_approvals\x18\a \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\b \x03(\tR\religibleRoles\x126\n" +
+	"\tdecisions\x18\t \x03(\v2\x18.api.v1.ApprovalDecisionR\tdecisions\x129\n" +
 	"\n" +
-	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9d\x01\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9d\x01\n" +
 	"\x10ApprovalDecision\x12\x1a\n" +
 	"\bapprover\x18\x01 \x01(\tR\bapprover\x12\x1a\n" +
 	"\bapproved\x18\x02 \x01(\bR\bapproved\x12\x16\n" +
@@ -731,17 +1543,22 @@ const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\aapprove\x18\x02 \x01(\bR\aapprove\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\"O\n" +
 	"\x16DecideApprovalResponse\x125\n" +
-	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"o\n" +
+	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"\xb9\x01\n" +
 	"\x15CreateApprovalRequest\x12\x1b\n" +
-	"\tticket_id\x18\x01 \x01(\tR\bticketId\x12\x16\n" +
-	"\x06action\x18\x02 \x01(\tR\x06action\x12!\n" +
-	"\fexecution_id\x18\x03 \x01(\tR\vexecutionId\"O\n" +
+	"\tticket_id\x18\x01 \x01(\tR\bticketId\x12!\n" +
+	"\fexecution_id\x18\x02 \x01(\tR\vexecutionId\x12\x10\n" +
+	"\x02id\x18\x03 \x01(\tH\x00R\x02id\x12!\n" +
+	"\vaction_type\x18\x04 \x01(\tH\x00R\n" +
+	"actionType\x12!\n" +
+	"\vticket_type\x18\x05 \x01(\tH\x00R\n" +
+	"ticketTypeB\b\n" +
+	"\x06target\"O\n" +
 	"\x16CreateApprovalResponse\x125\n" +
-	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"\xfc\x02\n" +
+	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"\x85\x03\n" +
 	"\x14ListApprovalsRequest\x12\x1d\n" +
 	"\n" +
-	"ticket_ids\x18\x01 \x03(\tR\tticketIds\x12\x18\n" +
-	"\aactions\x18\x02 \x03(\tR\aactions\x12\x1e\n" +
+	"ticket_ids\x18\x01 \x03(\tR\tticketIds\x12!\n" +
+	"\faction_types\x18\x02 \x03(\tR\vactionTypes\x12\x1e\n" +
 	"\n" +
 	"requesters\x18\x03 \x03(\tR\n" +
 	"requesters\x122\n" +
@@ -763,14 +1580,25 @@ const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\x1bAPPROVAL_STATUS_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17APPROVAL_STATUS_PENDING\x10\x01\x12\x1c\n" +
 	"\x18APPROVAL_STATUS_APPROVED\x10\x02\x12\x1c\n" +
-	"\x18APPROVAL_STATUS_REJECTED\x10\x032\xf5\x03\n" +
+	"\x18APPROVAL_STATUS_REJECTED\x10\x032\xbd\n" +
+	"\n" +
 	"\x0fApprovalService\x12\x98\x01\n" +
 	"\x0eCreateApproval\x12\x1d.api.v1.CreateApprovalRequest\x1a\x1e.api.v1.CreateApprovalResponse\"G\x82\xb5\x18'\n" +
 	"\x0fwrite:approvals\x12\x05admin\x12\x05agent\x12\x06system\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/approvals\x12\xb0\x01\n" +
 	"\x0eDecideApproval\x12\x1d.api.v1.DecideApprovalRequest\x1a\x1e.api.v1.DecideApprovalResponse\"_\x82\xb5\x18\"\n" +
 	"\x0fwrite:approvals\x12\x05admin\x12\bapprover\x82\xd3\xe4\x93\x023:\x01*\"./api/v1/approvals/{approval_request_id}/decide\x12\x93\x01\n" +
 	"\rListApprovals\x12\x1c.api.v1.ListApprovalsRequest\x1a\x1d.api.v1.ListApprovalsResponse\"E\x82\xb5\x18(\n" +
-	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/approvalsB7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
+	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/approvals\x12\xa2\x01\n" +
+	"\x14CreateApprovalConfig\x12#.api.v1.CreateApprovalConfigRequest\x1a$.api.v1.CreateApprovalConfigResponse\"?\x82\xb5\x18\x18\n" +
+	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/approval-configs\x12\xa0\x01\n" +
+	"\x11GetApprovalConfig\x12 .api.v1.GetApprovalConfigRequest\x1a\x16.api.v1.ApprovalConfig\"Q\x82\xb5\x18(\n" +
+	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/approval-configs/{id}\x12\xa7\x01\n" +
+	"\x14UpdateApprovalConfig\x12#.api.v1.UpdateApprovalConfigRequest\x1a$.api.v1.UpdateApprovalConfigResponse\"D\x82\xb5\x18\x18\n" +
+	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x02\":\x01*\x1a\x1d/api/v1/approval-configs/{id}\x12\xa4\x01\n" +
+	"\x14DeleteApprovalConfig\x12#.api.v1.DeleteApprovalConfigRequest\x1a$.api.v1.DeleteApprovalConfigResponse\"A\x82\xb5\x18\x18\n" +
+	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/approval-configs/{id}\x12\xac\x01\n" +
+	"\x13ListApprovalConfigs\x12\".api.v1.ListApprovalConfigsRequest\x1a#.api.v1.ListApprovalConfigsResponse\"L\x82\xb5\x18(\n" +
+	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/approval-configsB7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
 
 var (
 	file_api_proto_v1_approval_proto_rawDescOnce sync.Once
@@ -785,47 +1613,76 @@ func file_api_proto_v1_approval_proto_rawDescGZIP() []byte {
 }
 
 var file_api_proto_v1_approval_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_proto_v1_approval_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_api_proto_v1_approval_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_api_proto_v1_approval_proto_goTypes = []any{
-	(ApprovalStatus)(0),            // 0: api.v1.ApprovalStatus
-	(*ApprovalConfig)(nil),         // 1: api.v1.ApprovalConfig
-	(*ApprovalRequestData)(nil),    // 2: api.v1.ApprovalRequestData
-	(*ApprovalDecision)(nil),       // 3: api.v1.ApprovalDecision
-	(*DecideApprovalRequest)(nil),  // 4: api.v1.DecideApprovalRequest
-	(*DecideApprovalResponse)(nil), // 5: api.v1.DecideApprovalResponse
-	(*CreateApprovalRequest)(nil),  // 6: api.v1.CreateApprovalRequest
-	(*CreateApprovalResponse)(nil), // 7: api.v1.CreateApprovalResponse
-	(*ListApprovalsRequest)(nil),   // 8: api.v1.ListApprovalsRequest
-	(*ListApprovalsResponse)(nil),  // 9: api.v1.ListApprovalsResponse
-	(*timestamppb.Timestamp)(nil),  // 10: google.protobuf.Timestamp
-	(*TimeRange)(nil),              // 11: api.v1.TimeRange
-	(*PageRequest)(nil),            // 12: api.v1.PageRequest
-	(*PageInfo)(nil),               // 13: api.v1.PageInfo
+	(ApprovalStatus)(0),                  // 0: api.v1.ApprovalStatus
+	(*ApprovalConfig)(nil),               // 1: api.v1.ApprovalConfig
+	(*CreateApprovalConfigRequest)(nil),  // 2: api.v1.CreateApprovalConfigRequest
+	(*CreateApprovalConfigResponse)(nil), // 3: api.v1.CreateApprovalConfigResponse
+	(*GetApprovalConfigRequest)(nil),     // 4: api.v1.GetApprovalConfigRequest
+	(*UpdateApprovalConfigRequest)(nil),  // 5: api.v1.UpdateApprovalConfigRequest
+	(*UpdateApprovalConfigResponse)(nil), // 6: api.v1.UpdateApprovalConfigResponse
+	(*DeleteApprovalConfigRequest)(nil),  // 7: api.v1.DeleteApprovalConfigRequest
+	(*DeleteApprovalConfigResponse)(nil), // 8: api.v1.DeleteApprovalConfigResponse
+	(*ListApprovalConfigsRequest)(nil),   // 9: api.v1.ListApprovalConfigsRequest
+	(*ListApprovalConfigsResponse)(nil),  // 10: api.v1.ListApprovalConfigsResponse
+	(*ApprovalRequestData)(nil),          // 11: api.v1.ApprovalRequestData
+	(*ApprovalDecision)(nil),             // 12: api.v1.ApprovalDecision
+	(*DecideApprovalRequest)(nil),        // 13: api.v1.DecideApprovalRequest
+	(*DecideApprovalResponse)(nil),       // 14: api.v1.DecideApprovalResponse
+	(*CreateApprovalRequest)(nil),        // 15: api.v1.CreateApprovalRequest
+	(*CreateApprovalResponse)(nil),       // 16: api.v1.CreateApprovalResponse
+	(*ListApprovalsRequest)(nil),         // 17: api.v1.ListApprovalsRequest
+	(*ListApprovalsResponse)(nil),        // 18: api.v1.ListApprovalsResponse
+	(*timestamppb.Timestamp)(nil),        // 19: google.protobuf.Timestamp
+	(*TimeRange)(nil),                    // 20: api.v1.TimeRange
+	(*PageRequest)(nil),                  // 21: api.v1.PageRequest
+	(*PageInfo)(nil),                     // 22: api.v1.PageInfo
 }
 var file_api_proto_v1_approval_proto_depIdxs = []int32{
-	0,  // 0: api.v1.ApprovalRequestData.status:type_name -> api.v1.ApprovalStatus
-	3,  // 1: api.v1.ApprovalRequestData.decisions:type_name -> api.v1.ApprovalDecision
-	10, // 2: api.v1.ApprovalRequestData.created_at:type_name -> google.protobuf.Timestamp
-	10, // 3: api.v1.ApprovalRequestData.updated_at:type_name -> google.protobuf.Timestamp
-	10, // 4: api.v1.ApprovalDecision.decided_at:type_name -> google.protobuf.Timestamp
-	2,  // 5: api.v1.DecideApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
-	2,  // 6: api.v1.CreateApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
-	0,  // 7: api.v1.ListApprovalsRequest.statuses:type_name -> api.v1.ApprovalStatus
-	11, // 8: api.v1.ListApprovalsRequest.time_range:type_name -> api.v1.TimeRange
-	12, // 9: api.v1.ListApprovalsRequest.pagination:type_name -> api.v1.PageRequest
-	2,  // 10: api.v1.ListApprovalsResponse.requests:type_name -> api.v1.ApprovalRequestData
-	13, // 11: api.v1.ListApprovalsResponse.pagination:type_name -> api.v1.PageInfo
-	6,  // 12: api.v1.ApprovalService.CreateApproval:input_type -> api.v1.CreateApprovalRequest
-	4,  // 13: api.v1.ApprovalService.DecideApproval:input_type -> api.v1.DecideApprovalRequest
-	8,  // 14: api.v1.ApprovalService.ListApprovals:input_type -> api.v1.ListApprovalsRequest
-	7,  // 15: api.v1.ApprovalService.CreateApproval:output_type -> api.v1.CreateApprovalResponse
-	5,  // 16: api.v1.ApprovalService.DecideApproval:output_type -> api.v1.DecideApprovalResponse
-	9,  // 17: api.v1.ApprovalService.ListApprovals:output_type -> api.v1.ListApprovalsResponse
-	15, // [15:18] is the sub-list for method output_type
-	12, // [12:15] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	19, // 0: api.v1.ApprovalConfig.created_at:type_name -> google.protobuf.Timestamp
+	19, // 1: api.v1.ApprovalConfig.updated_at:type_name -> google.protobuf.Timestamp
+	19, // 2: api.v1.ApprovalConfig.deleted_at:type_name -> google.protobuf.Timestamp
+	1,  // 3: api.v1.CreateApprovalConfigRequest.config:type_name -> api.v1.ApprovalConfig
+	1,  // 4: api.v1.CreateApprovalConfigResponse.config:type_name -> api.v1.ApprovalConfig
+	1,  // 5: api.v1.UpdateApprovalConfigResponse.config:type_name -> api.v1.ApprovalConfig
+	20, // 6: api.v1.ListApprovalConfigsRequest.time_range:type_name -> api.v1.TimeRange
+	21, // 7: api.v1.ListApprovalConfigsRequest.pagination:type_name -> api.v1.PageRequest
+	1,  // 8: api.v1.ListApprovalConfigsResponse.configs:type_name -> api.v1.ApprovalConfig
+	22, // 9: api.v1.ListApprovalConfigsResponse.pagination:type_name -> api.v1.PageInfo
+	0,  // 10: api.v1.ApprovalRequestData.status:type_name -> api.v1.ApprovalStatus
+	12, // 11: api.v1.ApprovalRequestData.decisions:type_name -> api.v1.ApprovalDecision
+	19, // 12: api.v1.ApprovalRequestData.created_at:type_name -> google.protobuf.Timestamp
+	19, // 13: api.v1.ApprovalRequestData.updated_at:type_name -> google.protobuf.Timestamp
+	19, // 14: api.v1.ApprovalDecision.decided_at:type_name -> google.protobuf.Timestamp
+	11, // 15: api.v1.DecideApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
+	11, // 16: api.v1.CreateApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
+	0,  // 17: api.v1.ListApprovalsRequest.statuses:type_name -> api.v1.ApprovalStatus
+	20, // 18: api.v1.ListApprovalsRequest.time_range:type_name -> api.v1.TimeRange
+	21, // 19: api.v1.ListApprovalsRequest.pagination:type_name -> api.v1.PageRequest
+	11, // 20: api.v1.ListApprovalsResponse.requests:type_name -> api.v1.ApprovalRequestData
+	22, // 21: api.v1.ListApprovalsResponse.pagination:type_name -> api.v1.PageInfo
+	15, // 22: api.v1.ApprovalService.CreateApproval:input_type -> api.v1.CreateApprovalRequest
+	13, // 23: api.v1.ApprovalService.DecideApproval:input_type -> api.v1.DecideApprovalRequest
+	17, // 24: api.v1.ApprovalService.ListApprovals:input_type -> api.v1.ListApprovalsRequest
+	2,  // 25: api.v1.ApprovalService.CreateApprovalConfig:input_type -> api.v1.CreateApprovalConfigRequest
+	4,  // 26: api.v1.ApprovalService.GetApprovalConfig:input_type -> api.v1.GetApprovalConfigRequest
+	5,  // 27: api.v1.ApprovalService.UpdateApprovalConfig:input_type -> api.v1.UpdateApprovalConfigRequest
+	7,  // 28: api.v1.ApprovalService.DeleteApprovalConfig:input_type -> api.v1.DeleteApprovalConfigRequest
+	9,  // 29: api.v1.ApprovalService.ListApprovalConfigs:input_type -> api.v1.ListApprovalConfigsRequest
+	16, // 30: api.v1.ApprovalService.CreateApproval:output_type -> api.v1.CreateApprovalResponse
+	14, // 31: api.v1.ApprovalService.DecideApproval:output_type -> api.v1.DecideApprovalResponse
+	18, // 32: api.v1.ApprovalService.ListApprovals:output_type -> api.v1.ListApprovalsResponse
+	3,  // 33: api.v1.ApprovalService.CreateApprovalConfig:output_type -> api.v1.CreateApprovalConfigResponse
+	1,  // 34: api.v1.ApprovalService.GetApprovalConfig:output_type -> api.v1.ApprovalConfig
+	6,  // 35: api.v1.ApprovalService.UpdateApprovalConfig:output_type -> api.v1.UpdateApprovalConfigResponse
+	8,  // 36: api.v1.ApprovalService.DeleteApprovalConfig:output_type -> api.v1.DeleteApprovalConfigResponse
+	10, // 37: api.v1.ApprovalService.ListApprovalConfigs:output_type -> api.v1.ListApprovalConfigsResponse
+	30, // [30:38] is the sub-list for method output_type
+	22, // [22:30] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_approval_proto_init() }
@@ -835,13 +1692,37 @@ func file_api_proto_v1_approval_proto_init() {
 	}
 	file_api_proto_v1_common_proto_init()
 	file_api_proto_v1_options_proto_init()
+	file_api_proto_v1_approval_proto_msgTypes[0].OneofWrappers = []any{
+		(*ApprovalConfig_ActionType)(nil),
+		(*ApprovalConfig_TicketType)(nil),
+	}
+	file_api_proto_v1_approval_proto_msgTypes[3].OneofWrappers = []any{
+		(*GetApprovalConfigRequest_Id)(nil),
+		(*GetApprovalConfigRequest_ActionType)(nil),
+		(*GetApprovalConfigRequest_TicketType)(nil),
+	}
+	file_api_proto_v1_approval_proto_msgTypes[4].OneofWrappers = []any{
+		(*UpdateApprovalConfigRequest_Id)(nil),
+		(*UpdateApprovalConfigRequest_ActionType)(nil),
+		(*UpdateApprovalConfigRequest_TicketType)(nil),
+	}
+	file_api_proto_v1_approval_proto_msgTypes[6].OneofWrappers = []any{
+		(*DeleteApprovalConfigRequest_Id)(nil),
+		(*DeleteApprovalConfigRequest_ActionType)(nil),
+		(*DeleteApprovalConfigRequest_TicketType)(nil),
+	}
+	file_api_proto_v1_approval_proto_msgTypes[14].OneofWrappers = []any{
+		(*CreateApprovalRequest_Id)(nil),
+		(*CreateApprovalRequest_ActionType)(nil),
+		(*CreateApprovalRequest_TicketType)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_approval_proto_rawDesc), len(file_api_proto_v1_approval_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

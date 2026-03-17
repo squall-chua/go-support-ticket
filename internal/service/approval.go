@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,31 +20,58 @@ import (
 
 type ApprovalServiceServer struct {
 	apiv1.UnimplementedApprovalServiceServer
-	repo      repository.ApprovalRepository
-	publisher event.Publisher
+	repo       repository.ApprovalRepository
+	configRepo repository.ApprovalConfigRepository
+	publisher  event.Publisher
 }
 
 func NewApprovalServiceServer(
 	repo repository.ApprovalRepository,
+	configRepo repository.ApprovalConfigRepository,
 	publisher event.Publisher,
 ) *ApprovalServiceServer {
 	return &ApprovalServiceServer{
-		repo:      repo,
-		publisher: publisher,
+		repo:       repo,
+		configRepo: configRepo,
+		publisher:  publisher,
 	}
 }
 
 func (s *ApprovalServiceServer) CreateApproval(ctx context.Context, req *apiv1.CreateApprovalRequest) (*apiv1.CreateApprovalResponse, error) {
 	userID, _ := middleware.UserFromContext(ctx)
+
+	var id, actionType, ticketType string
+	switch t := req.Target.(type) {
+	case *apiv1.CreateApprovalRequest_Id:
+		id = t.Id
+	case *apiv1.CreateApprovalRequest_ActionType:
+		actionType = t.ActionType
+	case *apiv1.CreateApprovalRequest_TicketType:
+		ticketType = t.TicketType
+	default:
+		return nil, status.Error(codes.InvalidArgument, "target is required")
+	}
+
+	requiredApprovals := int32(1)
+	var eligibleRoles []string
+	config, err := s.configRepo.GetConfig(ctx, id, actionType, ticketType)
+	if err == nil && config != nil {
+		requiredApprovals = config.RequiredApprovals
+		eligibleRoles = config.EligibleRoles
+		if config.ActionType != nil {
+			actionType = *config.ActionType
+		}
+	}
+
 	approval := &model.Approval{
-		ID:          bson.NewObjectID(),
-		TicketID:    req.TicketId,
-		Action:      req.Action,
-		Requester:   userID,
-		Status:      int32(apiv1.ApprovalStatus_APPROVAL_STATUS_PENDING),
-		ExecutionID: req.ExecutionId,
-		CreatedAt:   time.Now().UTC(),
-		UpdatedAt:   time.Now().UTC(),
+		ID:                bson.NewObjectID(),
+		TicketID:          req.TicketId,
+		ActionType:        actionType,
+		ExecutionID:       req.ExecutionId,
+		Requester:         userID,
+		Status:            int32(apiv1.ApprovalStatus_APPROVAL_STATUS_PENDING),
+		RequiredApprovals: requiredApprovals,
+		EligibleRoles:     eligibleRoles,
 	}
 
 	if err := s.repo.CreateApproval(ctx, approval); err != nil {
@@ -85,25 +113,47 @@ func (s *ApprovalServiceServer) DecideApproval(ctx context.Context, req *apiv1.D
 		return nil, status.Error(codes.Unauthenticated, "approver identity not found")
 	}
 
-	newDecisions := append(approval.Decisions, model.Decision{
+	if len(approval.EligibleRoles) > 0 {
+		tokenInfo, ok := middleware.TokenInfoFromContext(ctx)
+		if !ok {
+			return nil, status.Error(codes.Unauthenticated, "token info not found")
+		}
+		isEligible := slices.ContainsFunc(approval.EligibleRoles, func(role string) bool {
+			return slices.Contains(tokenInfo.Roles, role)
+		})
+		if !isEligible {
+			return nil, status.Error(codes.PermissionDenied, "user is not eligible to decide on this approval")
+		}
+	}
+
+	decision := model.Decision{
 		Approver:  approver,
 		Approved:  req.Approve,
 		Reason:    req.Reason,
 		DecidedAt: time.Now().UTC(),
-	})
+	}
+	newDecisions := append(approval.Decisions, decision)
 
 	var newStatus int32
 	if req.Approve {
-		// Simplified logic: first approval wins if required is 0 (default handled)
-		newStatus = int32(apiv1.ApprovalStatus_APPROVAL_STATUS_APPROVED)
+		approvedCount := int32(0)
+		for _, d := range newDecisions {
+			if d.Approved {
+				approvedCount++
+			}
+		}
+		if approvedCount >= approval.RequiredApprovals {
+			newStatus = int32(apiv1.ApprovalStatus_APPROVAL_STATUS_APPROVED)
+		} else {
+			newStatus = int32(apiv1.ApprovalStatus_APPROVAL_STATUS_PENDING)
+		}
 	} else {
 		newStatus = int32(apiv1.ApprovalStatus_APPROVAL_STATUS_REJECTED)
 	}
 
 	update := model.ApprovalUpdate{
-		Status:    &newStatus,
-		Decisions: &newDecisions,
-		UpdatedAt: time.Now().UTC(),
+		Status:   &newStatus,
+		Decision: &decision, // Send only the new decision for atomic push
 	}
 
 	if err := s.repo.UpdateApproval(ctx, req.ApprovalRequestId, update); err != nil {
@@ -113,19 +163,20 @@ func (s *ApprovalServiceServer) DecideApproval(ctx context.Context, req *apiv1.D
 	// Update local object for subsequent logic and response
 	approval.Status = newStatus
 	approval.Decisions = newDecisions
-	approval.UpdatedAt = update.UpdatedAt
 
-	// If approved/rejected, publish final decision event
-	decisionEvt := event.Event{
-		EventId:    uuid.NewString(),
-		EventType:  eventconsts.ApprovalDecided,
-		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
-		Schema:     eventconsts.SchemaApproval,
-		ResourceID: approval.TicketID,
-		Data:       eventbus.ProtoMarshaler{Message: approval.ToProto()},
+	// If approved/rejected (final state), publish final decision event
+	if newStatus != int32(apiv1.ApprovalStatus_APPROVAL_STATUS_PENDING) {
+		decisionEvt := event.Event{
+			EventId:    uuid.NewString(),
+			EventType:  eventconsts.ApprovalDecided,
+			EventTime:  time.Now().UTC(),
+			Source:     eventconsts.SourceSupportTicket,
+			Schema:     eventconsts.SchemaApproval,
+			ResourceID: approval.TicketID,
+			Data:       eventbus.ProtoMarshaler{Message: approval.ToProto()},
+		}
+		_ = s.publisher.Publish(ctx, &decisionEvt)
 	}
-	_ = s.publisher.Publish(ctx, &decisionEvt)
 
 	return &apiv1.DecideApprovalResponse{
 		Request: approval.ToProto(),
@@ -133,20 +184,11 @@ func (s *ApprovalServiceServer) DecideApproval(ctx context.Context, req *apiv1.D
 }
 
 func (s *ApprovalServiceServer) ListApprovals(ctx context.Context, req *apiv1.ListApprovalsRequest) (*apiv1.ListApprovalsResponse, error) {
-	var limit, offset, pageNumber int32 = 100, 0, 1
-	if req.Pagination != nil {
-		limit = req.Pagination.PageSize
-		pageNumber = req.Pagination.PageNumber
-		if pageNumber > 1 {
-			offset = (pageNumber - 1) * limit
-		} else {
-			pageNumber = 1
-		}
-	}
+	limit, offset, pageNumber := getPaginationParams(req.Pagination)
 
 	filter := model.ApprovalFilter{
 		TicketIDs:         req.TicketIds,
-		Actions:           req.Actions,
+		ActionTypes:       req.ActionTypes,
 		Requesters:        req.Requesters,
 		ExecutionIDs:      req.ExecutionIds,
 		RequiredApprovals: req.RequiredApprovals,
@@ -157,16 +199,7 @@ func (s *ApprovalServiceServer) ListApprovals(ctx context.Context, req *apiv1.Li
 		filter.Statuses = append(filter.Statuses, int32(st))
 	}
 
-	if req.TimeRange != nil {
-		if req.TimeRange.StartTime != nil {
-			st := req.TimeRange.StartTime.AsTime()
-			filter.StartTime = &st
-		}
-		if req.TimeRange.EndTime != nil {
-			et := req.TimeRange.EndTime.AsTime()
-			filter.EndTime = &et
-		}
-	}
+	filter.StartTime, filter.EndTime = getTimeRange(req.TimeRange)
 
 	approvals, total, err := s.repo.ListApprovals(ctx, filter, limit, offset)
 	if err != nil {
@@ -180,6 +213,167 @@ func (s *ApprovalServiceServer) ListApprovals(ctx context.Context, req *apiv1.Li
 
 	return &apiv1.ListApprovalsResponse{
 		Requests: pbApprovals,
+		Pagination: &apiv1.PageInfo{
+			TotalSize:  total,
+			PageNumber: pageNumber,
+		},
+	}, nil
+}
+
+func (s *ApprovalServiceServer) CreateApprovalConfig(ctx context.Context, req *apiv1.CreateApprovalConfigRequest) (*apiv1.CreateApprovalConfigResponse, error) {
+	if req.Config == nil {
+		return nil, status.Error(codes.InvalidArgument, "config is required")
+	}
+	config := model.ApprovalConfigFromProto(req.Config)
+	if config.ApprovalConfigID.IsZero() {
+		config.ApprovalConfigID = bson.NewObjectID()
+	}
+
+	if err := s.configRepo.CreateConfig(ctx, config); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	evt := event.Event{
+		EventId:    uuid.NewString(),
+		EventType:  eventconsts.ApprovalConfigCreated,
+		EventTime:  time.Now().UTC(),
+		Source:     eventconsts.SourceSupportTicket,
+		Schema:     eventconsts.SchemaApprovalConfig,
+		ResourceID: config.ApprovalConfigID.Hex(),
+		Data:       eventbus.ProtoMarshaler{Message: config.ToProto()},
+	}
+	_ = s.publisher.Publish(ctx, &evt)
+
+	return &apiv1.CreateApprovalConfigResponse{Config: config.ToProto()}, nil
+}
+
+func (s *ApprovalServiceServer) GetApprovalConfig(ctx context.Context, req *apiv1.GetApprovalConfigRequest) (*apiv1.ApprovalConfig, error) {
+	var id, actionType, ticketType string
+	switch t := req.Target.(type) {
+	case *apiv1.GetApprovalConfigRequest_Id:
+		id = t.Id
+	case *apiv1.GetApprovalConfigRequest_ActionType:
+		actionType = t.ActionType
+	case *apiv1.GetApprovalConfigRequest_TicketType:
+		ticketType = t.TicketType
+	default:
+		return nil, status.Error(codes.InvalidArgument, "target is required")
+	}
+
+	config, err := s.configRepo.GetConfig(ctx, id, actionType, ticketType)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if config == nil {
+		return nil, status.Error(codes.NotFound, "approval config not found")
+	}
+	return config.ToProto(), nil
+}
+
+func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *apiv1.UpdateApprovalConfigRequest) (*apiv1.UpdateApprovalConfigResponse, error) {
+	var id, actionType, ticketType string
+	switch t := req.Target.(type) {
+	case *apiv1.UpdateApprovalConfigRequest_Id:
+		id = t.Id
+	case *apiv1.UpdateApprovalConfigRequest_ActionType:
+		actionType = t.ActionType
+	case *apiv1.UpdateApprovalConfigRequest_TicketType:
+		ticketType = t.TicketType
+	default:
+		return nil, status.Error(codes.InvalidArgument, "target is required")
+	}
+
+	update := model.ApprovalConfigUpdate{
+		RequiredApprovals: &req.RequiredApprovals,
+		EligibleRoles:     req.EligibleRoles,
+	}
+
+	updated, err := s.configRepo.UpdateConfig(ctx, id, actionType, ticketType, update)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if updated == nil {
+		return nil, status.Error(codes.NotFound, "approval config not found")
+	}
+
+	evt := event.Event{
+		EventId:    uuid.NewString(),
+		EventType:  eventconsts.ApprovalConfigUpdated,
+		EventTime:  time.Now().UTC(),
+		Source:     eventconsts.SourceSupportTicket,
+		Schema:     eventconsts.SchemaApprovalConfig,
+		ResourceID: updated.ApprovalConfigID.Hex(),
+		Data:       eventbus.ProtoMarshaler{Message: updated.ToProto()},
+	}
+	_ = s.publisher.Publish(ctx, &evt)
+
+	return &apiv1.UpdateApprovalConfigResponse{Config: updated.ToProto()}, nil
+}
+
+func (s *ApprovalServiceServer) DeleteApprovalConfig(ctx context.Context, req *apiv1.DeleteApprovalConfigRequest) (*apiv1.DeleteApprovalConfigResponse, error) {
+	var id, actionType, ticketType string
+	switch t := req.Target.(type) {
+	case *apiv1.DeleteApprovalConfigRequest_Id:
+		id = t.Id
+	case *apiv1.DeleteApprovalConfigRequest_ActionType:
+		actionType = t.ActionType
+	case *apiv1.DeleteApprovalConfigRequest_TicketType:
+		ticketType = t.TicketType
+	default:
+		return nil, status.Error(codes.InvalidArgument, "target is required")
+	}
+
+	config, err := s.configRepo.DeleteConfig(ctx, id, actionType, ticketType)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if config != nil {
+		evt := event.Event{
+			EventId:    uuid.NewString(),
+			EventType:  eventconsts.ApprovalConfigDeleted,
+			EventTime:  time.Now().UTC(),
+			Source:     eventconsts.SourceSupportTicket,
+			Schema:     eventconsts.SchemaApprovalConfig,
+			ResourceID: config.ApprovalConfigID.Hex(),
+			Data:       eventbus.ProtoMarshaler{Message: config.ToProto()},
+		}
+		_ = s.publisher.Publish(ctx, &evt)
+	}
+
+	return &apiv1.DeleteApprovalConfigResponse{}, nil
+}
+
+func (s *ApprovalServiceServer) ListApprovalConfigs(ctx context.Context, req *apiv1.ListApprovalConfigsRequest) (*apiv1.ListApprovalConfigsResponse, error) {
+	limit, offset, pageNumber := getPaginationParams(req.Pagination)
+
+	filter := model.ApprovalConfigFilter{
+		IDs:            req.Ids,
+		ActionTypes:    req.ActionTypes,
+		TicketTypes:    req.TicketTypes,
+		EligibleRoles:  req.EligibleRoles,
+		IncludeDeleted: req.IncludeDeleted,
+	}
+
+	if req.RequiredApprovals != 0 {
+		ra := req.RequiredApprovals
+		filter.RequiredApprovals = &ra
+	}
+
+	filter.StartTime, filter.EndTime = getTimeRange(req.TimeRange)
+
+	configs, total, err := s.configRepo.ListConfigs(ctx, filter, limit, offset)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	pbConfigs := make([]*apiv1.ApprovalConfig, 0, len(configs))
+	for _, c := range configs {
+		pbConfigs = append(pbConfigs, c.ToProto())
+	}
+
+	return &apiv1.ListApprovalConfigsResponse{
+		Configs: pbConfigs,
 		Pagination: &apiv1.PageInfo{
 			TotalSize:  total,
 			PageNumber: pageNumber,
@@ -202,8 +396,10 @@ func (s *ApprovalServiceServer) HandleActionPendingApproval(ctx context.Context,
 
 	_, err := s.CreateApproval(ctx, &apiv1.CreateApprovalRequest{
 		TicketId:    execution.TicketId,
-		Action:      execution.ActionType,
 		ExecutionId: execution.Id,
+		Target: &apiv1.CreateApprovalRequest_ActionType{
+			ActionType: execution.ActionType,
+		},
 	})
 
 	return err

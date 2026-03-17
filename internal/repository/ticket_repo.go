@@ -20,6 +20,9 @@ func NewTicketRepo(col *mongo.Collection) *TicketRepo {
 }
 
 func (r *TicketRepo) CreateTicket(ctx context.Context, ticket *model.Ticket) error {
+	now := time.Now().UTC()
+	ticket.CreatedAt = now
+	ticket.UpdatedAt = now
 	_, err := r.coll.InsertOne(ctx, ticket)
 	return err
 }
@@ -71,7 +74,7 @@ func (r *TicketRepo) buildTicketUpdate(update model.TicketUpdate) gmqb.Updater {
 	}
 
 	if !u.IsEmpty() {
-		u = u.Set(f("UpdatedAt"), update.UpdatedAt)
+		u = u.Set(f("UpdatedAt"), time.Now().UTC())
 	}
 
 	return u
@@ -204,21 +207,26 @@ func (r *TicketRepo) AddComment(ctx context.Context, ticketID string, comment *m
 	if err != nil {
 		return err
 	}
+	if comment.CreatedAt.IsZero() {
+		comment.CreatedAt = time.Now().UTC()
+	}
 	f := gmqb.Field[model.Ticket]
 	_, err = r.coll.UpdateOne(ctx,
 		gmqb.Eq("_id", oid),
-		gmqb.NewUpdate().Push(f("Comments"), comment),
+		gmqb.NewUpdate().
+			Push(f("Comments"), comment).
+			Set(f("UpdatedAt"), time.Now().UTC()),
 	)
 	return err
 }
 
-func (r *TicketRepo) DeleteTicket(ctx context.Context, id string, deletedAt time.Time) error {
+func (r *TicketRepo) DeleteTicket(ctx context.Context, id string) error {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 	f := gmqb.Field[model.Ticket]
-	update := gmqb.NewUpdate().Set(f("DeletedAt"), deletedAt)
+	update := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
 	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), update)
 	return err
 }

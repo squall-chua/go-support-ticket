@@ -21,16 +21,7 @@ func NewAuditServiceServer(repo repository.AuditRepository) apiv1.AuditServiceSe
 }
 
 func (s *AuditServiceServer) ListAuditTrail(ctx context.Context, req *apiv1.ListAuditTrailRequest) (*apiv1.ListAuditTrailResponse, error) {
-	var limit, offset, pageNumber int32 = 100, 0, 1
-	if req.Pagination != nil {
-		limit = req.Pagination.PageSize
-		pageNumber = req.Pagination.PageNumber
-		if pageNumber > 1 {
-			offset = (pageNumber - 1) * limit
-		} else {
-			pageNumber = 1
-		}
-	}
+	limit, offset, pageNumber := getPaginationParams(req.Pagination)
 	logs, total, err := s.repo.ListLogs(ctx, req.TicketId, "", limit, offset)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

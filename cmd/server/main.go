@@ -117,7 +117,7 @@ func main() {
 	g, ctx := errgroup.WithContext(ctx)
 
 	auditSvc := service.NewAuditServiceServer(repos.Audit)
-	approvalSvc := service.NewApprovalServiceServer(repos.Approvals, publisher)
+	approvalSvc := service.NewApprovalServiceServer(repos.Approvals, repos.ApprovalConfigs, publisher)
 	actionSvc := service.NewActionServiceServer(repos.Executions, repos.ActionSchemas, publisher)
 	ticketSvc := service.NewTicketServiceServer(repos.Tickets, repos.TicketTypes, publisher)
 

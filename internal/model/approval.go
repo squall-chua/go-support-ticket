@@ -11,10 +11,11 @@ import (
 type Approval struct {
 	ID                bson.ObjectID `json:"id" bson:"_id,omitempty"`
 	TicketID          string        `json:"ticket_id" bson:"ticket_id"`
-	Action            string        `json:"action" bson:"action"`
+	ActionType        string        `json:"action_type" bson:"action_type"`
 	Requester         string        `json:"requester" bson:"requester"`
 	Status            int32         `json:"status" bson:"status"`
 	RequiredApprovals int32         `json:"required_approvals" bson:"required_approvals"`
+	EligibleRoles     []string      `json:"eligible_roles" bson:"eligible_roles"`
 	ExecutionID       string        `json:"execution_id" bson:"execution_id"`
 	Decisions         []Decision    `json:"decisions" bson:"decisions"`
 	CreatedAt         time.Time     `json:"created_at" bson:"created_at"`
@@ -32,11 +33,12 @@ func (m *Approval) ToProto() *apiv1.ApprovalRequestData {
 	pb := &apiv1.ApprovalRequestData{
 		Id:                m.ID.Hex(),
 		TicketId:          m.TicketID,
-		Action:            m.Action,
+		ActionType:        m.ActionType,
+		ExecutionId:       m.ExecutionID,
 		Requester:         m.Requester,
 		Status:            apiv1.ApprovalStatus(m.Status),
 		RequiredApprovals: m.RequiredApprovals,
-		ExecutionId:       m.ExecutionID,
+		EligibleRoles:     m.EligibleRoles,
 		CreatedAt:         timestamppb.New(m.CreatedAt),
 		UpdatedAt:         timestamppb.New(m.UpdatedAt),
 	}
@@ -56,11 +58,12 @@ func ApprovalFromProto(pb *apiv1.ApprovalRequestData) *Approval {
 	m := &Approval{
 		ID:                id,
 		TicketID:          pb.TicketId,
-		Action:            pb.Action,
+		ActionType:        pb.ActionType,
 		Requester:         pb.Requester,
 		Status:            int32(pb.Status),
 		RequiredApprovals: pb.RequiredApprovals,
 		ExecutionID:       pb.ExecutionId,
+		EligibleRoles:     pb.EligibleRoles,
 		CreatedAt:         pb.CreatedAt.AsTime(),
 		UpdatedAt:         pb.UpdatedAt.AsTime(),
 	}
@@ -95,13 +98,12 @@ func DecisionFromProto(pb *apiv1.ApprovalDecision) Decision {
 
 type ApprovalUpdate struct {
 	Status    *int32
-	Decisions *[]Decision
-	UpdatedAt time.Time
+	Decision  *Decision
 }
 
 type ApprovalFilter struct {
 	TicketIDs         []string
-	Actions           []string
+	ActionTypes       []string
 	Requesters        []string
 	Statuses          []int32
 	ExecutionIDs      []string
@@ -109,4 +111,82 @@ type ApprovalFilter struct {
 	Approvers         []string
 	StartTime         *time.Time
 	EndTime           *time.Time
+}
+type ApprovalConfig struct {
+	ApprovalConfigID  bson.ObjectID `json:"approval_config_id" bson:"_id,omitempty"`
+	ActionType        *string       `json:"action_type,omitempty" bson:"action_type,omitempty"`
+	TicketType        *string       `json:"ticket_type,omitempty" bson:"ticket_type,omitempty"`
+	RequiredApprovals int32         `json:"required_approvals" bson:"required_approvals"`
+	EligibleRoles     []string      `json:"eligible_roles" bson:"eligible_roles"`
+	CreatedAt         time.Time     `json:"created_at" bson:"created_at"`
+	UpdatedAt         time.Time     `json:"updated_at" bson:"updated_at"`
+	DeletedAt         *time.Time    `json:"deleted_at" bson:"deleted_at,omitempty"`
+}
+
+func (m *ApprovalConfig) ToProto() *apiv1.ApprovalConfig {
+	pb := &apiv1.ApprovalConfig{
+		Id:                m.ApprovalConfigID.Hex(),
+		RequiredApprovals: m.RequiredApprovals,
+		EligibleRoles:     m.EligibleRoles,
+		CreatedAt:         timestamppb.New(m.CreatedAt),
+		UpdatedAt:         timestamppb.New(m.UpdatedAt),
+	}
+	if m.ActionType != nil {
+		pb.Target = &apiv1.ApprovalConfig_ActionType{ActionType: *m.ActionType}
+	} else if m.TicketType != nil {
+		pb.Target = &apiv1.ApprovalConfig_TicketType{TicketType: *m.TicketType}
+	}
+
+	if m.DeletedAt != nil {
+		pb.DeletedAt = timestamppb.New(*m.DeletedAt)
+	}
+	return pb
+}
+
+func ApprovalConfigFromProto(pb *apiv1.ApprovalConfig) *ApprovalConfig {
+	if pb == nil {
+		return nil
+	}
+	m := &ApprovalConfig{
+		RequiredApprovals: pb.RequiredApprovals,
+		EligibleRoles:     pb.EligibleRoles,
+	}
+	if pb.Id != "" {
+		m.ApprovalConfigID, _ = bson.ObjectIDFromHex(pb.Id)
+	}
+
+	switch t := pb.Target.(type) {
+	case *apiv1.ApprovalConfig_ActionType:
+		m.ActionType = &t.ActionType
+	case *apiv1.ApprovalConfig_TicketType:
+		m.TicketType = &t.TicketType
+	}
+
+	if pb.CreatedAt != nil {
+		m.CreatedAt = pb.CreatedAt.AsTime()
+	}
+	if pb.UpdatedAt != nil {
+		m.UpdatedAt = pb.UpdatedAt.AsTime()
+	}
+	if pb.DeletedAt != nil {
+		deletedAt := pb.DeletedAt.AsTime()
+		m.DeletedAt = &deletedAt
+	}
+	return m
+}
+
+type ApprovalConfigFilter struct {
+	IDs               []string
+	ActionTypes       []string
+	TicketTypes       []string
+	RequiredApprovals *int32
+	EligibleRoles     []string
+	StartTime         *time.Time
+	EndTime           *time.Time
+	IncludeDeleted    bool
+}
+
+type ApprovalConfigUpdate struct {
+	RequiredApprovals *int32
+	EligibleRoles     []string
 }

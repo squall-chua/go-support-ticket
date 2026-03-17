@@ -20,6 +20,9 @@ func NewTicketTypeRepo(col *mongo.Collection) *TicketTypeRepo {
 }
 
 func (r *TicketTypeRepo) CreateType(ctx context.Context, tType *model.TicketType) error {
+	now := time.Now().UTC()
+	tType.CreatedAt = now
+	tType.UpdatedAt = now
 	_, err := r.coll.InsertOne(ctx, tType)
 	return err
 }
@@ -102,18 +105,18 @@ func (r *TicketTypeRepo) UpdateType(ctx context.Context, id string, update model
 		return r.GetType(ctx, id)
 	}
 
-	u = u.Set(f("UpdatedAt"), update.UpdatedAt)
+	u = u.Set(f("UpdatedAt"), time.Now().UTC())
 
 	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq("_id", oid), u, gmqb.WithReturnDocument(options.After))
 }
 
-func (r *TicketTypeRepo) DeleteType(ctx context.Context, id string, deletedAt time.Time) error {
+func (r *TicketTypeRepo) DeleteType(ctx context.Context, id string) error {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 	f := gmqb.Field[model.TicketType]
-	update := gmqb.NewUpdate().Set(f("DeletedAt"), deletedAt)
+	update := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
 	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), update)
 	return err
 }

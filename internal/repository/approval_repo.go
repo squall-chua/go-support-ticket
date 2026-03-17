@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/squall-chua/gmqb"
 	"github.com/squall-chua/go-support-ticket/internal/model"
@@ -18,6 +19,9 @@ func NewApprovalRepo(col *mongo.Collection) *ApprovalRepo {
 }
 
 func (r *ApprovalRepo) CreateApproval(ctx context.Context, approval *model.Approval) error {
+	now := time.Now().UTC()
+	approval.CreatedAt = now
+	approval.UpdatedAt = now
 	_, err := r.coll.InsertOne(ctx, approval)
 	return err
 }
@@ -42,15 +46,15 @@ func (r *ApprovalRepo) UpdateApproval(ctx context.Context, id string, update mod
 	if update.Status != nil {
 		u = u.Set(f("Status"), *update.Status)
 	}
-	if update.Decisions != nil {
-		u = u.Set(f("Decisions"), *update.Decisions)
+	if update.Decision != nil {
+		u = u.Push(f("Decisions"), *update.Decision)
 	}
 
 	if u.IsEmpty() {
 		return nil
 	}
 
-	u = u.Set(f("UpdatedAt"), update.UpdatedAt)
+	u = u.Set(f("UpdatedAt"), time.Now().UTC())
 
 	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), u)
 	return err
@@ -65,8 +69,8 @@ func (r *ApprovalRepo) ListApprovals(ctx context.Context, filter model.ApprovalF
 	if len(filter.TicketIDs) > 0 {
 		q.In(f("TicketID"), filter.TicketIDs)
 	}
-	if len(filter.Actions) > 0 {
-		q.In(f("Action"), filter.Actions)
+	if len(filter.ActionTypes) > 0 {
+		q.In(f("ActionType"), filter.ActionTypes)
 	}
 	if len(filter.Requesters) > 0 {
 		q.In(f("Requester"), filter.Requesters)

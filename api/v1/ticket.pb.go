@@ -2237,7 +2237,6 @@ func (x *DeleteTicketRequest) GetTicketId() string {
 
 type DeleteTicketResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2270,13 +2269,6 @@ func (x *DeleteTicketResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use DeleteTicketResponse.ProtoReflect.Descriptor instead.
 func (*DeleteTicketResponse) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_ticket_proto_rawDescGZIP(), []int{31}
-}
-
-func (x *DeleteTicketResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
 }
 
 var File_api_proto_v1_ticket_proto protoreflect.FileDescriptor
@@ -2510,9 +2502,8 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
 	"pagination\"2\n" +
 	"\x13DeleteTicketRequest\x12\x1b\n" +
-	"\tticket_id\x18\x01 \x01(\tR\bticketId\"0\n" +
-	"\x14DeleteTicketResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess*\xd8\x01\n" +
+	"\tticket_id\x18\x01 \x01(\tR\bticketId\"\x16\n" +
+	"\x14DeleteTicketResponse*\xd8\x01\n" +
 	"\fTicketStatus\x12\x1d\n" +
 	"\x19TICKET_STATUS_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12TICKET_STATUS_OPEN\x10\x01\x12\x1d\n" +

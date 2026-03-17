@@ -249,9 +249,7 @@ message DeleteTicketRequest {
   string ticket_id = 1;
 }
 
-message DeleteTicketResponse {
-  bool success = 1;
-}
+message DeleteTicketResponse {}
 
 service TicketService {
   // Ticket Type

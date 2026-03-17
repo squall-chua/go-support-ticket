@@ -10,10 +10,72 @@ import "google/api/annotations.proto";
 import "api/proto/v1/options.proto";
 
 message ApprovalConfig {
-  string action = 1;
-  string ticket_type = 2;
-  int32 required_approvals = 3;
-  repeated string eligible_roles = 4;
+  string id = 1;
+  oneof target {
+    string action_type = 2;
+    string ticket_type = 3;
+  }
+  int32 required_approvals = 4;
+  repeated string eligible_roles = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp deleted_at = 8;
+}
+
+message CreateApprovalConfigRequest {
+  ApprovalConfig config = 1;
+}
+
+message CreateApprovalConfigResponse {
+  ApprovalConfig config = 1;
+}
+
+message GetApprovalConfigRequest {
+  oneof target {
+    string id = 1;
+    string action_type = 2;
+    string ticket_type = 3;
+  }
+}
+
+message UpdateApprovalConfigRequest {
+  oneof target {
+    string id = 1;
+    string action_type = 2;
+    string ticket_type = 3;
+  }
+  int32 required_approvals = 4;
+  repeated string eligible_roles = 5;
+}
+
+message UpdateApprovalConfigResponse {
+  ApprovalConfig config = 1;
+}
+
+message DeleteApprovalConfigRequest {
+  oneof target {
+    string id = 1;
+    string action_type = 2;
+    string ticket_type = 3;
+  }
+}
+
+message DeleteApprovalConfigResponse {}
+
+message ListApprovalConfigsRequest {
+  repeated string ids = 1;
+  repeated string action_types = 2;
+  repeated string ticket_types = 3;
+  int32 required_approvals = 4;
+  repeated string eligible_roles = 5;
+  TimeRange time_range = 6;
+  bool include_deleted = 7;
+  PageRequest pagination = 8;
+}
+
+message ListApprovalConfigsResponse {
+  repeated ApprovalConfig configs = 1;
+  PageInfo pagination = 2;
 }
 
 enum ApprovalStatus {
@@ -26,14 +88,15 @@ enum ApprovalStatus {
 message ApprovalRequestData {
   string id = 1;
   string ticket_id = 2;
-  string action = 3;
+  string action_type = 3;
   string execution_id = 4;
   string requester = 5;
   ApprovalStatus status = 6;
   int32 required_approvals = 7;
-  repeated ApprovalDecision decisions = 8;
-  google.protobuf.Timestamp created_at = 9;
-  google.protobuf.Timestamp updated_at = 10;
+  repeated string eligible_roles = 8;
+  repeated ApprovalDecision decisions = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
 }
 
 message ApprovalDecision {
@@ -55,8 +118,12 @@ message DecideApprovalResponse {
 
 message CreateApprovalRequest {
   string ticket_id = 1;
-  string action = 2;
-  string execution_id = 3;
+  string execution_id = 2;
+  oneof target {
+    string id = 3;
+    string action_type = 4;
+    string ticket_type = 5;
+  }
 }
 
 message CreateApprovalResponse {
@@ -65,7 +132,7 @@ message CreateApprovalResponse {
 
 message ListApprovalsRequest {
   repeated string ticket_ids = 1;
-  repeated string actions = 2;
+  repeated string action_types = 2;
   repeated string requesters = 3;
   repeated ApprovalStatus statuses = 4;
   repeated string execution_ids = 5;
@@ -104,6 +171,54 @@ service ApprovalService {
   rpc ListApprovals(ListApprovalsRequest) returns (ListApprovalsResponse) {
     option (google.api.http) = {
       get: "/api/v1/approvals"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:approvals"]
+      required_roles: ["admin", "approver", "agent"]
+    };
+  }
+
+  rpc CreateApprovalConfig(CreateApprovalConfigRequest) returns (CreateApprovalConfigResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/approval-configs"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:approvals"]
+      required_roles: ["admin"]
+    };
+  }
+  rpc GetApprovalConfig(GetApprovalConfigRequest) returns (ApprovalConfig) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-configs/{id}"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:approvals"]
+      required_roles: ["admin", "approver", "agent"]
+    };
+  }
+  rpc UpdateApprovalConfig(UpdateApprovalConfigRequest) returns (UpdateApprovalConfigResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/approval-configs/{id}"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:approvals"]
+      required_roles: ["admin"]
+    };
+  }
+  rpc DeleteApprovalConfig(DeleteApprovalConfigRequest) returns (DeleteApprovalConfigResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/approval-configs/{id}"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:approvals"]
+      required_roles: ["admin"]
+    };
+  }
+  rpc ListApprovalConfigs(ListApprovalConfigsRequest) returns (ListApprovalConfigsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/approval-configs"
     };
     option (auth.v1.rule) = {
       required_scopes: ["read:approvals"]

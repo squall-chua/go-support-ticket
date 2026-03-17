@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/squall-chua/gmqb"
 	"github.com/squall-chua/go-support-ticket/internal/model"
@@ -18,6 +19,9 @@ func NewActionExecutionRepo(col *mongo.Collection) *ActionExecutionRepo {
 }
 
 func (r *ActionExecutionRepo) CreateExecution(ctx context.Context, e *model.ActionExecution) error {
+	now := time.Now().UTC()
+	e.CreatedAt = now
+	e.UpdatedAt = now
 	_, err := r.coll.InsertOne(ctx, e)
 	return err
 }
@@ -42,35 +46,47 @@ func (r *ActionExecutionRepo) UpdateExecution(ctx context.Context, id string, up
 	if update.Status != nil {
 		u.Set(f("Status"), *update.Status)
 	}
-	if update.ResultMetadata != nil {
-		u.Set(f("ResultMetadata"), *update.ResultMetadata)
-	}
-	if update.Error != nil {
-		u.Set(f("Error"), *update.Error)
-	}
-	if update.Logs != nil {
-		u.Set(f("Logs"), *update.Logs)
+	if update.Result != nil {
+		u.Set(f("Result"), update.Result)
 	}
 	if update.CompletedAt != nil {
-		u.Set(f("CompletedAt"), *update.CompletedAt)
+		// This field is also in Result, but we might keep it top-level for some reason? 
+		// Actually I removed it from ActionExecution struct in model.
+		// So CompletedAt should be part of Result.
+		// I'll skip setting it top-level since it's gone from the struct.
 	}
-	u.Set(f("UpdatedAt"), update.UpdatedAt)
+	u.Set(f("UpdatedAt"), time.Now().UTC())
 
 	_, err = r.coll.UpdateOne(ctx, gmqb.Eq("_id", oid), u)
 	return err
 }
 
 
-func (r *ActionExecutionRepo) ListExecutions(ctx context.Context, ticketID, actionType string, limit, offset int32) ([]*model.ActionExecution, int32, error) {
+func (r *ActionExecutionRepo) ListExecutions(ctx context.Context, filter model.ActionExecutionFilter, limit, offset int32) ([]*model.ActionExecution, int32, error) {
 	f := gmqb.Field[model.ActionExecution]
-	filter := gmqb.NewFilter()
+	mqbFilter := gmqb.NewFilter()
 
-	if ticketID != "" {
-		filter.Eq(f("TicketID"), ticketID)
+	if len(filter.IDs) > 0 {
+		mqbFilter.In("_id", filter.IDs)
 	}
-	if actionType != "" {
-		filter.Eq(f("ActionType"), actionType)
+	if len(filter.TicketIDs) > 0 {
+		mqbFilter.In(f("TicketID"), filter.TicketIDs)
+	}
+	if len(filter.ActionTypes) > 0 {
+		mqbFilter.In(f("ActionType"), filter.ActionTypes)
+	}
+	if len(filter.Statuses) > 0 {
+		mqbFilter.In(f("Status"), filter.Statuses)
+	}
+	if len(filter.ExecutingUsers) > 0 {
+		mqbFilter.In(f("ExecutingUser"), filter.ExecutingUsers)
+	}
+	if filter.StartTime != nil {
+		mqbFilter.Gte(f("CreatedAt"), *filter.StartTime)
+	}
+	if filter.EndTime != nil {
+		mqbFilter.Lte(f("CreatedAt"), *filter.EndTime)
 	}
 
-	return listPaginated(ctx, r.coll, filter, gmqb.Desc(f("CreatedAt")), limit, offset)
+	return listPaginated(ctx, r.coll, mqbFilter, gmqb.Desc(f("CreatedAt")), limit, offset)
 }

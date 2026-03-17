@@ -19,6 +19,7 @@ type ActionSchema struct {
 	RequireApproval bool                `json:"require_approval" bson:"require_approval"`
 	CreatedAt       time.Time           `json:"created_at" bson:"created_at"`
 	UpdatedAt       time.Time           `json:"updated_at" bson:"updated_at"`
+	DeletedAt       *time.Time          `json:"deleted_at,omitempty" bson:"deleted_at,omitempty"`
 }
 
 type ActionParameter struct {
@@ -38,19 +39,24 @@ type ActionResultField struct {
 }
 
 type ActionExecution struct {
-	ID             bson.ObjectID          `json:"id" bson:"_id,omitempty"`
-	TicketID       string                 `json:"ticket_id" bson:"ticket_id"`
-	ActionType     string                 `json:"action_type" bson:"action_type"`
-	Status         int32                  `json:"status" bson:"status"`
-	Parameters     map[string]interface{} `json:"parameters" bson:"parameters"`
-	ResultMetadata map[string]interface{} `json:"result_metadata" bson:"result_metadata"`
-	Error          string                 `json:"error" bson:"error"`
-	Logs           string                 `json:"logs" bson:"logs"`
-	ExecutingUser  string                 `json:"executing_user" bson:"executing_user"`
-	ExecuteAt      time.Time              `json:"execute_at" bson:"execute_at"`
-	CompletedAt    time.Time              `json:"completed_at" bson:"completed_at"`
-	CreatedAt      time.Time              `json:"created_at" bson:"created_at"`
-	UpdatedAt      time.Time              `json:"updated_at" bson:"updated_at"`
+	ID            bson.ObjectID          `json:"id" bson:"_id,omitempty"`
+	TicketID      string                 `json:"ticket_id" bson:"ticket_id"`
+	ActionType    string                 `json:"action_type" bson:"action_type"`
+	Status        int32                  `json:"status" bson:"status"`
+	Parameters    map[string]interface{} `json:"parameters" bson:"parameters"`
+	Result        *ActionExecutionResult `json:"result,omitempty" bson:"result,omitempty"`
+	ExecutingUser string                 `json:"executing_user" bson:"executing_user"`
+	ExecuteAt     time.Time              `json:"execute_at" bson:"execute_at"`
+	CreatedAt     time.Time              `json:"created_at" bson:"created_at"`
+	UpdatedAt     time.Time              `json:"updated_at" bson:"updated_at"`
+}
+
+type ActionExecutionResult struct {
+	Status      int32                  `json:"status" bson:"status"`
+	Error       string                 `json:"error" bson:"error"`
+	Logs        string                 `json:"logs" bson:"logs"`
+	CompletedAt time.Time              `json:"completed_at" bson:"completed_at"`
+	Metadata    map[string]interface{} `json:"metadata" bson:"metadata"`
 }
 
 func (m *ActionSchema) ToProto() *apiv1.ActionSchema {
@@ -62,6 +68,10 @@ func (m *ActionSchema) ToProto() *apiv1.ActionSchema {
 		RequireApproval: m.RequireApproval,
 		CreatedAt:       timestamppb.New(m.CreatedAt),
 		UpdatedAt:       timestamppb.New(m.UpdatedAt),
+	}
+
+	if m.DeletedAt != nil {
+		pb.DeletedAt = timestamppb.New(*m.DeletedAt)
 	}
 
 	for _, p := range m.Parameters {
@@ -88,6 +98,7 @@ func ActionSchemaFromProto(pb *apiv1.ActionSchema) *ActionSchema {
 		RequireApproval: pb.RequireApproval,
 		CreatedAt:       pb.CreatedAt.AsTime(),
 		UpdatedAt:       pb.UpdatedAt.AsTime(),
+		DeletedAt:       func() *time.Time { if pb.DeletedAt == nil { return nil }; t := pb.DeletedAt.AsTime(); return &t }(),
 	}
 
 	for _, p := range pb.Parameters {
@@ -107,11 +118,8 @@ func (m *ActionExecution) ToProto() *apiv1.ActionExecution {
 		TicketId:      m.TicketID,
 		ActionType:    m.ActionType,
 		Status:        apiv1.ActionStatus(m.Status),
-		Error:         m.Error,
-		Logs:          m.Logs,
 		ExecutingUser: m.ExecutingUser,
 		ExecuteAt:     timestamppb.New(m.ExecuteAt),
-		CompletedAt:   timestamppb.New(m.CompletedAt),
 		CreatedAt:     timestamppb.New(m.CreatedAt),
 		UpdatedAt:     timestamppb.New(m.UpdatedAt),
 	}
@@ -125,11 +133,19 @@ func (m *ActionExecution) ToProto() *apiv1.ActionExecution {
 		}
 	}
 
-	if len(m.ResultMetadata) > 0 {
-		pb.ResultMetadata = make(map[string]*structpb.Value)
-		for k, v := range m.ResultMetadata {
-			if val, err := structpb.NewValue(v); err == nil {
-				pb.ResultMetadata[k] = val
+	if m.Result != nil {
+		pb.Result = &apiv1.ActionExecutionResult{
+			Status:      apiv1.ActionExecutionStatus(m.Result.Status),
+			Error:       m.Result.Error,
+			Logs:        m.Result.Logs,
+			CompletedAt: timestamppb.New(m.Result.CompletedAt),
+		}
+		if len(m.Result.Metadata) > 0 {
+			pb.Result.Results = make(map[string]*structpb.Value)
+			for k, v := range m.Result.Metadata {
+				if val, err := structpb.NewValue(v); err == nil {
+					pb.Result.Results[k] = val
+				}
 			}
 		}
 	}
@@ -147,11 +163,8 @@ func ActionExecutionFromProto(pb *apiv1.ActionExecution) *ActionExecution {
 		TicketID:      pb.TicketId,
 		ActionType:    pb.ActionType,
 		Status:        int32(pb.Status),
-		Error:         pb.Error,
-		Logs:          pb.Logs,
 		ExecutingUser: pb.ExecutingUser,
 		ExecuteAt:     pb.ExecuteAt.AsTime(),
-		CompletedAt:   pb.CompletedAt.AsTime(),
 		CreatedAt:     pb.CreatedAt.AsTime(),
 		UpdatedAt:     pb.UpdatedAt.AsTime(),
 	}
@@ -163,10 +176,18 @@ func ActionExecutionFromProto(pb *apiv1.ActionExecution) *ActionExecution {
 		}
 	}
 
-	if len(pb.ResultMetadata) > 0 {
-		m.ResultMetadata = make(map[string]interface{})
-		for k, v := range pb.ResultMetadata {
-			m.ResultMetadata[k] = v.AsInterface()
+	if pb.Result != nil {
+		m.Result = &ActionExecutionResult{
+			Status:      int32(pb.Result.Status),
+			Error:       pb.Result.Error,
+			Logs:        pb.Result.Logs,
+			CompletedAt: pb.Result.CompletedAt.AsTime(),
+		}
+		if len(pb.Result.Results) > 0 {
+			m.Result.Metadata = make(map[string]interface{})
+			for k, v := range pb.Result.Results {
+				m.Result.Metadata[k] = v.AsInterface()
+			}
 		}
 	}
 
@@ -239,6 +260,7 @@ type ActionSchemaFilter struct {
 	RequireApproval *bool
 	StartTime       *time.Time
 	EndTime         *time.Time
+	IncludeDeleted  bool
 }
 
 type ActionSchemaUpdate struct {
@@ -247,22 +269,19 @@ type ActionSchemaUpdate struct {
 	Parameters      *[]ActionParameter
 	ResultSchema    *[]ActionResultField
 	RequireApproval *bool
-	UpdatedAt       time.Time
 }
 type ActionExecutionUpdate struct {
-	Status         *int32
-	ResultMetadata *map[string]interface{}
-	Error          *string
-	Logs           *string
-	CompletedAt    *time.Time
-	UpdatedAt      time.Time
+	Status      *int32
+	Result      *ActionExecutionResult
+	CompletedAt *time.Time // Still useful for shortcut updates if needed, but Result has it too.
 }
 
 type ActionExecutionFilter struct {
-	IDs         []bson.ObjectID
-	TicketIDs   []string
-	ActionTypes []string
-	Statuses    []int32
-	StartTime   *time.Time
-	EndTime     *time.Time
+	IDs            []bson.ObjectID
+	TicketIDs      []string
+	ActionTypes    []string
+	Statuses       []int32
+	ExecutingUsers []string
+	StartTime      *time.Time
+	EndTime        *time.Time
 }

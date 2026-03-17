@@ -37,7 +37,6 @@ type TicketUpdate struct {
 	MergedInto  *bson.ObjectID
 	NewComment  *Comment
 	Metadata    Metadata
-	UpdatedAt   time.Time
 }
 
 type TicketFilter struct {
@@ -85,7 +84,6 @@ type TicketTypeUpdate struct {
 	RequireApproval *bool
 	AutoVisible     *bool
 	Activated       *bool
-	UpdatedAt       time.Time
 }
 
 type TicketTypeFilter struct {

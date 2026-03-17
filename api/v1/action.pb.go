@@ -149,6 +149,55 @@ func (ActionStatus) EnumDescriptor() ([]byte, []int) {
 	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{1}
 }
 
+type ActionExecutionStatus int32
+
+const (
+	ActionExecutionStatus_ACTION_EXECUTION_STATUS_UNSPECIFIED ActionExecutionStatus = 0
+	ActionExecutionStatus_ACTION_EXECUTION_STATUS_COMPLETED   ActionExecutionStatus = 1
+	ActionExecutionStatus_ACTION_EXECUTION_STATUS_FAILED      ActionExecutionStatus = 2
+)
+
+// Enum value maps for ActionExecutionStatus.
+var (
+	ActionExecutionStatus_name = map[int32]string{
+		0: "ACTION_EXECUTION_STATUS_UNSPECIFIED",
+		1: "ACTION_EXECUTION_STATUS_COMPLETED",
+		2: "ACTION_EXECUTION_STATUS_FAILED",
+	}
+	ActionExecutionStatus_value = map[string]int32{
+		"ACTION_EXECUTION_STATUS_UNSPECIFIED": 0,
+		"ACTION_EXECUTION_STATUS_COMPLETED":   1,
+		"ACTION_EXECUTION_STATUS_FAILED":      2,
+	}
+)
+
+func (x ActionExecutionStatus) Enum() *ActionExecutionStatus {
+	p := new(ActionExecutionStatus)
+	*p = x
+	return p
+}
+
+func (x ActionExecutionStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ActionExecutionStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_api_proto_v1_action_proto_enumTypes[2].Descriptor()
+}
+
+func (ActionExecutionStatus) Type() protoreflect.EnumType {
+	return &file_api_proto_v1_action_proto_enumTypes[2]
+}
+
+func (x ActionExecutionStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ActionExecutionStatus.Descriptor instead.
+func (ActionExecutionStatus) EnumDescriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{2}
+}
+
 type ActionParameter struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -312,6 +361,7 @@ type ActionSchema struct {
 	RequireApproval bool                   `protobuf:"varint,7,opt,name=require_approval,json=requireApproval,proto3" json:"require_approval,omitempty"`
 	CreatedAt       *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt       *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt       *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -409,23 +459,27 @@ func (x *ActionSchema) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *ActionSchema) GetDeletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DeletedAt
+	}
+	return nil
+}
+
 type ActionExecution struct {
-	state          protoimpl.MessageState     `protogen:"open.v1"`
-	Id             string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TicketId       string                     `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	ActionType     string                     `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
-	Status         ActionStatus               `protobuf:"varint,4,opt,name=status,proto3,enum=api.v1.ActionStatus" json:"status,omitempty"`
-	Parameters     map[string]*structpb.Value `protobuf:"bytes,5,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	ResultMetadata map[string]*structpb.Value `protobuf:"bytes,6,rep,name=result_metadata,json=resultMetadata,proto3" json:"result_metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Error          string                     `protobuf:"bytes,7,opt,name=error,proto3" json:"error,omitempty"`
-	Logs           string                     `protobuf:"bytes,8,opt,name=logs,proto3" json:"logs,omitempty"`
-	ExecutingUser  string                     `protobuf:"bytes,9,opt,name=executing_user,json=executingUser,proto3" json:"executing_user,omitempty"`
-	ExecuteAt      *timestamppb.Timestamp     `protobuf:"bytes,10,opt,name=execute_at,json=executeAt,proto3" json:"execute_at,omitempty"`
-	CompletedAt    *timestamppb.Timestamp     `protobuf:"bytes,11,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
-	CreatedAt      *timestamppb.Timestamp     `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      *timestamppb.Timestamp     `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Id            string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TicketId      string                     `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	ActionType    string                     `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Status        ActionStatus               `protobuf:"varint,4,opt,name=status,proto3,enum=api.v1.ActionStatus" json:"status,omitempty"`
+	Parameters    map[string]*structpb.Value `protobuf:"bytes,5,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Result        *ActionExecutionResult     `protobuf:"bytes,6,opt,name=result,proto3" json:"result,omitempty"`
+	ExecutingUser string                     `protobuf:"bytes,7,opt,name=executing_user,json=executingUser,proto3" json:"executing_user,omitempty"`
+	CreatedAt     *timestamppb.Timestamp     `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp     `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	ExecuteAt     *timestamppb.Timestamp     `protobuf:"bytes,10,opt,name=execute_at,json=executeAt,proto3" json:"execute_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ActionExecution) Reset() {
@@ -493,25 +547,11 @@ func (x *ActionExecution) GetParameters() map[string]*structpb.Value {
 	return nil
 }
 
-func (x *ActionExecution) GetResultMetadata() map[string]*structpb.Value {
+func (x *ActionExecution) GetResult() *ActionExecutionResult {
 	if x != nil {
-		return x.ResultMetadata
+		return x.Result
 	}
 	return nil
-}
-
-func (x *ActionExecution) GetError() string {
-	if x != nil {
-		return x.Error
-	}
-	return ""
-}
-
-func (x *ActionExecution) GetLogs() string {
-	if x != nil {
-		return x.Logs
-	}
-	return ""
 }
 
 func (x *ActionExecution) GetExecutingUser() string {
@@ -519,20 +559,6 @@ func (x *ActionExecution) GetExecutingUser() string {
 		return x.ExecutingUser
 	}
 	return ""
-}
-
-func (x *ActionExecution) GetExecuteAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.ExecuteAt
-	}
-	return nil
-}
-
-func (x *ActionExecution) GetCompletedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CompletedAt
-	}
-	return nil
 }
 
 func (x *ActionExecution) GetCreatedAt() *timestamppb.Timestamp {
@@ -549,7 +575,98 @@ func (x *ActionExecution) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-type ListAvailableActionsRequest struct {
+func (x *ActionExecution) GetExecuteAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExecuteAt
+	}
+	return nil
+}
+
+type ActionExecutionResult struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	ExecutionId   string                     `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Status        ActionExecutionStatus      `protobuf:"varint,2,opt,name=status,proto3,enum=api.v1.ActionExecutionStatus" json:"status,omitempty"`
+	Error         string                     `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
+	Logs          string                     `protobuf:"bytes,4,opt,name=logs,proto3" json:"logs,omitempty"`
+	CompletedAt   *timestamppb.Timestamp     `protobuf:"bytes,5,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	Results       map[string]*structpb.Value `protobuf:"bytes,6,rep,name=results,proto3" json:"results,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ActionExecutionResult) Reset() {
+	*x = ActionExecutionResult{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ActionExecutionResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ActionExecutionResult) ProtoMessage() {}
+
+func (x *ActionExecutionResult) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ActionExecutionResult.ProtoReflect.Descriptor instead.
+func (*ActionExecutionResult) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ActionExecutionResult) GetExecutionId() string {
+	if x != nil {
+		return x.ExecutionId
+	}
+	return ""
+}
+
+func (x *ActionExecutionResult) GetStatus() ActionExecutionStatus {
+	if x != nil {
+		return x.Status
+	}
+	return ActionExecutionStatus_ACTION_EXECUTION_STATUS_UNSPECIFIED
+}
+
+func (x *ActionExecutionResult) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+func (x *ActionExecutionResult) GetLogs() string {
+	if x != nil {
+		return x.Logs
+	}
+	return ""
+}
+
+func (x *ActionExecutionResult) GetCompletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return nil
+}
+
+func (x *ActionExecutionResult) GetResults() map[string]*structpb.Value {
+	if x != nil {
+		return x.Results
+	}
+	return nil
+}
+
+type ListActionSchemasRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Ids             []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
 	ActionTypes     []string               `protobuf:"bytes,2,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
@@ -557,25 +674,26 @@ type ListAvailableActionsRequest struct {
 	RequireApproval *bool                  `protobuf:"varint,4,opt,name=require_approval,json=requireApproval,proto3,oneof" json:"require_approval,omitempty"`
 	TimeRange       *TimeRange             `protobuf:"bytes,5,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
 	Pagination      *PageRequest           `protobuf:"bytes,6,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	IncludeDeleted  bool                   `protobuf:"varint,7,opt,name=include_deleted,json=includeDeleted,proto3" json:"include_deleted,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *ListAvailableActionsRequest) Reset() {
-	*x = ListAvailableActionsRequest{}
-	mi := &file_api_proto_v1_action_proto_msgTypes[4]
+func (x *ListActionSchemasRequest) Reset() {
+	*x = ListActionSchemasRequest{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListAvailableActionsRequest) String() string {
+func (x *ListActionSchemasRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListAvailableActionsRequest) ProtoMessage() {}
+func (*ListActionSchemasRequest) ProtoMessage() {}
 
-func (x *ListAvailableActionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_action_proto_msgTypes[4]
+func (x *ListActionSchemasRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -586,54 +704,61 @@ func (x *ListAvailableActionsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListAvailableActionsRequest.ProtoReflect.Descriptor instead.
-func (*ListAvailableActionsRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{4}
+// Deprecated: Use ListActionSchemasRequest.ProtoReflect.Descriptor instead.
+func (*ListActionSchemasRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ListAvailableActionsRequest) GetIds() []string {
+func (x *ListActionSchemasRequest) GetIds() []string {
 	if x != nil {
 		return x.Ids
 	}
 	return nil
 }
 
-func (x *ListAvailableActionsRequest) GetActionTypes() []string {
+func (x *ListActionSchemasRequest) GetActionTypes() []string {
 	if x != nil {
 		return x.ActionTypes
 	}
 	return nil
 }
 
-func (x *ListAvailableActionsRequest) GetDisplayName() string {
+func (x *ListActionSchemasRequest) GetDisplayName() string {
 	if x != nil {
 		return x.DisplayName
 	}
 	return ""
 }
 
-func (x *ListAvailableActionsRequest) GetRequireApproval() bool {
+func (x *ListActionSchemasRequest) GetRequireApproval() bool {
 	if x != nil && x.RequireApproval != nil {
 		return *x.RequireApproval
 	}
 	return false
 }
 
-func (x *ListAvailableActionsRequest) GetTimeRange() *TimeRange {
+func (x *ListActionSchemasRequest) GetTimeRange() *TimeRange {
 	if x != nil {
 		return x.TimeRange
 	}
 	return nil
 }
 
-func (x *ListAvailableActionsRequest) GetPagination() *PageRequest {
+func (x *ListActionSchemasRequest) GetPagination() *PageRequest {
 	if x != nil {
 		return x.Pagination
 	}
 	return nil
 }
 
-type ListAvailableActionsResponse struct {
+func (x *ListActionSchemasRequest) GetIncludeDeleted() bool {
+	if x != nil {
+		return x.IncludeDeleted
+	}
+	return false
+}
+
+type ListActionSchemasResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Schemas       []*ActionSchema        `protobuf:"bytes,1,rep,name=schemas,proto3" json:"schemas,omitempty"`
 	Pagination    *PageInfo              `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
@@ -641,21 +766,21 @@ type ListAvailableActionsResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ListAvailableActionsResponse) Reset() {
-	*x = ListAvailableActionsResponse{}
-	mi := &file_api_proto_v1_action_proto_msgTypes[5]
+func (x *ListActionSchemasResponse) Reset() {
+	*x = ListActionSchemasResponse{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ListAvailableActionsResponse) String() string {
+func (x *ListActionSchemasResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ListAvailableActionsResponse) ProtoMessage() {}
+func (*ListActionSchemasResponse) ProtoMessage() {}
 
-func (x *ListAvailableActionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_action_proto_msgTypes[5]
+func (x *ListActionSchemasResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -666,19 +791,19 @@ func (x *ListAvailableActionsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListAvailableActionsResponse.ProtoReflect.Descriptor instead.
-func (*ListAvailableActionsResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use ListActionSchemasResponse.ProtoReflect.Descriptor instead.
+func (*ListActionSchemasResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ListAvailableActionsResponse) GetSchemas() []*ActionSchema {
+func (x *ListActionSchemasResponse) GetSchemas() []*ActionSchema {
 	if x != nil {
 		return x.Schemas
 	}
 	return nil
 }
 
-func (x *ListAvailableActionsResponse) GetPagination() *PageInfo {
+func (x *ListActionSchemasResponse) GetPagination() *PageInfo {
 	if x != nil {
 		return x.Pagination
 	}
@@ -696,7 +821,7 @@ type ExecuteActionRequest struct {
 
 func (x *ExecuteActionRequest) Reset() {
 	*x = ExecuteActionRequest{}
-	mi := &file_api_proto_v1_action_proto_msgTypes[6]
+	mi := &file_api_proto_v1_action_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -708,7 +833,7 @@ func (x *ExecuteActionRequest) String() string {
 func (*ExecuteActionRequest) ProtoMessage() {}
 
 func (x *ExecuteActionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_action_proto_msgTypes[6]
+	mi := &file_api_proto_v1_action_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -721,7 +846,7 @@ func (x *ExecuteActionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecuteActionRequest.ProtoReflect.Descriptor instead.
 func (*ExecuteActionRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{6}
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ExecuteActionRequest) GetTicketId() string {
@@ -754,7 +879,7 @@ type GetActionExecutionRequest struct {
 
 func (x *GetActionExecutionRequest) Reset() {
 	*x = GetActionExecutionRequest{}
-	mi := &file_api_proto_v1_action_proto_msgTypes[7]
+	mi := &file_api_proto_v1_action_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -766,7 +891,7 @@ func (x *GetActionExecutionRequest) String() string {
 func (*GetActionExecutionRequest) ProtoMessage() {}
 
 func (x *GetActionExecutionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_action_proto_msgTypes[7]
+	mi := &file_api_proto_v1_action_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -779,7 +904,7 @@ func (x *GetActionExecutionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetActionExecutionRequest.ProtoReflect.Descriptor instead.
 func (*GetActionExecutionRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{7}
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetActionExecutionRequest) GetExecutionId() string {
@@ -787,6 +912,150 @@ func (x *GetActionExecutionRequest) GetExecutionId() string {
 		return x.ExecutionId
 	}
 	return ""
+}
+
+type ListActionExecutionsRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Ids            []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	TicketIds      []string               `protobuf:"bytes,2,rep,name=ticket_ids,json=ticketIds,proto3" json:"ticket_ids,omitempty"`
+	ActionTypes    []string               `protobuf:"bytes,3,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
+	Statuses       []ActionStatus         `protobuf:"varint,4,rep,packed,name=statuses,proto3,enum=api.v1.ActionStatus" json:"statuses,omitempty"`
+	ExecutingUsers []string               `protobuf:"bytes,5,rep,name=executing_users,json=executingUsers,proto3" json:"executing_users,omitempty"`
+	TimeRange      *TimeRange             `protobuf:"bytes,6,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
+	Pagination     *PageRequest           `protobuf:"bytes,7,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ListActionExecutionsRequest) Reset() {
+	*x = ListActionExecutionsRequest{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListActionExecutionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListActionExecutionsRequest) ProtoMessage() {}
+
+func (x *ListActionExecutionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListActionExecutionsRequest.ProtoReflect.Descriptor instead.
+func (*ListActionExecutionsRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListActionExecutionsRequest) GetIds() []string {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
+func (x *ListActionExecutionsRequest) GetTicketIds() []string {
+	if x != nil {
+		return x.TicketIds
+	}
+	return nil
+}
+
+func (x *ListActionExecutionsRequest) GetActionTypes() []string {
+	if x != nil {
+		return x.ActionTypes
+	}
+	return nil
+}
+
+func (x *ListActionExecutionsRequest) GetStatuses() []ActionStatus {
+	if x != nil {
+		return x.Statuses
+	}
+	return nil
+}
+
+func (x *ListActionExecutionsRequest) GetExecutingUsers() []string {
+	if x != nil {
+		return x.ExecutingUsers
+	}
+	return nil
+}
+
+func (x *ListActionExecutionsRequest) GetTimeRange() *TimeRange {
+	if x != nil {
+		return x.TimeRange
+	}
+	return nil
+}
+
+func (x *ListActionExecutionsRequest) GetPagination() *PageRequest {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
+}
+
+type ListActionExecutionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Executions    []*ActionExecution     `protobuf:"bytes,1,rep,name=executions,proto3" json:"executions,omitempty"`
+	Pagination    *PageInfo              `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListActionExecutionsResponse) Reset() {
+	*x = ListActionExecutionsResponse{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListActionExecutionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListActionExecutionsResponse) ProtoMessage() {}
+
+func (x *ListActionExecutionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListActionExecutionsResponse.ProtoReflect.Descriptor instead.
+func (*ListActionExecutionsResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ListActionExecutionsResponse) GetExecutions() []*ActionExecution {
+	if x != nil {
+		return x.Executions
+	}
+	return nil
+}
+
+func (x *ListActionExecutionsResponse) GetPagination() *PageInfo {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
 }
 
 type UpdateActionSchemaRequest struct {
@@ -803,7 +1072,7 @@ type UpdateActionSchemaRequest struct {
 
 func (x *UpdateActionSchemaRequest) Reset() {
 	*x = UpdateActionSchemaRequest{}
-	mi := &file_api_proto_v1_action_proto_msgTypes[8]
+	mi := &file_api_proto_v1_action_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -815,7 +1084,7 @@ func (x *UpdateActionSchemaRequest) String() string {
 func (*UpdateActionSchemaRequest) ProtoMessage() {}
 
 func (x *UpdateActionSchemaRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_action_proto_msgTypes[8]
+	mi := &file_api_proto_v1_action_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -828,7 +1097,7 @@ func (x *UpdateActionSchemaRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateActionSchemaRequest.ProtoReflect.Descriptor instead.
 func (*UpdateActionSchemaRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{8}
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *UpdateActionSchemaRequest) GetActionType() string {
@@ -882,7 +1151,7 @@ type UpdateActionSchemaResponse struct {
 
 func (x *UpdateActionSchemaResponse) Reset() {
 	*x = UpdateActionSchemaResponse{}
-	mi := &file_api_proto_v1_action_proto_msgTypes[9]
+	mi := &file_api_proto_v1_action_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -894,7 +1163,7 @@ func (x *UpdateActionSchemaResponse) String() string {
 func (*UpdateActionSchemaResponse) ProtoMessage() {}
 
 func (x *UpdateActionSchemaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_v1_action_proto_msgTypes[9]
+	mi := &file_api_proto_v1_action_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -907,7 +1176,7 @@ func (x *UpdateActionSchemaResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateActionSchemaResponse.ProtoReflect.Descriptor instead.
 func (*UpdateActionSchemaResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{9}
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UpdateActionSchemaResponse) GetSchema() *ActionSchema {
@@ -915,6 +1184,214 @@ func (x *UpdateActionSchemaResponse) GetSchema() *ActionSchema {
 		return x.Schema
 	}
 	return nil
+}
+
+type CreateActionSchemaRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ActionType      string                 `protobuf:"bytes,1,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	DisplayName     string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Description     string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Parameters      []*ActionParameter     `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty"`
+	ResultSchema    []*ActionResultField   `protobuf:"bytes,5,rep,name=result_schema,json=resultSchema,proto3" json:"result_schema,omitempty"`
+	RequireApproval bool                   `protobuf:"varint,6,opt,name=require_approval,json=requireApproval,proto3" json:"require_approval,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *CreateActionSchemaRequest) Reset() {
+	*x = CreateActionSchemaRequest{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateActionSchemaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateActionSchemaRequest) ProtoMessage() {}
+
+func (x *CreateActionSchemaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateActionSchemaRequest.ProtoReflect.Descriptor instead.
+func (*CreateActionSchemaRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CreateActionSchemaRequest) GetActionType() string {
+	if x != nil {
+		return x.ActionType
+	}
+	return ""
+}
+
+func (x *CreateActionSchemaRequest) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *CreateActionSchemaRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateActionSchemaRequest) GetParameters() []*ActionParameter {
+	if x != nil {
+		return x.Parameters
+	}
+	return nil
+}
+
+func (x *CreateActionSchemaRequest) GetResultSchema() []*ActionResultField {
+	if x != nil {
+		return x.ResultSchema
+	}
+	return nil
+}
+
+func (x *CreateActionSchemaRequest) GetRequireApproval() bool {
+	if x != nil {
+		return x.RequireApproval
+	}
+	return false
+}
+
+type CreateActionSchemaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Schema        *ActionSchema          `protobuf:"bytes,1,opt,name=schema,proto3" json:"schema,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateActionSchemaResponse) Reset() {
+	*x = CreateActionSchemaResponse{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateActionSchemaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateActionSchemaResponse) ProtoMessage() {}
+
+func (x *CreateActionSchemaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateActionSchemaResponse.ProtoReflect.Descriptor instead.
+func (*CreateActionSchemaResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *CreateActionSchemaResponse) GetSchema() *ActionSchema {
+	if x != nil {
+		return x.Schema
+	}
+	return nil
+}
+
+type DeleteActionSchemaRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ActionType    string                 `protobuf:"bytes,1,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteActionSchemaRequest) Reset() {
+	*x = DeleteActionSchemaRequest{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteActionSchemaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteActionSchemaRequest) ProtoMessage() {}
+
+func (x *DeleteActionSchemaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteActionSchemaRequest.ProtoReflect.Descriptor instead.
+func (*DeleteActionSchemaRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *DeleteActionSchemaRequest) GetActionType() string {
+	if x != nil {
+		return x.ActionType
+	}
+	return ""
+}
+
+type DeleteActionSchemaResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteActionSchemaResponse) Reset() {
+	*x = DeleteActionSchemaResponse{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteActionSchemaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteActionSchemaResponse) ProtoMessage() {}
+
+func (x *DeleteActionSchemaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteActionSchemaResponse.ProtoReflect.Descriptor instead.
+func (*DeleteActionSchemaResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{16}
 }
 
 var File_api_proto_v1_action_proto protoreflect.FileDescriptor
@@ -934,7 +1411,7 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12%\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x11.api.v1.FieldTypeR\x04type\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x125\n" +
-	"\bchildren\x18\x04 \x03(\v2\x19.api.v1.ActionResultFieldR\bchildren\"\x9e\x03\n" +
+	"\bchildren\x18\x04 \x03(\v2\x19.api.v1.ActionResultFieldR\bchildren\"\xd9\x03\n" +
 	"\fActionSchema\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1f\n" +
 	"\vaction_type\x18\x02 \x01(\tR\n" +
@@ -949,7 +1426,10 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9f\x06\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"\n" +
+	"deleted_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\xbc\x04\n" +
 	"\x0fActionExecution\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tticket_id\x18\x02 \x01(\tR\bticketId\x12\x1f\n" +
@@ -958,26 +1438,30 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x01(\x0e2\x14.api.v1.ActionStatusR\x06status\x12G\n" +
 	"\n" +
 	"parameters\x18\x05 \x03(\v2'.api.v1.ActionExecution.ParametersEntryR\n" +
-	"parameters\x12T\n" +
-	"\x0fresult_metadata\x18\x06 \x03(\v2+.api.v1.ActionExecution.ResultMetadataEntryR\x0eresultMetadata\x12\x14\n" +
-	"\x05error\x18\a \x01(\tR\x05error\x12\x12\n" +
-	"\x04logs\x18\b \x01(\tR\x04logs\x12%\n" +
-	"\x0eexecuting_user\x18\t \x01(\tR\rexecutingUser\x129\n" +
+	"parameters\x125\n" +
+	"\x06result\x18\x06 \x01(\v2\x1d.api.v1.ActionExecutionResultR\x06result\x12%\n" +
+	"\x0eexecuting_user\x18\a \x01(\tR\rexecutingUser\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
 	"execute_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\texecuteAt\x12=\n" +
-	"\fcompleted_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x129\n" +
-	"\n" +
-	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x1aU\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\texecuteAt\x1aU\n" +
 	"\x0fParametersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
-	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\x1aY\n" +
-	"\x13ResultMetadataEntry\x12\x10\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"\xf4\x02\n" +
+	"\x15ActionExecutionResult\x12!\n" +
+	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\x125\n" +
+	"\x06status\x18\x02 \x01(\x0e2\x1d.api.v1.ActionExecutionStatusR\x06status\x12\x14\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\x12\x12\n" +
+	"\x04logs\x18\x04 \x01(\tR\x04logs\x12=\n" +
+	"\fcompleted_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x12D\n" +
+	"\aresults\x18\x06 \x03(\v2*.api.v1.ActionExecutionResult.ResultsEntryR\aresults\x1aR\n" +
+	"\fResultsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
-	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"\xa1\x02\n" +
-	"\x1bListAvailableActionsRequest\x12\x10\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"\xc7\x02\n" +
+	"\x18ListActionSchemasRequest\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\tR\x03ids\x12!\n" +
 	"\faction_types\x18\x02 \x03(\tR\vactionTypes\x12!\n" +
 	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12.\n" +
@@ -986,9 +1470,10 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"time_range\x18\x05 \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x123\n" +
 	"\n" +
 	"pagination\x18\x06 \x01(\v2\x13.api.v1.PageRequestR\n" +
-	"paginationB\x13\n" +
-	"\x11_require_approval\"\x80\x01\n" +
-	"\x1cListAvailableActionsResponse\x12.\n" +
+	"pagination\x12'\n" +
+	"\x0finclude_deleted\x18\a \x01(\bR\x0eincludeDeletedB\x13\n" +
+	"\x11_require_approval\"}\n" +
+	"\x19ListActionSchemasResponse\x12.\n" +
 	"\aschemas\x18\x01 \x03(\v2\x14.api.v1.ActionSchemaR\aschemas\x120\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
@@ -1004,7 +1489,26 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
 	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\">\n" +
 	"\x19GetActionExecutionRequest\x12!\n" +
-	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\"\xea\x02\n" +
+	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\"\xb3\x02\n" +
+	"\x1bListActionExecutionsRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\x12\x1d\n" +
+	"\n" +
+	"ticket_ids\x18\x02 \x03(\tR\tticketIds\x12!\n" +
+	"\faction_types\x18\x03 \x03(\tR\vactionTypes\x120\n" +
+	"\bstatuses\x18\x04 \x03(\x0e2\x14.api.v1.ActionStatusR\bstatuses\x12'\n" +
+	"\x0fexecuting_users\x18\x05 \x03(\tR\x0eexecutingUsers\x120\n" +
+	"\n" +
+	"time_range\x18\x06 \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x123\n" +
+	"\n" +
+	"pagination\x18\a \x01(\v2\x13.api.v1.PageRequestR\n" +
+	"pagination\"\x89\x01\n" +
+	"\x1cListActionExecutionsResponse\x127\n" +
+	"\n" +
+	"executions\x18\x01 \x03(\v2\x17.api.v1.ActionExecutionR\n" +
+	"executions\x120\n" +
+	"\n" +
+	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
+	"pagination\"\xea\x02\n" +
 	"\x19UpdateActionSchemaRequest\x12\x1f\n" +
 	"\vaction_type\x18\x01 \x01(\tR\n" +
 	"actionType\x12&\n" +
@@ -1019,7 +1523,23 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\f_descriptionB\x13\n" +
 	"\x11_require_approval\"J\n" +
 	"\x1aUpdateActionSchemaResponse\x12,\n" +
-	"\x06schema\x18\x01 \x01(\v2\x14.api.v1.ActionSchemaR\x06schema*\xc6\x01\n" +
+	"\x06schema\x18\x01 \x01(\v2\x14.api.v1.ActionSchemaR\x06schema\"\xa5\x02\n" +
+	"\x19CreateActionSchemaRequest\x12\x1f\n" +
+	"\vaction_type\x18\x01 \x01(\tR\n" +
+	"actionType\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x127\n" +
+	"\n" +
+	"parameters\x18\x04 \x03(\v2\x17.api.v1.ActionParameterR\n" +
+	"parameters\x12>\n" +
+	"\rresult_schema\x18\x05 \x03(\v2\x19.api.v1.ActionResultFieldR\fresultSchema\x12)\n" +
+	"\x10require_approval\x18\x06 \x01(\bR\x0frequireApproval\"J\n" +
+	"\x1aCreateActionSchemaResponse\x12,\n" +
+	"\x06schema\x18\x01 \x01(\v2\x14.api.v1.ActionSchemaR\x06schema\"<\n" +
+	"\x19DeleteActionSchemaRequest\x12\x1f\n" +
+	"\vaction_type\x18\x01 \x01(\tR\n" +
+	"actionType\"\x1c\n" +
+	"\x1aDeleteActionSchemaResponse*\xc6\x01\n" +
 	"\tFieldType\x12\x1a\n" +
 	"\x16FIELD_TYPE_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11FIELD_TYPE_STRING\x10\x01\x12\x16\n" +
@@ -1036,16 +1556,26 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x19ACTION_STATUS_IN_PROGRESS\x10\x03\x12\x1b\n" +
 	"\x17ACTION_STATUS_COMPLETED\x10\x04\x12\x18\n" +
 	"\x14ACTION_STATUS_FAILED\x10\x05\x12\x1a\n" +
-	"\x16ACTION_STATUS_REJECTED\x10\x062\xe4\x04\n" +
-	"\rActionService\x12\x8c\x01\n" +
-	"\x14ListAvailableActions\x12#.api.v1.ListAvailableActionsRequest\x1a$.api.v1.ListAvailableActionsResponse\")\x82\xb5\x18\x0e\n" +
-	"\fread:actions\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/actions\x12\x83\x01\n" +
+	"\x16ACTION_STATUS_REJECTED\x10\x06*\x8b\x01\n" +
+	"\x15ActionExecutionStatus\x12'\n" +
+	"#ACTION_EXECUTION_STATUS_UNSPECIFIED\x10\x00\x12%\n" +
+	"!ACTION_EXECUTION_STATUS_COMPLETED\x10\x01\x12\"\n" +
+	"\x1eACTION_EXECUTION_STATUS_FAILED\x10\x022\xbc\b\n" +
+	"\rActionService\x12\x83\x01\n" +
 	"\rExecuteAction\x12\x1c.api.v1.ExecuteActionRequest\x1a\x17.api.v1.ActionExecution\";\x82\xb5\x18\x1d\n" +
 	"\rwrite:actions\x12\x05admin\x12\x05agent\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/actions\x12\x94\x01\n" +
 	"\x12GetActionExecution\x12!.api.v1.GetActionExecutionRequest\x1a\x17.api.v1.ActionExecution\"B\x82\xb5\x18\x0e\n" +
-	"\fread:actions\x82\xd3\xe4\x93\x02*\x12(/api/v1/action-executions/{execution_id}\x12\xa6\x01\n" +
+	"\fread:actions\x82\xd3\xe4\x93\x02*\x12(/api/v1/action-executions/{execution_id}\x12\x96\x01\n" +
+	"\x14ListActionExecutions\x12#.api.v1.ListActionExecutionsRequest\x1a$.api.v1.ListActionExecutionsResponse\"3\x82\xb5\x18\x0e\n" +
+	"\fread:actions\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/action-executions\x12\x98\x01\n" +
+	"\x12CreateActionSchema\x12!.api.v1.CreateActionSchemaRequest\x1a\".api.v1.CreateActionSchemaResponse\";\x82\xb5\x18\x16\n" +
+	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/action-schemas\x12\x8a\x01\n" +
+	"\x11ListActionSchemas\x12 .api.v1.ListActionSchemasRequest\x1a!.api.v1.ListActionSchemasResponse\"0\x82\xb5\x18\x0e\n" +
+	"\fread:actions\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/action-schemas\x12\xa6\x01\n" +
 	"\x12UpdateActionSchema\x12!.api.v1.UpdateActionSchemaRequest\x1a\".api.v1.UpdateActionSchemaResponse\"I\x82\xb5\x18\x16\n" +
-	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02):\x01*\x1a$/api/v1/action-schemas/{action_type}B7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
+	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02):\x01*\x1a$/api/v1/action-schemas/{action_type}\x12\xa3\x01\n" +
+	"\x12DeleteActionSchema\x12!.api.v1.DeleteActionSchemaRequest\x1a\".api.v1.DeleteActionSchemaResponse\"F\x82\xb5\x18\x16\n" +
+	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02&*$/api/v1/action-schemas/{action_type}B7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
 
 var (
 	file_api_proto_v1_action_proto_rawDescOnce sync.Once
@@ -1059,70 +1589,95 @@ func file_api_proto_v1_action_proto_rawDescGZIP() []byte {
 	return file_api_proto_v1_action_proto_rawDescData
 }
 
-var file_api_proto_v1_action_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_api_proto_v1_action_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_api_proto_v1_action_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_api_proto_v1_action_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_api_proto_v1_action_proto_goTypes = []any{
 	(FieldType)(0),                       // 0: api.v1.FieldType
 	(ActionStatus)(0),                    // 1: api.v1.ActionStatus
-	(*ActionParameter)(nil),              // 2: api.v1.ActionParameter
-	(*ActionResultField)(nil),            // 3: api.v1.ActionResultField
-	(*ActionSchema)(nil),                 // 4: api.v1.ActionSchema
-	(*ActionExecution)(nil),              // 5: api.v1.ActionExecution
-	(*ListAvailableActionsRequest)(nil),  // 6: api.v1.ListAvailableActionsRequest
-	(*ListAvailableActionsResponse)(nil), // 7: api.v1.ListAvailableActionsResponse
-	(*ExecuteActionRequest)(nil),         // 8: api.v1.ExecuteActionRequest
-	(*GetActionExecutionRequest)(nil),    // 9: api.v1.GetActionExecutionRequest
-	(*UpdateActionSchemaRequest)(nil),    // 10: api.v1.UpdateActionSchemaRequest
-	(*UpdateActionSchemaResponse)(nil),   // 11: api.v1.UpdateActionSchemaResponse
-	nil,                                  // 12: api.v1.ActionExecution.ParametersEntry
-	nil,                                  // 13: api.v1.ActionExecution.ResultMetadataEntry
-	nil,                                  // 14: api.v1.ExecuteActionRequest.ParametersEntry
-	(*structpb.Value)(nil),               // 15: google.protobuf.Value
-	(*timestamppb.Timestamp)(nil),        // 16: google.protobuf.Timestamp
-	(*TimeRange)(nil),                    // 17: api.v1.TimeRange
-	(*PageRequest)(nil),                  // 18: api.v1.PageRequest
-	(*PageInfo)(nil),                     // 19: api.v1.PageInfo
+	(ActionExecutionStatus)(0),           // 2: api.v1.ActionExecutionStatus
+	(*ActionParameter)(nil),              // 3: api.v1.ActionParameter
+	(*ActionResultField)(nil),            // 4: api.v1.ActionResultField
+	(*ActionSchema)(nil),                 // 5: api.v1.ActionSchema
+	(*ActionExecution)(nil),              // 6: api.v1.ActionExecution
+	(*ActionExecutionResult)(nil),        // 7: api.v1.ActionExecutionResult
+	(*ListActionSchemasRequest)(nil),     // 8: api.v1.ListActionSchemasRequest
+	(*ListActionSchemasResponse)(nil),    // 9: api.v1.ListActionSchemasResponse
+	(*ExecuteActionRequest)(nil),         // 10: api.v1.ExecuteActionRequest
+	(*GetActionExecutionRequest)(nil),    // 11: api.v1.GetActionExecutionRequest
+	(*ListActionExecutionsRequest)(nil),  // 12: api.v1.ListActionExecutionsRequest
+	(*ListActionExecutionsResponse)(nil), // 13: api.v1.ListActionExecutionsResponse
+	(*UpdateActionSchemaRequest)(nil),    // 14: api.v1.UpdateActionSchemaRequest
+	(*UpdateActionSchemaResponse)(nil),   // 15: api.v1.UpdateActionSchemaResponse
+	(*CreateActionSchemaRequest)(nil),    // 16: api.v1.CreateActionSchemaRequest
+	(*CreateActionSchemaResponse)(nil),   // 17: api.v1.CreateActionSchemaResponse
+	(*DeleteActionSchemaRequest)(nil),    // 18: api.v1.DeleteActionSchemaRequest
+	(*DeleteActionSchemaResponse)(nil),   // 19: api.v1.DeleteActionSchemaResponse
+	nil,                                  // 20: api.v1.ActionExecution.ParametersEntry
+	nil,                                  // 21: api.v1.ActionExecutionResult.ResultsEntry
+	nil,                                  // 22: api.v1.ExecuteActionRequest.ParametersEntry
+	(*structpb.Value)(nil),               // 23: google.protobuf.Value
+	(*timestamppb.Timestamp)(nil),        // 24: google.protobuf.Timestamp
+	(*TimeRange)(nil),                    // 25: api.v1.TimeRange
+	(*PageRequest)(nil),                  // 26: api.v1.PageRequest
+	(*PageInfo)(nil),                     // 27: api.v1.PageInfo
 }
 var file_api_proto_v1_action_proto_depIdxs = []int32{
 	0,  // 0: api.v1.ActionParameter.type:type_name -> api.v1.FieldType
-	15, // 1: api.v1.ActionParameter.default_value:type_name -> google.protobuf.Value
+	23, // 1: api.v1.ActionParameter.default_value:type_name -> google.protobuf.Value
 	0,  // 2: api.v1.ActionResultField.type:type_name -> api.v1.FieldType
-	3,  // 3: api.v1.ActionResultField.children:type_name -> api.v1.ActionResultField
-	2,  // 4: api.v1.ActionSchema.parameters:type_name -> api.v1.ActionParameter
-	3,  // 5: api.v1.ActionSchema.result_schema:type_name -> api.v1.ActionResultField
-	16, // 6: api.v1.ActionSchema.created_at:type_name -> google.protobuf.Timestamp
-	16, // 7: api.v1.ActionSchema.updated_at:type_name -> google.protobuf.Timestamp
-	1,  // 8: api.v1.ActionExecution.status:type_name -> api.v1.ActionStatus
-	12, // 9: api.v1.ActionExecution.parameters:type_name -> api.v1.ActionExecution.ParametersEntry
-	13, // 10: api.v1.ActionExecution.result_metadata:type_name -> api.v1.ActionExecution.ResultMetadataEntry
-	16, // 11: api.v1.ActionExecution.execute_at:type_name -> google.protobuf.Timestamp
-	16, // 12: api.v1.ActionExecution.completed_at:type_name -> google.protobuf.Timestamp
-	16, // 13: api.v1.ActionExecution.created_at:type_name -> google.protobuf.Timestamp
-	16, // 14: api.v1.ActionExecution.updated_at:type_name -> google.protobuf.Timestamp
-	17, // 15: api.v1.ListAvailableActionsRequest.time_range:type_name -> api.v1.TimeRange
-	18, // 16: api.v1.ListAvailableActionsRequest.pagination:type_name -> api.v1.PageRequest
-	4,  // 17: api.v1.ListAvailableActionsResponse.schemas:type_name -> api.v1.ActionSchema
-	19, // 18: api.v1.ListAvailableActionsResponse.pagination:type_name -> api.v1.PageInfo
-	14, // 19: api.v1.ExecuteActionRequest.parameters:type_name -> api.v1.ExecuteActionRequest.ParametersEntry
-	2,  // 20: api.v1.UpdateActionSchemaRequest.parameters:type_name -> api.v1.ActionParameter
-	3,  // 21: api.v1.UpdateActionSchemaRequest.result_schema:type_name -> api.v1.ActionResultField
-	4,  // 22: api.v1.UpdateActionSchemaResponse.schema:type_name -> api.v1.ActionSchema
-	15, // 23: api.v1.ActionExecution.ParametersEntry.value:type_name -> google.protobuf.Value
-	15, // 24: api.v1.ActionExecution.ResultMetadataEntry.value:type_name -> google.protobuf.Value
-	15, // 25: api.v1.ExecuteActionRequest.ParametersEntry.value:type_name -> google.protobuf.Value
-	6,  // 26: api.v1.ActionService.ListAvailableActions:input_type -> api.v1.ListAvailableActionsRequest
-	8,  // 27: api.v1.ActionService.ExecuteAction:input_type -> api.v1.ExecuteActionRequest
-	9,  // 28: api.v1.ActionService.GetActionExecution:input_type -> api.v1.GetActionExecutionRequest
-	10, // 29: api.v1.ActionService.UpdateActionSchema:input_type -> api.v1.UpdateActionSchemaRequest
-	7,  // 30: api.v1.ActionService.ListAvailableActions:output_type -> api.v1.ListAvailableActionsResponse
-	5,  // 31: api.v1.ActionService.ExecuteAction:output_type -> api.v1.ActionExecution
-	5,  // 32: api.v1.ActionService.GetActionExecution:output_type -> api.v1.ActionExecution
-	11, // 33: api.v1.ActionService.UpdateActionSchema:output_type -> api.v1.UpdateActionSchemaResponse
-	30, // [30:34] is the sub-list for method output_type
-	26, // [26:30] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	4,  // 3: api.v1.ActionResultField.children:type_name -> api.v1.ActionResultField
+	3,  // 4: api.v1.ActionSchema.parameters:type_name -> api.v1.ActionParameter
+	4,  // 5: api.v1.ActionSchema.result_schema:type_name -> api.v1.ActionResultField
+	24, // 6: api.v1.ActionSchema.created_at:type_name -> google.protobuf.Timestamp
+	24, // 7: api.v1.ActionSchema.updated_at:type_name -> google.protobuf.Timestamp
+	24, // 8: api.v1.ActionSchema.deleted_at:type_name -> google.protobuf.Timestamp
+	1,  // 9: api.v1.ActionExecution.status:type_name -> api.v1.ActionStatus
+	20, // 10: api.v1.ActionExecution.parameters:type_name -> api.v1.ActionExecution.ParametersEntry
+	7,  // 11: api.v1.ActionExecution.result:type_name -> api.v1.ActionExecutionResult
+	24, // 12: api.v1.ActionExecution.created_at:type_name -> google.protobuf.Timestamp
+	24, // 13: api.v1.ActionExecution.updated_at:type_name -> google.protobuf.Timestamp
+	24, // 14: api.v1.ActionExecution.execute_at:type_name -> google.protobuf.Timestamp
+	2,  // 15: api.v1.ActionExecutionResult.status:type_name -> api.v1.ActionExecutionStatus
+	24, // 16: api.v1.ActionExecutionResult.completed_at:type_name -> google.protobuf.Timestamp
+	21, // 17: api.v1.ActionExecutionResult.results:type_name -> api.v1.ActionExecutionResult.ResultsEntry
+	25, // 18: api.v1.ListActionSchemasRequest.time_range:type_name -> api.v1.TimeRange
+	26, // 19: api.v1.ListActionSchemasRequest.pagination:type_name -> api.v1.PageRequest
+	5,  // 20: api.v1.ListActionSchemasResponse.schemas:type_name -> api.v1.ActionSchema
+	27, // 21: api.v1.ListActionSchemasResponse.pagination:type_name -> api.v1.PageInfo
+	22, // 22: api.v1.ExecuteActionRequest.parameters:type_name -> api.v1.ExecuteActionRequest.ParametersEntry
+	1,  // 23: api.v1.ListActionExecutionsRequest.statuses:type_name -> api.v1.ActionStatus
+	25, // 24: api.v1.ListActionExecutionsRequest.time_range:type_name -> api.v1.TimeRange
+	26, // 25: api.v1.ListActionExecutionsRequest.pagination:type_name -> api.v1.PageRequest
+	6,  // 26: api.v1.ListActionExecutionsResponse.executions:type_name -> api.v1.ActionExecution
+	27, // 27: api.v1.ListActionExecutionsResponse.pagination:type_name -> api.v1.PageInfo
+	3,  // 28: api.v1.UpdateActionSchemaRequest.parameters:type_name -> api.v1.ActionParameter
+	4,  // 29: api.v1.UpdateActionSchemaRequest.result_schema:type_name -> api.v1.ActionResultField
+	5,  // 30: api.v1.UpdateActionSchemaResponse.schema:type_name -> api.v1.ActionSchema
+	3,  // 31: api.v1.CreateActionSchemaRequest.parameters:type_name -> api.v1.ActionParameter
+	4,  // 32: api.v1.CreateActionSchemaRequest.result_schema:type_name -> api.v1.ActionResultField
+	5,  // 33: api.v1.CreateActionSchemaResponse.schema:type_name -> api.v1.ActionSchema
+	23, // 34: api.v1.ActionExecution.ParametersEntry.value:type_name -> google.protobuf.Value
+	23, // 35: api.v1.ActionExecutionResult.ResultsEntry.value:type_name -> google.protobuf.Value
+	23, // 36: api.v1.ExecuteActionRequest.ParametersEntry.value:type_name -> google.protobuf.Value
+	10, // 37: api.v1.ActionService.ExecuteAction:input_type -> api.v1.ExecuteActionRequest
+	11, // 38: api.v1.ActionService.GetActionExecution:input_type -> api.v1.GetActionExecutionRequest
+	12, // 39: api.v1.ActionService.ListActionExecutions:input_type -> api.v1.ListActionExecutionsRequest
+	16, // 40: api.v1.ActionService.CreateActionSchema:input_type -> api.v1.CreateActionSchemaRequest
+	8,  // 41: api.v1.ActionService.ListActionSchemas:input_type -> api.v1.ListActionSchemasRequest
+	14, // 42: api.v1.ActionService.UpdateActionSchema:input_type -> api.v1.UpdateActionSchemaRequest
+	18, // 43: api.v1.ActionService.DeleteActionSchema:input_type -> api.v1.DeleteActionSchemaRequest
+	6,  // 44: api.v1.ActionService.ExecuteAction:output_type -> api.v1.ActionExecution
+	6,  // 45: api.v1.ActionService.GetActionExecution:output_type -> api.v1.ActionExecution
+	13, // 46: api.v1.ActionService.ListActionExecutions:output_type -> api.v1.ListActionExecutionsResponse
+	17, // 47: api.v1.ActionService.CreateActionSchema:output_type -> api.v1.CreateActionSchemaResponse
+	9,  // 48: api.v1.ActionService.ListActionSchemas:output_type -> api.v1.ListActionSchemasResponse
+	15, // 49: api.v1.ActionService.UpdateActionSchema:output_type -> api.v1.UpdateActionSchemaResponse
+	19, // 50: api.v1.ActionService.DeleteActionSchema:output_type -> api.v1.DeleteActionSchemaResponse
+	44, // [44:51] is the sub-list for method output_type
+	37, // [37:44] is the sub-list for method input_type
+	37, // [37:37] is the sub-list for extension type_name
+	37, // [37:37] is the sub-list for extension extendee
+	0,  // [0:37] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_action_proto_init() }
@@ -1132,15 +1687,15 @@ func file_api_proto_v1_action_proto_init() {
 	}
 	file_api_proto_v1_common_proto_init()
 	file_api_proto_v1_options_proto_init()
-	file_api_proto_v1_action_proto_msgTypes[4].OneofWrappers = []any{}
-	file_api_proto_v1_action_proto_msgTypes[8].OneofWrappers = []any{}
+	file_api_proto_v1_action_proto_msgTypes[5].OneofWrappers = []any{}
+	file_api_proto_v1_action_proto_msgTypes[11].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_action_proto_rawDesc), len(file_api_proto_v1_action_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   13,
+			NumEnums:      3,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
