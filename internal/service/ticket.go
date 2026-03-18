@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -51,7 +52,7 @@ func (s *TicketServiceServer) isInternal(roles []string) bool {
 	return false
 }
 
-func NewTicketServiceServer(repo repository.TicketRepository, typeRepo repository.TicketTypeRepository, publisher event.Publisher) apiv1.TicketServiceServer {
+func NewTicketServiceServer(repo repository.TicketRepository, typeRepo repository.TicketTypeRepository, publisher event.Publisher) *TicketServiceServer {
 	return &TicketServiceServer{
 		repo:      repo,
 		typeRepo:  typeRepo,
@@ -82,7 +83,7 @@ func (s *TicketServiceServer) CreateTicketType(ctx context.Context, req *apiv1.C
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketTypeCreated,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaTicketType,
 		ResourceID: tType.ID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: resp.TicketType},
@@ -175,7 +176,7 @@ func (s *TicketServiceServer) UpdateTicketType(ctx context.Context, req *apiv1.U
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketTypeUpdated,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaTicketType,
 		ResourceID: tType.ID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: resp.TicketType},
@@ -193,7 +194,7 @@ func (s *TicketServiceServer) DeleteTicketType(ctx context.Context, req *apiv1.D
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketTypeDeleted,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaTicketType,
 		ResourceID: req.Id,
 	}
@@ -244,7 +245,7 @@ func (s *TicketServiceServer) CreateTicket(ctx context.Context, req *apiv1.Creat
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketCreated,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaSupportTicket,
 		ResourceID: ticket.ID.Hex(),
 		Data:       payload,
@@ -313,68 +314,46 @@ func (s *TicketServiceServer) UpdateTicket(ctx context.Context, req *apiv1.Updat
 		}
 	}
 
+	// Fetch current to check if it already requires approval
+	current, err := s.repo.GetTicket(ctx, req.TicketId, userID, roles)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// Override update logic if the ticket requires approval
+	if current != nil && current.RequireApproval {
+		// Map changes to metadata for approval
+		metadata := make(map[string]any)
+		if data, err := json.Marshal(update); err == nil {
+			_ = json.Unmarshal(data, &metadata)
+		}
+
+		currentPb, _ := current.ToProto()
+		s.publishEvent(ctx, eventconsts.TicketUpdatePendingApproval, current.ID.Hex(), eventbus.ProtoMarshaler{Message: currentPb}, metadata)
+
+		// Execute update as status-only transition
+		status := int32(apiv1.TicketStatus_TICKET_STATUS_PENDING_APPROVAL)
+		update = model.TicketUpdate{Status: &status}
+	}
+
 	ticket, err := s.repo.UpdateTicket(ctx, req.TicketId, update, userID, roles)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	if ticket == nil {
-		return nil, status.Error(codes.NotFound, "ticket not found")
-	}
-
-	pb, err := ticket.ToProto()
-	if err != nil {
+	if err != nil || ticket == nil {
+		if err == nil {
+			return nil, status.Error(codes.NotFound, "ticket not found")
+		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	evt := event.Event{
-		EventId:    uuid.NewString(),
-		EventType:  eventconsts.TicketUpdated,
-		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
-		Schema:     eventconsts.SchemaSupportTicket,
-		ResourceID: ticket.ID.Hex(),
-		Data:       eventbus.ProtoMarshaler{Message: pb},
+	pb, _ := ticket.ToProto()
+
+	// Only publish TicketUpdated if it's not pending approval
+	if update.Status != nil && *update.Status != int32(apiv1.TicketStatus_TICKET_STATUS_PENDING_APPROVAL) {
+		s.publishEvent(ctx, eventconsts.TicketUpdated, ticket.ID.Hex(), eventbus.ProtoMarshaler{Message: pb}, nil)
 	}
-	_ = s.publisher.Publish(ctx, &evt)
 
 	return &apiv1.UpdateTicketResponse{
 		Ticket: pb,
 	}, nil
-}
-
-func (s *TicketServiceServer) publishTicketAssigned(ctx context.Context, ticket *model.Ticket) {
-	payload := map[string]interface{}{"ticket_id": ticket.ID.Hex(), "assignee_id": ticket.AssignedTo}
-	evt := event.Event{
-		EventId:    uuid.NewString(),
-		EventType:  eventconsts.TicketAssigned,
-		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
-		Schema:     eventconsts.SchemaSupportTicket,
-		ResourceID: ticket.ID.Hex(),
-		Data:       payload,
-		Metadata: map[string]any{
-			"assigned_to": ticket.AssignedTo,
-		},
-	}
-	_ = s.publisher.Publish(ctx, &evt)
-}
-
-func (s *TicketServiceServer) publishTicketMerged(ctx context.Context, source *model.Ticket, target *model.Ticket) {
-	targetPb, _ := target.ToProto()
-	evt := event.Event{
-		EventId:    uuid.NewString(),
-		EventType:  eventconsts.TicketMerged,
-		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
-		Schema:     eventconsts.SchemaSupportTicket,
-		ResourceID: target.ID.Hex(),
-		Data:       eventbus.ProtoMarshaler{Message: targetPb},
-		Metadata: map[string]any{
-			"source_ticket_id": source.ID.Hex(),
-			"target_ticket_id": target.ID.Hex(),
-		},
-	}
-	_ = s.publisher.Publish(ctx, &evt)
 }
 
 func (s *TicketServiceServer) AssignTicket(ctx context.Context, req *apiv1.AssignTicketRequest) (*apiv1.AssignTicketResponse, error) {
@@ -432,6 +411,9 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 	if source == nil {
 		return nil, status.Error(codes.NotFound, "source ticket not found")
 	}
+	if source.Status != int32(apiv1.TicketStatus_TICKET_STATUS_OPEN) && source.Status != int32(apiv1.TicketStatus_TICKET_STATUS_IN_PROGRESS) {
+		return nil, status.Error(codes.FailedPrecondition, "source ticket must be in OPEN or IN_PROGRESS status to be merged")
+	}
 
 	target, err := s.repo.GetTicket(ctx, req.TargetTicketId, userID, roles)
 	if err != nil {
@@ -440,11 +422,35 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 	if target == nil {
 		return nil, status.Error(codes.NotFound, "target ticket not found")
 	}
+	if target.Status != int32(apiv1.TicketStatus_TICKET_STATUS_OPEN) && target.Status != int32(apiv1.TicketStatus_TICKET_STATUS_IN_PROGRESS) {
+		return nil, status.Error(codes.FailedPrecondition, "target ticket must be in OPEN or IN_PROGRESS status to be merged")
+	}
 
-	mergedStatus := int32(apiv1.TicketStatus_TICKET_STATUS_MERGED)
+	statusToApply := int32(apiv1.TicketStatus_TICKET_STATUS_MERGED)
+	if source.RequireApproval || target.RequireApproval {
+		statusToApply = int32(apiv1.TicketStatus_TICKET_STATUS_PENDING_APPROVAL)
+
+		// Both tickets go to PENDING_APPROVAL
+		updateTarget := model.TicketUpdate{Status: &statusToApply}
+		_, err = s.repo.UpdateTicket(ctx, req.TargetTicketId, updateTarget, userID, roles)
+		if err != nil {
+			return nil, status.Error(codes.Internal, "failed to update target ticket status")
+		}
+
+		// Map source ticket to metadata for approval
+		sourcePb, _ := source.ToProto()
+		metadata := map[string]any{
+			"source_ticket_id": source.ID.Hex(),
+			"target_ticket_id": target.ID.Hex(),
+		}
+		s.publishEvent(ctx, eventconsts.TicketMergePendingApproval, source.ID.Hex(), eventbus.ProtoMarshaler{Message: sourcePb}, metadata)
+	}
+
 	updateSource := model.TicketUpdate{
-		Status:     &mergedStatus,
-		MergedInto: &target.ID,
+		Status: &statusToApply,
+	}
+	if statusToApply == int32(apiv1.TicketStatus_TICKET_STATUS_MERGED) {
+		updateSource.MergedInto = &target.ID
 	}
 
 	source, err = s.repo.UpdateTicket(ctx, req.SourceTicketId, updateSource, userID, roles)
@@ -452,18 +458,20 @@ func (s *TicketServiceServer) MergeTickets(ctx context.Context, req *apiv1.Merge
 		return nil, status.Error(codes.Internal, "failed to update source ticket status")
 	}
 
-	// Optionally add a comment to target ticket about the merge
-	comment := &model.Comment{
-		ID:      bson.NewObjectID(),
-		Author:  SystemAuthor,
-		Content: "Ticket " + source.ID.Hex() + " merged into this ticket.",
+	if statusToApply == int32(apiv1.TicketStatus_TICKET_STATUS_MERGED) {
+		// Optionally add a comment to target ticket about the merge
+		comment := &model.Comment{
+			ID:      bson.NewObjectID(),
+			Author:  SystemAuthor,
+			Content: "Ticket " + source.ID.Hex() + " merged into this ticket.",
+		}
+		_ = s.repo.AddComment(ctx, req.TargetTicketId, comment, userID, roles)
+
+		// Fetch updated target ticket
+		target, _ = s.repo.GetTicket(ctx, target.ID.Hex(), userID, roles)
+
+		s.publishTicketMerged(ctx, source, target, eventconsts.TicketMerged)
 	}
-	_ = s.repo.AddComment(ctx, req.TargetTicketId, comment, userID, roles)
-
-	// Fetch updated target ticket to return
-	target, _ = s.repo.GetTicket(ctx, target.ID.Hex(), userID, roles)
-
-	s.publishTicketMerged(ctx, source, target)
 
 	sourcePb, _ := source.ToProto()
 	targetPb, _ := target.ToProto()
@@ -567,7 +575,7 @@ func (s *TicketServiceServer) AddComment(ctx context.Context, req *apiv1.AddComm
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketCommentAdded,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaSupportTicket,
 		ResourceID: req.TicketId,
 		Data:       eventbus.ProtoMarshaler{Message: comment.ToProto()},
@@ -595,7 +603,7 @@ func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.Delet
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketDeleted,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaSupportTicket,
 		ResourceID: req.TicketId,
 		Metadata: map[string]any{
@@ -605,4 +613,135 @@ func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.Delet
 	_ = s.publisher.Publish(ctx, &evt)
 
 	return &apiv1.DeleteTicketResponse{}, nil
+}
+
+func (s *TicketServiceServer) publishEvent(ctx context.Context, eventType, resourceID string, data any, metadata map[string]any) {
+	evt := event.Event{
+		EventId:    uuid.NewString(),
+		EventType:  eventType,
+		EventTime:  time.Now().UTC(),
+		Source:     eventconsts.SourceTicket,
+		Schema:     eventconsts.SchemaSupportTicket,
+		ResourceID: resourceID,
+		Data:       data,
+		Metadata:   metadata,
+	}
+	_ = s.publisher.Publish(ctx, &evt)
+}
+
+func (s *TicketServiceServer) publishTicketUpdated(ctx context.Context, ticket *model.Ticket) {
+	pb, _ := ticket.ToProto()
+	s.publishEvent(ctx, eventconsts.TicketUpdated, ticket.ID.Hex(), eventbus.ProtoMarshaler{Message: pb}, nil)
+}
+
+func (s *TicketServiceServer) publishTicketAssigned(ctx context.Context, ticket *model.Ticket) {
+	ticketPb, _ := ticket.ToProto()
+	metadata := map[string]any{"assigned_to": ticket.AssignedTo}
+	s.publishEvent(ctx, eventconsts.TicketAssigned, ticket.ID.Hex(), eventbus.ProtoMarshaler{Message: ticketPb}, metadata)
+}
+
+func (s *TicketServiceServer) publishTicketMerged(ctx context.Context, source *model.Ticket, target *model.Ticket, eventType string) {
+	targetPb, _ := target.ToProto()
+	metadata := map[string]any{
+		"source_ticket_id": source.ID.Hex(),
+		"target_ticket_id": target.ID.Hex(),
+	}
+	s.publishEvent(ctx, eventType, target.ID.Hex(), eventbus.ProtoMarshaler{Message: targetPb}, metadata)
+}
+
+func (s *TicketServiceServer) RegisterHandlers(subscriber event.Subscriber) {
+	subscriber.Subscribe(eventconsts.SchemaApproval, eventconsts.ApprovalDecided, s.HandleApprovalDecided)
+}
+
+func (s *TicketServiceServer) HandleApprovalDecided(ctx context.Context, evt *event.Event) error {
+	var approval apiv1.ApprovalRequestData
+	if err := eventbus.UnmarshalPayload(evt.Data, &approval); err != nil {
+		return err
+	}
+
+	if approval.Origin != eventconsts.SourceTicket {
+		return nil
+	}
+
+	userID := SystemAuthor
+	roles := []string{"admin", "agent", "system"}
+
+	switch approval.ActionType {
+	case eventconsts.ActionTicketUpdate:
+		if approval.Status == apiv1.ApprovalStatus_APPROVAL_STATUS_APPROVED {
+			var update model.TicketUpdate
+			metadata := make(map[string]any)
+			for k, v := range approval.Metadata {
+				metadata[k] = v.AsInterface()
+			}
+			data, _ := json.Marshal(metadata)
+			_ = json.Unmarshal(data, &update)
+
+			// Force status to IN_PROGRESS if no status is provided
+			if update.Status == nil || *update.Status == int32(apiv1.TicketStatus_TICKET_STATUS_PENDING_APPROVAL) {
+				statusInProgress := int32(apiv1.TicketStatus_TICKET_STATUS_IN_PROGRESS)
+				update.Status = &statusInProgress
+			}
+
+			ticket, err := s.repo.UpdateTicket(ctx, approval.TicketId, update, userID, roles)
+			if err == nil && ticket != nil {
+				s.publishTicketUpdated(ctx, ticket)
+			}
+			return err
+		} else if approval.Status == apiv1.ApprovalStatus_APPROVAL_STATUS_REJECTED {
+			statusInProgress := int32(apiv1.TicketStatus_TICKET_STATUS_IN_PROGRESS)
+			update := model.TicketUpdate{Status: &statusInProgress}
+			_, err := s.repo.UpdateTicket(ctx, approval.TicketId, update, userID, roles)
+			return err
+		}
+
+	case eventconsts.ActionTicketMerge:
+		if approval.Status == apiv1.ApprovalStatus_APPROVAL_STATUS_APPROVED {
+			sourceID := approval.Metadata["source_ticket_id"].GetStringValue()
+			targetIDStr := approval.TargetId
+			targetOID, _ := bson.ObjectIDFromHex(targetIDStr)
+
+			statusMerged := int32(apiv1.TicketStatus_TICKET_STATUS_MERGED)
+			statusInProgress := int32(apiv1.TicketStatus_TICKET_STATUS_IN_PROGRESS)
+
+			// Update source status to MERGED
+			updateSource := model.TicketUpdate{
+				Status:     &statusMerged,
+				MergedInto: &targetOID,
+			}
+			source, err := s.repo.UpdateTicket(ctx, sourceID, updateSource, userID, roles)
+			if err == nil && source != nil {
+				// Revert target status from PENDING_APPROVAL to IN_PROGRESS
+				updateTarget := model.TicketUpdate{Status: &statusInProgress}
+				_, _ = s.repo.UpdateTicket(ctx, targetIDStr, updateTarget, userID, roles)
+
+				comment := &model.Comment{
+					ID:        bson.NewObjectID(),
+					Author:    SystemAuthor,
+					Content:   "Ticket " + source.ID.Hex() + " merged into this ticket following approval.",
+					CreatedAt: time.Now().UTC(),
+				}
+				_ = s.repo.AddComment(ctx, targetIDStr, comment, userID, roles)
+
+				pb, _ := source.ToProto()
+				metadata := map[string]any{"target_ticket_id": targetIDStr}
+				s.publishEvent(ctx, eventconsts.TicketMerged, source.ID.Hex(), eventbus.ProtoMarshaler{Message: pb}, metadata)
+			}
+			return err
+		} else if approval.Status == apiv1.ApprovalStatus_APPROVAL_STATUS_REJECTED {
+			sourceID := approval.Metadata["source_ticket_id"].GetStringValue()
+			targetID := approval.Metadata["target_ticket_id"].GetStringValue()
+
+			statusInProgress := int32(apiv1.TicketStatus_TICKET_STATUS_IN_PROGRESS)
+			update := model.TicketUpdate{
+				Status: &statusInProgress,
+			}
+			// Revert both tickets' statuses
+			_, _ = s.repo.UpdateTicket(ctx, sourceID, update, userID, roles)
+			_, err := s.repo.UpdateTicket(ctx, targetID, update, userID, roles)
+			return err
+		}
+	}
+
+	return nil
 }

@@ -41,6 +41,7 @@ type ActionResultField struct {
 type ActionExecution struct {
 	ID            bson.ObjectID          `json:"id" bson:"_id,omitempty"`
 	TicketID      string                 `json:"ticket_id" bson:"ticket_id"`
+	TicketType    string                 `json:"ticket_type" bson:"ticket_type"`
 	ActionType    string                 `json:"action_type" bson:"action_type"`
 	Status        int32                  `json:"status" bson:"status"`
 	Parameters    map[string]interface{} `json:"parameters" bson:"parameters"`
@@ -116,6 +117,7 @@ func (m *ActionExecution) ToProto() *apiv1.ActionExecution {
 	pb := &apiv1.ActionExecution{
 		Id:            m.ID.Hex(),
 		TicketId:      m.TicketID,
+		TicketType:    m.TicketType,
 		ActionType:    m.ActionType,
 		Status:        apiv1.ActionStatus(m.Status),
 		ExecutingUser: m.ExecutingUser,
@@ -161,6 +163,7 @@ func ActionExecutionFromProto(pb *apiv1.ActionExecution) *ActionExecution {
 	m := &ActionExecution{
 		ID:            id,
 		TicketID:      pb.TicketId,
+		TicketType:    pb.TicketType,
 		ActionType:    pb.ActionType,
 		Status:        int32(pb.Status),
 		ExecutingUser: pb.ExecutingUser,
@@ -279,6 +282,7 @@ type ActionExecutionUpdate struct {
 type ActionExecutionFilter struct {
 	IDs            []bson.ObjectID
 	TicketIDs      []string
+	TicketTypes    []string
 	ActionTypes    []string
 	Statuses       []int32
 	ExecutingUsers []string

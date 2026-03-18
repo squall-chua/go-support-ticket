@@ -30,17 +30,17 @@ type Ticket struct {
 }
 
 type TicketUpdate struct {
-	Title           *string
-	Description     *string
-	TicketType      *string
-	RequireApproval *bool
-	VisibleRoles    []string
-	Status          *int32
-	Priority        *int32
-	AssignedTo      *string
-	MergedInto      *bson.ObjectID
-	NewComment      *Comment
-	Metadata        Metadata
+	Title           *string        `json:"title,omitempty"`
+	Description     *string        `json:"description,omitempty"`
+	TicketType      *string        `json:"ticket_type,omitempty"`
+	RequireApproval *bool          `json:"require_approval,omitempty"`
+	VisibleRoles    []string       `json:"visible_roles,omitempty"`
+	Status          *int32         `json:"status,omitempty"`
+	Priority        *int32         `json:"priority,omitempty"`
+	AssignedTo      *string        `json:"assigned_to,omitempty"`
+	MergedInto      *bson.ObjectID `json:"merged_into,omitempty"`
+	NewComment      *Comment       `json:"new_comment,omitempty"`
+	Metadata        Metadata       `json:"metadata,omitempty"`
 }
 
 type TicketFilter struct {

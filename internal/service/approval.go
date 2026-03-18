@@ -16,6 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 type ApprovalServiceServer struct {
@@ -40,38 +41,41 @@ func NewApprovalServiceServer(
 func (s *ApprovalServiceServer) CreateApproval(ctx context.Context, req *apiv1.CreateApprovalRequest) (*apiv1.CreateApprovalResponse, error) {
 	userID, _ := middleware.UserFromContext(ctx)
 
-	var id, actionType, ticketType string
-	switch t := req.Target.(type) {
-	case *apiv1.CreateApprovalRequest_Id:
-		id = t.Id
-	case *apiv1.CreateApprovalRequest_ActionType:
-		actionType = t.ActionType
-	case *apiv1.CreateApprovalRequest_TicketType:
-		ticketType = t.TicketType
-	default:
-		return nil, status.Error(codes.InvalidArgument, "target is required")
+	if req.TicketType == "" && req.ActionType == "" {
+		return nil, status.Error(codes.InvalidArgument, "either ticket_type or action_type is required")
 	}
+	ticketType := req.TicketType
+	actionType := req.ActionType
 
 	requiredApprovals := int32(1)
 	var eligibleRoles []string
-	config, err := s.configRepo.GetConfig(ctx, id, actionType, ticketType)
+	config, err := s.configRepo.GetConfig(ctx, ticketType, actionType)
 	if err == nil && config != nil {
 		requiredApprovals = config.RequiredApprovals
 		eligibleRoles = config.EligibleRoles
-		if config.ActionType != nil {
-			actionType = *config.ActionType
+		if config.ActionType != "" {
+			actionType = config.ActionType
 		}
 	}
 
 	approval := &model.Approval{
 		ID:                bson.NewObjectID(),
 		TicketID:          req.TicketId,
+		TicketType:        ticketType,
 		ActionType:        actionType,
-		ExecutionID:       req.ExecutionId,
+		TargetID:          req.TargetId,
 		Requester:         userID,
+		Origin:            req.Origin,
 		Status:            int32(apiv1.ApprovalStatus_APPROVAL_STATUS_PENDING),
 		RequiredApprovals: requiredApprovals,
 		EligibleRoles:     eligibleRoles,
+		Metadata:          make(map[string]any),
+	}
+
+	if req.Metadata != nil {
+		for k, v := range req.Metadata {
+			approval.Metadata[k] = v.AsInterface()
+		}
 	}
 
 	if err := s.repo.CreateApproval(ctx, approval); err != nil {
@@ -82,11 +86,11 @@ func (s *ApprovalServiceServer) CreateApproval(ctx context.Context, req *apiv1.C
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ApprovalRequested,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceApproval,
 		Schema:     eventconsts.SchemaApproval,
 		ResourceID: req.TicketId,
 		Data:       eventbus.ProtoMarshaler{Message: approval.ToProto()},
-		Metadata:   map[string]any{"target_id": req.ExecutionId},
+		Metadata:   map[string]any{"target_id": req.TargetId},
 	}
 	_ = s.publisher.Publish(ctx, &evt)
 
@@ -165,12 +169,12 @@ func (s *ApprovalServiceServer) DecideApproval(ctx context.Context, req *apiv1.D
 	approval.Decisions = newDecisions
 
 	// If approved/rejected (final state), publish final decision event
-	if newStatus != int32(apiv1.ApprovalStatus_APPROVAL_STATUS_PENDING) {
+	if newStatus == int32(apiv1.ApprovalStatus_APPROVAL_STATUS_APPROVED) || newStatus == int32(apiv1.ApprovalStatus_APPROVAL_STATUS_REJECTED) {
 		decisionEvt := event.Event{
 			EventId:    uuid.NewString(),
 			EventType:  eventconsts.ApprovalDecided,
 			EventTime:  time.Now().UTC(),
-			Source:     eventconsts.SourceSupportTicket,
+			Source:     eventconsts.SourceApproval,
 			Schema:     eventconsts.SchemaApproval,
 			ResourceID: approval.TicketID,
 			Data:       eventbus.ProtoMarshaler{Message: approval.ToProto()},
@@ -188,11 +192,13 @@ func (s *ApprovalServiceServer) ListApprovals(ctx context.Context, req *apiv1.Li
 
 	filter := model.ApprovalFilter{
 		TicketIDs:         req.TicketIds,
+		TicketTypes:       req.TicketTypes,
 		ActionTypes:       req.ActionTypes,
 		Requesters:        req.Requesters,
-		ExecutionIDs:      req.ExecutionIds,
+		TargetIDs:         req.TargetIds,
 		RequiredApprovals: req.RequiredApprovals,
 		Approvers:         req.Approvers,
+		Origins:           req.Origins,
 	}
 
 	for _, st := range req.Statuses {
@@ -237,7 +243,7 @@ func (s *ApprovalServiceServer) CreateApprovalConfig(ctx context.Context, req *a
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ApprovalConfigCreated,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceApproval,
 		Schema:     eventconsts.SchemaApprovalConfig,
 		ResourceID: config.ApprovalConfigID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: config.ToProto()},
@@ -248,19 +254,12 @@ func (s *ApprovalServiceServer) CreateApprovalConfig(ctx context.Context, req *a
 }
 
 func (s *ApprovalServiceServer) GetApprovalConfig(ctx context.Context, req *apiv1.GetApprovalConfigRequest) (*apiv1.ApprovalConfig, error) {
-	var id, actionType, ticketType string
-	switch t := req.Target.(type) {
-	case *apiv1.GetApprovalConfigRequest_Id:
-		id = t.Id
-	case *apiv1.GetApprovalConfigRequest_ActionType:
-		actionType = t.ActionType
-	case *apiv1.GetApprovalConfigRequest_TicketType:
-		ticketType = t.TicketType
-	default:
-		return nil, status.Error(codes.InvalidArgument, "target is required")
+	ticketType := req.TicketType
+	actionType := req.ActionType
+	if ticketType == "" && actionType == "" {
+		return nil, status.Error(codes.InvalidArgument, "either ticket_type or action_type is required")
 	}
-
-	config, err := s.configRepo.GetConfig(ctx, id, actionType, ticketType)
+	config, err := s.configRepo.GetConfig(ctx, ticketType, actionType)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -271,16 +270,10 @@ func (s *ApprovalServiceServer) GetApprovalConfig(ctx context.Context, req *apiv
 }
 
 func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *apiv1.UpdateApprovalConfigRequest) (*apiv1.UpdateApprovalConfigResponse, error) {
-	var id, actionType, ticketType string
-	switch t := req.Target.(type) {
-	case *apiv1.UpdateApprovalConfigRequest_Id:
-		id = t.Id
-	case *apiv1.UpdateApprovalConfigRequest_ActionType:
-		actionType = t.ActionType
-	case *apiv1.UpdateApprovalConfigRequest_TicketType:
-		ticketType = t.TicketType
-	default:
-		return nil, status.Error(codes.InvalidArgument, "target is required")
+	ticketType := req.TicketType
+	actionType := req.ActionType
+	if ticketType == "" && actionType == "" {
+		return nil, status.Error(codes.InvalidArgument, "either ticket_type or action_type is required")
 	}
 
 	update := model.ApprovalConfigUpdate{
@@ -288,7 +281,7 @@ func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *a
 		EligibleRoles:     req.EligibleRoles,
 	}
 
-	updated, err := s.configRepo.UpdateConfig(ctx, id, actionType, ticketType, update)
+	updated, err := s.configRepo.UpdateConfig(ctx, ticketType, actionType, update)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -300,7 +293,7 @@ func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *a
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ApprovalConfigUpdated,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceApproval,
 		Schema:     eventconsts.SchemaApprovalConfig,
 		ResourceID: updated.ApprovalConfigID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: updated.ToProto()},
@@ -311,19 +304,12 @@ func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *a
 }
 
 func (s *ApprovalServiceServer) DeleteApprovalConfig(ctx context.Context, req *apiv1.DeleteApprovalConfigRequest) (*apiv1.DeleteApprovalConfigResponse, error) {
-	var id, actionType, ticketType string
-	switch t := req.Target.(type) {
-	case *apiv1.DeleteApprovalConfigRequest_Id:
-		id = t.Id
-	case *apiv1.DeleteApprovalConfigRequest_ActionType:
-		actionType = t.ActionType
-	case *apiv1.DeleteApprovalConfigRequest_TicketType:
-		ticketType = t.TicketType
-	default:
-		return nil, status.Error(codes.InvalidArgument, "target is required")
+	ticketType := req.TicketType
+	actionType := req.ActionType
+	if ticketType == "" && actionType == "" {
+		return nil, status.Error(codes.InvalidArgument, "either ticket_type or action_type is required")
 	}
-
-	config, err := s.configRepo.DeleteConfig(ctx, id, actionType, ticketType)
+	config, err := s.configRepo.DeleteConfig(ctx, ticketType, actionType)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -333,7 +319,7 @@ func (s *ApprovalServiceServer) DeleteApprovalConfig(ctx context.Context, req *a
 			EventId:    uuid.NewString(),
 			EventType:  eventconsts.ApprovalConfigDeleted,
 			EventTime:  time.Now().UTC(),
-			Source:     eventconsts.SourceSupportTicket,
+			Source:     eventconsts.SourceApproval,
 			Schema:     eventconsts.SchemaApprovalConfig,
 			ResourceID: config.ApprovalConfigID.Hex(),
 			Data:       eventbus.ProtoMarshaler{Message: config.ToProto()},
@@ -348,7 +334,6 @@ func (s *ApprovalServiceServer) ListApprovalConfigs(ctx context.Context, req *ap
 	limit, offset, pageNumber := getPaginationParams(req.Pagination)
 
 	filter := model.ApprovalConfigFilter{
-		IDs:            req.Ids,
 		ActionTypes:    req.ActionTypes,
 		TicketTypes:    req.TicketTypes,
 		EligibleRoles:  req.EligibleRoles,
@@ -383,6 +368,8 @@ func (s *ApprovalServiceServer) ListApprovalConfigs(ctx context.Context, req *ap
 
 func (s *ApprovalServiceServer) RegisterHandlers(subscriber event.Subscriber) {
 	subscriber.Subscribe(eventconsts.SchemaAction, eventconsts.ActionExecutionPending, s.HandleActionPendingApproval)
+	subscriber.Subscribe(eventconsts.SchemaSupportTicket, eventconsts.TicketUpdatePendingApproval, s.HandleTicketUpdatePendingApproval)
+	subscriber.Subscribe(eventconsts.SchemaSupportTicket, eventconsts.TicketMergePendingApproval, s.HandleTicketMergePendingApproval)
 }
 
 func (s *ApprovalServiceServer) HandleActionPendingApproval(ctx context.Context, evt *event.Event) error {
@@ -394,13 +381,81 @@ func (s *ApprovalServiceServer) HandleActionPendingApproval(ctx context.Context,
 	// Set user in context for CreateApproval
 	ctx = middleware.WithUser(ctx, execution.ExecutingUser)
 
-	_, err := s.CreateApproval(ctx, &apiv1.CreateApprovalRequest{
-		TicketId:    execution.TicketId,
-		ExecutionId: execution.Id,
-		Target: &apiv1.CreateApprovalRequest_ActionType{
-			ActionType: execution.ActionType,
-		},
-	})
+	metadata := make(map[string]*structpb.Value)
+	if evt.Metadata != nil {
+		for k, v := range evt.Metadata {
+			if val, err := structpb.NewValue(v); err == nil {
+				metadata[k] = val
+			}
+		}
+	}
 
+	_, err := s.CreateApproval(ctx, &apiv1.CreateApprovalRequest{
+		TicketId:   execution.TicketId,
+		TargetId:   execution.Id,
+		TicketType: execution.TicketType,
+		ActionType: execution.ActionType,
+		Origin:     evt.Source,
+		Metadata:   metadata,
+	})
+	return err
+}
+
+func (s *ApprovalServiceServer) HandleTicketUpdatePendingApproval(ctx context.Context, evt *event.Event) error {
+	var ticket apiv1.Ticket
+	if err := eventbus.UnmarshalPayload(evt.Data, &ticket); err != nil {
+		return err
+	}
+
+	// Set user in context for CreateApproval
+	ctx = middleware.WithUser(ctx, ticket.AssignedTo)
+
+	metadata := make(map[string]*structpb.Value)
+	if evt.Metadata != nil {
+		for k, v := range evt.Metadata {
+			if val, err := structpb.NewValue(v); err == nil {
+				metadata[k] = val
+			}
+		}
+	}
+
+	_, err := s.CreateApproval(ctx, &apiv1.CreateApprovalRequest{
+		TicketId:   ticket.Id,
+		TicketType: ticket.TicketType,
+		ActionType: eventconsts.ActionTicketUpdate,
+		Origin:     evt.Source,
+		Metadata:   metadata,
+	})
+	return err
+}
+
+func (s *ApprovalServiceServer) HandleTicketMergePendingApproval(ctx context.Context, evt *event.Event) error {
+	var ticket apiv1.Ticket
+	if err := eventbus.UnmarshalPayload(evt.Data, &ticket); err != nil {
+		return err
+	}
+
+	// Set user in context for CreateApproval
+	ctx = middleware.WithUser(ctx, ticket.AssignedTo)
+
+	targetID, _ := evt.Metadata["target_ticket_id"].(string)
+
+	metadata := make(map[string]*structpb.Value)
+	if evt.Metadata != nil {
+		for k, v := range evt.Metadata {
+			if val, err := structpb.NewValue(v); err == nil {
+				metadata[k] = val
+			}
+		}
+	}
+
+	_, err := s.CreateApproval(ctx, &apiv1.CreateApprovalRequest{
+		TicketId:   ticket.Id,
+		TargetId:   targetID, // Use target_id as a proxy for target ticket id during merge
+		TicketType: ticket.TicketType,
+		ActionType: eventconsts.ActionTicketMerge,
+		Origin:     evt.Source,
+		Metadata:   metadata,
+	})
 	return err
 }

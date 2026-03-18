@@ -1,23 +1,18 @@
-support_ticket:
-  ticket.created:
+approval_config:
+  approval_config.created:
     queue_type: kafka
     destinations:
-      - ticket-events
+      - approval-events
     dlq_postfix: .failed
-  ticket.updated:
+  approval_config.updated:
     queue_type: kafka
     destinations:
-      - ticket-events
+      - approval-events
     dlq_postfix: .failed
-  ticket.assigned:
+  approval_config.deleted:
     queue_type: kafka
     destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.comment.added:
-    queue_type: kafka
-    destinations:
-      - ticket-events
+      - approval-events
     dlq_postfix: .failed
 approval:
   approval.requested:
@@ -82,19 +77,44 @@ ticket_type:
     destinations:
       - ticket-type-events
     dlq_postfix: .failed
-approval_config:
-  approval_config.created:
+ticket:
+  ticket.created:
     queue_type: kafka
     destinations:
-      - approval-events
+      - ticket-events
     dlq_postfix: .failed
-  approval_config.updated:
+  ticket.updated:
     queue_type: kafka
     destinations:
-      - approval-events
+      - ticket-events
     dlq_postfix: .failed
-  approval_config.deleted:
+  ticket.assigned:
     queue_type: kafka
     destinations:
-      - approval-events
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.comment.added:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.update.pending_approval:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.merged:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.merge.pending_approval:
+    queue_type: kafka
+    destinations:
+      - ticket-events
+    dlq_postfix: .failed
+  ticket.deleted:
+    queue_type: kafka
+    destinations:
+      - ticket-events
     dlq_postfix: .failed

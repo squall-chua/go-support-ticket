@@ -70,17 +70,23 @@ func (r *ApprovalRepo) ListApprovals(ctx context.Context, filter model.ApprovalF
 	if len(filter.TicketIDs) > 0 {
 		q.In(f("TicketID"), filter.TicketIDs)
 	}
+	if len(filter.TicketTypes) > 0 {
+		q.In(f("TicketType"), filter.TicketTypes)
+	}
 	if len(filter.ActionTypes) > 0 {
 		q.In(f("ActionType"), filter.ActionTypes)
 	}
 	if len(filter.Requesters) > 0 {
 		q.In(f("Requester"), filter.Requesters)
 	}
+	if len(filter.Origins) > 0 {
+		q.In(f("Origin"), filter.Origins)
+	}
 	if len(filter.Statuses) > 0 {
 		q.In(f("Status"), filter.Statuses)
 	}
-	if len(filter.ExecutionIDs) > 0 {
-		q.In(f("ExecutionID"), filter.ExecutionIDs)
+	if len(filter.TargetIDs) > 0 {
+		q.In(f("TargetID"), filter.TargetIDs)
 	}
 	if len(filter.RequiredApprovals) > 0 {
 		q.In(f("RequiredApprovals"), filter.RequiredApprovals)

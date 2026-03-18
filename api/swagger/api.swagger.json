@@ -403,7 +403,7 @@
         },
         "parameters": [
           {
-            "name": "ids",
+            "name": "ticketTypes",
             "in": "query",
             "required": false,
             "type": "array",
@@ -414,16 +414,6 @@
           },
           {
             "name": "actionTypes",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "ticketTypes",
             "in": "query",
             "required": false,
             "type": "array",
@@ -519,7 +509,7 @@
         ]
       }
     },
-    "/api/v1/approval-configs/{id}": {
+    "/api/v1/approval-configs/{ticketType}/{actionType}": {
       "get": {
         "operationId": "ApprovalService_GetApprovalConfig",
         "responses": {
@@ -538,21 +528,15 @@
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "ticketType",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
             "name": "actionType",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ticketType",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -578,21 +562,15 @@
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "ticketType",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
             "name": "actionType",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ticketType",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -618,7 +596,13 @@
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "ticketType",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "actionType",
             "in": "path",
             "required": true,
             "type": "string"
@@ -666,6 +650,16 @@
             "collectionFormat": "multi"
           },
           {
+            "name": "ticketTypes",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
             "name": "actionTypes",
             "in": "query",
             "required": false,
@@ -702,7 +696,7 @@
             "collectionFormat": "multi"
           },
           {
-            "name": "executionIds",
+            "name": "targetIds",
             "in": "query",
             "required": false,
             "type": "array",
@@ -759,6 +753,16 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "origins",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
           }
         ],
         "tags": [
@@ -1516,12 +1520,6 @@
     "ApprovalServiceUpdateApprovalConfigBody": {
       "type": "object",
       "properties": {
-        "actionType": {
-          "type": "string"
-        },
-        "ticketType": {
-          "type": "string"
-        },
         "requiredApprovals": {
           "type": "integer",
           "format": "int32"
@@ -1647,6 +1645,9 @@
           "type": "string"
         },
         "ticketId": {
+          "type": "string"
+        },
+        "ticketType": {
           "type": "string"
         },
         "actionType": {
@@ -1828,13 +1829,10 @@
     "v1ApprovalConfig": {
       "type": "object",
       "properties": {
-        "id": {
+        "ticketType": {
           "type": "string"
         },
         "actionType": {
-          "type": "string"
-        },
-        "ticketType": {
           "type": "string"
         },
         "requiredApprovals": {
@@ -1888,14 +1886,24 @@
         "ticketId": {
           "type": "string"
         },
+        "ticketType": {
+          "type": "string"
+        },
         "actionType": {
           "type": "string"
         },
-        "executionId": {
+        "targetId": {
           "type": "string"
         },
         "requester": {
           "type": "string"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
         },
         "status": {
           "$ref": "#/definitions/v1ApprovalStatus"
@@ -2056,17 +2064,21 @@
         "ticketId": {
           "type": "string"
         },
-        "executionId": {
+        "targetId": {
           "type": "string"
         },
-        "id": {
+        "ticketType": {
           "type": "string"
         },
         "actionType": {
           "type": "string"
         },
-        "ticketType": {
+        "origin": {
           "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {}
         }
       }
     },

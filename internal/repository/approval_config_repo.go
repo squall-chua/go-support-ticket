@@ -6,7 +6,6 @@ import (
 
 	"github.com/squall-chua/gmqb"
 	"github.com/squall-chua/go-support-ticket/internal/model"
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -26,41 +25,17 @@ func (r *ApprovalConfigRepo) CreateConfig(ctx context.Context, config *model.App
 	return err
 }
 
-func (r *ApprovalConfigRepo) GetConfig(ctx context.Context, id, actionType, ticketType string) (*model.ApprovalConfig, error) {
+func (r *ApprovalConfigRepo) GetConfig(ctx context.Context, ticketType, actionType string) (*model.ApprovalConfig, error) {
 	f := gmqb.Field[model.ApprovalConfig]
 	q := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
-	if id != "" {
-		oid, err := bson.ObjectIDFromHex(id)
-		if err != nil {
-			return nil, err
-		}
-		q.Eq(f("ID"), oid)
-	} else if actionType != "" {
-		q.Eq(f("ActionType"), actionType)
-	} else if ticketType != "" {
-		q.Eq(f("TicketType"), ticketType)
-	} else {
-		return nil, nil
-	}
+	q.Eq(f("TicketType"), ticketType).Eq(f("ActionType"), actionType)
 	return r.coll.FindOne(ctx, q)
 }
 
-func (r *ApprovalConfigRepo) UpdateConfig(ctx context.Context, id, actionType, ticketType string, update model.ApprovalConfigUpdate) (*model.ApprovalConfig, error) {
+func (r *ApprovalConfigRepo) UpdateConfig(ctx context.Context, ticketType, actionType string, update model.ApprovalConfigUpdate) (*model.ApprovalConfig, error) {
 	f := gmqb.Field[model.ApprovalConfig]
 	q := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
-	if id != "" {
-		oid, err := bson.ObjectIDFromHex(id)
-		if err != nil {
-			return nil, err
-		}
-		q.Eq(f("ID"), oid)
-	} else if actionType != "" {
-		q.Eq(f("ActionType"), actionType)
-	} else if ticketType != "" {
-		q.Eq(f("TicketType"), ticketType)
-	} else {
-		return nil, nil
-	}
+	q.Eq(f("TicketType"), ticketType).Eq(f("ActionType"), actionType)
 
 	u := gmqb.NewUpdate().Set(f("UpdatedAt"), time.Now().UTC())
 	if update.RequiredApprovals != nil {
@@ -73,22 +48,10 @@ func (r *ApprovalConfigRepo) UpdateConfig(ctx context.Context, id, actionType, t
 	return r.coll.FindOneAndUpdate(ctx, q, u)
 }
 
-func (r *ApprovalConfigRepo) DeleteConfig(ctx context.Context, id, actionType, ticketType string) (*model.ApprovalConfig, error) {
+func (r *ApprovalConfigRepo) DeleteConfig(ctx context.Context, ticketType, actionType string) (*model.ApprovalConfig, error) {
 	f := gmqb.Field[model.ApprovalConfig]
 	q := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
-	if id != "" {
-		oid, err := bson.ObjectIDFromHex(id)
-		if err != nil {
-			return nil, err
-		}
-		q.Eq(f("ID"), oid)
-	} else if actionType != "" {
-		q.Eq(f("ActionType"), actionType)
-	} else if ticketType != "" {
-		q.Eq(f("TicketType"), ticketType)
-	} else {
-		return nil, nil
-	}
+	q.Eq(f("TicketType"), ticketType).Eq(f("ActionType"), actionType)
 
 	u := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
 	return r.coll.FindOneAndUpdate(ctx, q, u)
@@ -99,18 +62,6 @@ func (r *ApprovalConfigRepo) ListConfigs(ctx context.Context, filter model.Appro
 	q := gmqb.NewFilter()
 	if !filter.IncludeDeleted {
 		q.Eq(f("DeletedAt"), nil)
-	}
-
-	if len(filter.IDs) > 0 {
-		var oids []bson.ObjectID
-		for _, id := range filter.IDs {
-			if oid, err := bson.ObjectIDFromHex(id); err == nil {
-				oids = append(oids, oid)
-			}
-		}
-		if len(oids) > 0 {
-			q.In(f("ID"), oids)
-		}
 	}
 
 	if len(filter.ActionTypes) > 0 {

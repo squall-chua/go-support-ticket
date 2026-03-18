@@ -169,8 +169,6 @@ func local_request_ApprovalService_CreateApprovalConfig_0(ctx context.Context, m
 	return msg, metadata, err
 }
 
-var filter_ApprovalService_GetApprovalConfig_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
-
 func request_ApprovalService_GetApprovalConfig_0(ctx context.Context, marshaler runtime.Marshaler, client ApprovalServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetApprovalConfigRequest
@@ -180,24 +178,21 @@ func request_ApprovalService_GetApprovalConfig_0(ctx context.Context, marshaler 
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id"]
+	val, ok := pathParams["ticket_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ticket_type")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &GetApprovalConfigRequest_Id{}
-	} else if _, ok := protoReq.Target.(*GetApprovalConfigRequest_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *GetApprovalConfigRequest_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*GetApprovalConfigRequest_Id).Id, err = runtime.String(val)
+	protoReq.TicketType, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ticket_type", err)
 	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["action_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "action_type")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ApprovalService_GetApprovalConfig_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.ActionType, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "action_type", err)
 	}
 	msg, err := client.GetApprovalConfig(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -209,24 +204,21 @@ func local_request_ApprovalService_GetApprovalConfig_0(ctx context.Context, mars
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["id"]
+	val, ok := pathParams["ticket_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ticket_type")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &GetApprovalConfigRequest_Id{}
-	} else if _, ok := protoReq.Target.(*GetApprovalConfigRequest_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *GetApprovalConfigRequest_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*GetApprovalConfigRequest_Id).Id, err = runtime.String(val)
+	protoReq.TicketType, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ticket_type", err)
 	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["action_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "action_type")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ApprovalService_GetApprovalConfig_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.ActionType, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "action_type", err)
 	}
 	msg, err := server.GetApprovalConfig(ctx, &protoReq)
 	return msg, metadata, err
@@ -244,18 +236,21 @@ func request_ApprovalService_UpdateApprovalConfig_0(ctx context.Context, marshal
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id"]
+	val, ok := pathParams["ticket_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ticket_type")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &UpdateApprovalConfigRequest_Id{}
-	} else if _, ok := protoReq.Target.(*UpdateApprovalConfigRequest_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *UpdateApprovalConfigRequest_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*UpdateApprovalConfigRequest_Id).Id, err = runtime.String(val)
+	protoReq.TicketType, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ticket_type", err)
+	}
+	val, ok = pathParams["action_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "action_type")
+	}
+	protoReq.ActionType, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "action_type", err)
 	}
 	msg, err := client.UpdateApprovalConfig(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -270,24 +265,25 @@ func local_request_ApprovalService_UpdateApprovalConfig_0(ctx context.Context, m
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	val, ok := pathParams["id"]
+	val, ok := pathParams["ticket_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ticket_type")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &UpdateApprovalConfigRequest_Id{}
-	} else if _, ok := protoReq.Target.(*UpdateApprovalConfigRequest_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *UpdateApprovalConfigRequest_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*UpdateApprovalConfigRequest_Id).Id, err = runtime.String(val)
+	protoReq.TicketType, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ticket_type", err)
+	}
+	val, ok = pathParams["action_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "action_type")
+	}
+	protoReq.ActionType, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "action_type", err)
 	}
 	msg, err := server.UpdateApprovalConfig(ctx, &protoReq)
 	return msg, metadata, err
 }
-
-var filter_ApprovalService_DeleteApprovalConfig_0 = &utilities.DoubleArray{Encoding: map[string]int{"id": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
 func request_ApprovalService_DeleteApprovalConfig_0(ctx context.Context, marshaler runtime.Marshaler, client ApprovalServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
@@ -298,24 +294,21 @@ func request_ApprovalService_DeleteApprovalConfig_0(ctx context.Context, marshal
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
 	}
-	val, ok := pathParams["id"]
+	val, ok := pathParams["ticket_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ticket_type")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DeleteApprovalConfigRequest_Id{}
-	} else if _, ok := protoReq.Target.(*DeleteApprovalConfigRequest_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DeleteApprovalConfigRequest_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DeleteApprovalConfigRequest_Id).Id, err = runtime.String(val)
+	protoReq.TicketType, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ticket_type", err)
 	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["action_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "action_type")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ApprovalService_DeleteApprovalConfig_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.ActionType, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "action_type", err)
 	}
 	msg, err := client.DeleteApprovalConfig(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -327,24 +320,21 @@ func local_request_ApprovalService_DeleteApprovalConfig_0(ctx context.Context, m
 		metadata runtime.ServerMetadata
 		err      error
 	)
-	val, ok := pathParams["id"]
+	val, ok := pathParams["ticket_type"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ticket_type")
 	}
-	if protoReq.Target == nil {
-		protoReq.Target = &DeleteApprovalConfigRequest_Id{}
-	} else if _, ok := protoReq.Target.(*DeleteApprovalConfigRequest_Id); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *DeleteApprovalConfigRequest_Id, but: %t\n", protoReq.Target)
-	}
-	protoReq.Target.(*DeleteApprovalConfigRequest_Id).Id, err = runtime.String(val)
+	protoReq.TicketType, err = runtime.String(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ticket_type", err)
 	}
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok = pathParams["action_type"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "action_type")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ApprovalService_DeleteApprovalConfig_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.ActionType, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "action_type", err)
 	}
 	msg, err := server.DeleteApprovalConfig(ctx, &protoReq)
 	return msg, metadata, err
@@ -477,7 +467,7 @@ func RegisterApprovalServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.ApprovalService/GetApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.ApprovalService/GetApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{ticket_type}/{action_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -497,7 +487,7 @@ func RegisterApprovalServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.ApprovalService/UpdateApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.ApprovalService/UpdateApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{ticket_type}/{action_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -517,7 +507,7 @@ func RegisterApprovalServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.ApprovalService/DeleteApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/api.v1.ApprovalService/DeleteApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{ticket_type}/{action_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -663,7 +653,7 @@ func RegisterApprovalServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.ApprovalService/GetApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.ApprovalService/GetApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{ticket_type}/{action_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -680,7 +670,7 @@ func RegisterApprovalServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.ApprovalService/UpdateApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.ApprovalService/UpdateApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{ticket_type}/{action_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -697,7 +687,7 @@ func RegisterApprovalServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.ApprovalService/DeleteApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/api.v1.ApprovalService/DeleteApprovalConfig", runtime.WithHTTPPathPattern("/api/v1/approval-configs/{ticket_type}/{action_type}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -735,9 +725,9 @@ var (
 	pattern_ApprovalService_DecideApproval_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "approvals", "approval_request_id", "decide"}, ""))
 	pattern_ApprovalService_ListApprovals_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "approvals"}, ""))
 	pattern_ApprovalService_CreateApprovalConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "approval-configs"}, ""))
-	pattern_ApprovalService_GetApprovalConfig_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "approval-configs", "id"}, ""))
-	pattern_ApprovalService_UpdateApprovalConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "approval-configs", "id"}, ""))
-	pattern_ApprovalService_DeleteApprovalConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "approval-configs", "id"}, ""))
+	pattern_ApprovalService_GetApprovalConfig_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "approval-configs", "ticket_type", "action_type"}, ""))
+	pattern_ApprovalService_UpdateApprovalConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "approval-configs", "ticket_type", "action_type"}, ""))
+	pattern_ApprovalService_DeleteApprovalConfig_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "approval-configs", "ticket_type", "action_type"}, ""))
 	pattern_ApprovalService_ListApprovalConfigs_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "approval-configs"}, ""))
 )
 

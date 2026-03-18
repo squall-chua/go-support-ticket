@@ -470,14 +470,15 @@ type ActionExecution struct {
 	state         protoimpl.MessageState     `protogen:"open.v1"`
 	Id            string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	TicketId      string                     `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	ActionType    string                     `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
-	Status        ActionStatus               `protobuf:"varint,4,opt,name=status,proto3,enum=api.v1.ActionStatus" json:"status,omitempty"`
-	Parameters    map[string]*structpb.Value `protobuf:"bytes,5,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Result        *ActionExecutionResult     `protobuf:"bytes,6,opt,name=result,proto3" json:"result,omitempty"`
-	ExecutingUser string                     `protobuf:"bytes,7,opt,name=executing_user,json=executingUser,proto3" json:"executing_user,omitempty"`
-	CreatedAt     *timestamppb.Timestamp     `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp     `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	ExecuteAt     *timestamppb.Timestamp     `protobuf:"bytes,10,opt,name=execute_at,json=executeAt,proto3" json:"execute_at,omitempty"`
+	TicketType    string                     `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	ActionType    string                     `protobuf:"bytes,4,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Status        ActionStatus               `protobuf:"varint,5,opt,name=status,proto3,enum=api.v1.ActionStatus" json:"status,omitempty"`
+	Parameters    map[string]*structpb.Value `protobuf:"bytes,6,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Result        *ActionExecutionResult     `protobuf:"bytes,7,opt,name=result,proto3" json:"result,omitempty"`
+	ExecutingUser string                     `protobuf:"bytes,8,opt,name=executing_user,json=executingUser,proto3" json:"executing_user,omitempty"`
+	CreatedAt     *timestamppb.Timestamp     `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp     `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	ExecuteAt     *timestamppb.Timestamp     `protobuf:"bytes,11,opt,name=execute_at,json=executeAt,proto3" json:"execute_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -522,6 +523,13 @@ func (x *ActionExecution) GetId() string {
 func (x *ActionExecution) GetTicketId() string {
 	if x != nil {
 		return x.TicketId
+	}
+	return ""
+}
+
+func (x *ActionExecution) GetTicketType() string {
+	if x != nil {
+		return x.TicketType
 	}
 	return ""
 }
@@ -1429,25 +1437,27 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
 	"deleted_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\xbc\x04\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\xdd\x04\n" +
 	"\x0fActionExecution\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tticket_id\x18\x02 \x01(\tR\bticketId\x12\x1f\n" +
-	"\vaction_type\x18\x03 \x01(\tR\n" +
+	"\vticket_type\x18\x03 \x01(\tR\n" +
+	"ticketType\x12\x1f\n" +
+	"\vaction_type\x18\x04 \x01(\tR\n" +
 	"actionType\x12,\n" +
-	"\x06status\x18\x04 \x01(\x0e2\x14.api.v1.ActionStatusR\x06status\x12G\n" +
+	"\x06status\x18\x05 \x01(\x0e2\x14.api.v1.ActionStatusR\x06status\x12G\n" +
 	"\n" +
-	"parameters\x18\x05 \x03(\v2'.api.v1.ActionExecution.ParametersEntryR\n" +
+	"parameters\x18\x06 \x03(\v2'.api.v1.ActionExecution.ParametersEntryR\n" +
 	"parameters\x125\n" +
-	"\x06result\x18\x06 \x01(\v2\x1d.api.v1.ActionExecutionResultR\x06result\x12%\n" +
-	"\x0eexecuting_user\x18\a \x01(\tR\rexecutingUser\x129\n" +
+	"\x06result\x18\a \x01(\v2\x1d.api.v1.ActionExecutionResultR\x06result\x12%\n" +
+	"\x0eexecuting_user\x18\b \x01(\tR\rexecutingUser\x129\n" +
 	"\n" +
-	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"updated_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"execute_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\texecuteAt\x1aU\n" +
+	"execute_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\texecuteAt\x1aU\n" +
 	"\x0fParametersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
 	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"\xf4\x02\n" +

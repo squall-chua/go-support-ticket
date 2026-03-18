@@ -63,14 +63,15 @@ message ActionSchema {
 message ActionExecution {
   string id = 1;
   string ticket_id = 2;
-  string action_type = 3;
-  ActionStatus status = 4;
-  map<string, google.protobuf.Value> parameters = 5;
-  ActionExecutionResult result = 6;
-  string executing_user = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
-  google.protobuf.Timestamp execute_at = 10;
+  string ticket_type = 3;
+  string action_type = 4;
+  ActionStatus status = 5;
+  map<string, google.protobuf.Value> parameters = 6;
+  ActionExecutionResult result = 7;
+  string executing_user = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp execute_at = 11;
 }
 
 enum ActionExecutionStatus {

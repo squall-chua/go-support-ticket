@@ -48,9 +48,9 @@ type ApprovalRepository interface {
 
 type ApprovalConfigRepository interface {
 	CreateConfig(ctx context.Context, config *model.ApprovalConfig) error
-	GetConfig(ctx context.Context, id, actionType, ticketType string) (*model.ApprovalConfig, error)
-	UpdateConfig(ctx context.Context, id, actionType, ticketType string, update model.ApprovalConfigUpdate) (*model.ApprovalConfig, error)
-	DeleteConfig(ctx context.Context, id, actionType, ticketType string) (*model.ApprovalConfig, error)
+	GetConfig(ctx context.Context, ticketType, actionType string) (*model.ApprovalConfig, error)
+	UpdateConfig(ctx context.Context, ticketType, actionType string, update model.ApprovalConfigUpdate) (*model.ApprovalConfig, error)
+	DeleteConfig(ctx context.Context, ticketType, actionType string) (*model.ApprovalConfig, error)
 	ListConfigs(ctx context.Context, filter model.ApprovalConfigFilter, limit, offset int32) ([]*model.ApprovalConfig, int32, error)
 }
 

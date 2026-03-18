@@ -10,6 +10,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -76,18 +77,14 @@ func (ApprovalStatus) EnumDescriptor() ([]byte, []int) {
 }
 
 type ApprovalConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// Types that are valid to be assigned to Target:
-	//
-	//	*ApprovalConfig_ActionType
-	//	*ApprovalConfig_TicketType
-	Target            isApprovalConfig_Target `protobuf_oneof:"target"`
-	RequiredApprovals int32                   `protobuf:"varint,4,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	EligibleRoles     []string                `protobuf:"bytes,5,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
-	CreatedAt         *timestamppb.Timestamp  `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt         *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt         *timestamppb.Timestamp  `protobuf:"bytes,8,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	TicketType        string                 `protobuf:"bytes,1,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	ActionType        string                 `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	RequiredApprovals int32                  `protobuf:"varint,3,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	EligibleRoles     []string               `protobuf:"bytes,4,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt         *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -122,34 +119,16 @@ func (*ApprovalConfig) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ApprovalConfig) GetId() string {
+func (x *ApprovalConfig) GetTicketType() string {
 	if x != nil {
-		return x.Id
+		return x.TicketType
 	}
 	return ""
-}
-
-func (x *ApprovalConfig) GetTarget() isApprovalConfig_Target {
-	if x != nil {
-		return x.Target
-	}
-	return nil
 }
 
 func (x *ApprovalConfig) GetActionType() string {
 	if x != nil {
-		if x, ok := x.Target.(*ApprovalConfig_ActionType); ok {
-			return x.ActionType
-		}
-	}
-	return ""
-}
-
-func (x *ApprovalConfig) GetTicketType() string {
-	if x != nil {
-		if x, ok := x.Target.(*ApprovalConfig_TicketType); ok {
-			return x.TicketType
-		}
+		return x.ActionType
 	}
 	return ""
 }
@@ -188,22 +167,6 @@ func (x *ApprovalConfig) GetDeletedAt() *timestamppb.Timestamp {
 	}
 	return nil
 }
-
-type isApprovalConfig_Target interface {
-	isApprovalConfig_Target()
-}
-
-type ApprovalConfig_ActionType struct {
-	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
-}
-
-type ApprovalConfig_TicketType struct {
-	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
-}
-
-func (*ApprovalConfig_ActionType) isApprovalConfig_Target() {}
-
-func (*ApprovalConfig_TicketType) isApprovalConfig_Target() {}
 
 type CreateApprovalConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -294,13 +257,9 @@ func (x *CreateApprovalConfigResponse) GetConfig() *ApprovalConfig {
 }
 
 type GetApprovalConfigRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Target:
-	//
-	//	*GetApprovalConfigRequest_Id
-	//	*GetApprovalConfigRequest_ActionType
-	//	*GetApprovalConfigRequest_TicketType
-	Target        isGetApprovalConfigRequest_Target `protobuf_oneof:"target"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TicketType    string                 `protobuf:"bytes,1,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	ActionType    string                 `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -335,72 +294,26 @@ func (*GetApprovalConfigRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetApprovalConfigRequest) GetTarget() isGetApprovalConfigRequest_Target {
+func (x *GetApprovalConfigRequest) GetTicketType() string {
 	if x != nil {
-		return x.Target
-	}
-	return nil
-}
-
-func (x *GetApprovalConfigRequest) GetId() string {
-	if x != nil {
-		if x, ok := x.Target.(*GetApprovalConfigRequest_Id); ok {
-			return x.Id
-		}
+		return x.TicketType
 	}
 	return ""
 }
 
 func (x *GetApprovalConfigRequest) GetActionType() string {
 	if x != nil {
-		if x, ok := x.Target.(*GetApprovalConfigRequest_ActionType); ok {
-			return x.ActionType
-		}
+		return x.ActionType
 	}
 	return ""
 }
-
-func (x *GetApprovalConfigRequest) GetTicketType() string {
-	if x != nil {
-		if x, ok := x.Target.(*GetApprovalConfigRequest_TicketType); ok {
-			return x.TicketType
-		}
-	}
-	return ""
-}
-
-type isGetApprovalConfigRequest_Target interface {
-	isGetApprovalConfigRequest_Target()
-}
-
-type GetApprovalConfigRequest_Id struct {
-	Id string `protobuf:"bytes,1,opt,name=id,proto3,oneof"`
-}
-
-type GetApprovalConfigRequest_ActionType struct {
-	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
-}
-
-type GetApprovalConfigRequest_TicketType struct {
-	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
-}
-
-func (*GetApprovalConfigRequest_Id) isGetApprovalConfigRequest_Target() {}
-
-func (*GetApprovalConfigRequest_ActionType) isGetApprovalConfigRequest_Target() {}
-
-func (*GetApprovalConfigRequest_TicketType) isGetApprovalConfigRequest_Target() {}
 
 type UpdateApprovalConfigRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Target:
-	//
-	//	*UpdateApprovalConfigRequest_Id
-	//	*UpdateApprovalConfigRequest_ActionType
-	//	*UpdateApprovalConfigRequest_TicketType
-	Target            isUpdateApprovalConfigRequest_Target `protobuf_oneof:"target"`
-	RequiredApprovals int32                                `protobuf:"varint,4,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	EligibleRoles     []string                             `protobuf:"bytes,5,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	TicketType        string                 `protobuf:"bytes,1,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	ActionType        string                 `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	RequiredApprovals int32                  `protobuf:"varint,3,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	EligibleRoles     []string               `protobuf:"bytes,4,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -435,36 +348,16 @@ func (*UpdateApprovalConfigRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UpdateApprovalConfigRequest) GetTarget() isUpdateApprovalConfigRequest_Target {
+func (x *UpdateApprovalConfigRequest) GetTicketType() string {
 	if x != nil {
-		return x.Target
-	}
-	return nil
-}
-
-func (x *UpdateApprovalConfigRequest) GetId() string {
-	if x != nil {
-		if x, ok := x.Target.(*UpdateApprovalConfigRequest_Id); ok {
-			return x.Id
-		}
+		return x.TicketType
 	}
 	return ""
 }
 
 func (x *UpdateApprovalConfigRequest) GetActionType() string {
 	if x != nil {
-		if x, ok := x.Target.(*UpdateApprovalConfigRequest_ActionType); ok {
-			return x.ActionType
-		}
-	}
-	return ""
-}
-
-func (x *UpdateApprovalConfigRequest) GetTicketType() string {
-	if x != nil {
-		if x, ok := x.Target.(*UpdateApprovalConfigRequest_TicketType); ok {
-			return x.TicketType
-		}
+		return x.ActionType
 	}
 	return ""
 }
@@ -482,28 +375,6 @@ func (x *UpdateApprovalConfigRequest) GetEligibleRoles() []string {
 	}
 	return nil
 }
-
-type isUpdateApprovalConfigRequest_Target interface {
-	isUpdateApprovalConfigRequest_Target()
-}
-
-type UpdateApprovalConfigRequest_Id struct {
-	Id string `protobuf:"bytes,1,opt,name=id,proto3,oneof"`
-}
-
-type UpdateApprovalConfigRequest_ActionType struct {
-	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
-}
-
-type UpdateApprovalConfigRequest_TicketType struct {
-	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
-}
-
-func (*UpdateApprovalConfigRequest_Id) isUpdateApprovalConfigRequest_Target() {}
-
-func (*UpdateApprovalConfigRequest_ActionType) isUpdateApprovalConfigRequest_Target() {}
-
-func (*UpdateApprovalConfigRequest_TicketType) isUpdateApprovalConfigRequest_Target() {}
 
 type UpdateApprovalConfigResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -550,13 +421,9 @@ func (x *UpdateApprovalConfigResponse) GetConfig() *ApprovalConfig {
 }
 
 type DeleteApprovalConfigRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Target:
-	//
-	//	*DeleteApprovalConfigRequest_Id
-	//	*DeleteApprovalConfigRequest_ActionType
-	//	*DeleteApprovalConfigRequest_TicketType
-	Target        isDeleteApprovalConfigRequest_Target `protobuf_oneof:"target"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TicketType    string                 `protobuf:"bytes,1,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	ActionType    string                 `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -591,61 +458,19 @@ func (*DeleteApprovalConfigRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *DeleteApprovalConfigRequest) GetTarget() isDeleteApprovalConfigRequest_Target {
+func (x *DeleteApprovalConfigRequest) GetTicketType() string {
 	if x != nil {
-		return x.Target
-	}
-	return nil
-}
-
-func (x *DeleteApprovalConfigRequest) GetId() string {
-	if x != nil {
-		if x, ok := x.Target.(*DeleteApprovalConfigRequest_Id); ok {
-			return x.Id
-		}
+		return x.TicketType
 	}
 	return ""
 }
 
 func (x *DeleteApprovalConfigRequest) GetActionType() string {
 	if x != nil {
-		if x, ok := x.Target.(*DeleteApprovalConfigRequest_ActionType); ok {
-			return x.ActionType
-		}
+		return x.ActionType
 	}
 	return ""
 }
-
-func (x *DeleteApprovalConfigRequest) GetTicketType() string {
-	if x != nil {
-		if x, ok := x.Target.(*DeleteApprovalConfigRequest_TicketType); ok {
-			return x.TicketType
-		}
-	}
-	return ""
-}
-
-type isDeleteApprovalConfigRequest_Target interface {
-	isDeleteApprovalConfigRequest_Target()
-}
-
-type DeleteApprovalConfigRequest_Id struct {
-	Id string `protobuf:"bytes,1,opt,name=id,proto3,oneof"`
-}
-
-type DeleteApprovalConfigRequest_ActionType struct {
-	ActionType string `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3,oneof"`
-}
-
-type DeleteApprovalConfigRequest_TicketType struct {
-	TicketType string `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3,oneof"`
-}
-
-func (*DeleteApprovalConfigRequest_Id) isDeleteApprovalConfigRequest_Target() {}
-
-func (*DeleteApprovalConfigRequest_ActionType) isDeleteApprovalConfigRequest_Target() {}
-
-func (*DeleteApprovalConfigRequest_TicketType) isDeleteApprovalConfigRequest_Target() {}
 
 type DeleteApprovalConfigResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -685,14 +510,13 @@ func (*DeleteApprovalConfigResponse) Descriptor() ([]byte, []int) {
 
 type ListApprovalConfigsRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	Ids               []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
+	TicketTypes       []string               `protobuf:"bytes,1,rep,name=ticket_types,json=ticketTypes,proto3" json:"ticket_types,omitempty"`
 	ActionTypes       []string               `protobuf:"bytes,2,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
-	TicketTypes       []string               `protobuf:"bytes,3,rep,name=ticket_types,json=ticketTypes,proto3" json:"ticket_types,omitempty"`
-	RequiredApprovals int32                  `protobuf:"varint,4,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	EligibleRoles     []string               `protobuf:"bytes,5,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
-	TimeRange         *TimeRange             `protobuf:"bytes,6,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
-	IncludeDeleted    bool                   `protobuf:"varint,7,opt,name=include_deleted,json=includeDeleted,proto3" json:"include_deleted,omitempty"`
-	Pagination        *PageRequest           `protobuf:"bytes,8,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	RequiredApprovals int32                  `protobuf:"varint,3,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	EligibleRoles     []string               `protobuf:"bytes,4,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	TimeRange         *TimeRange             `protobuf:"bytes,5,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
+	IncludeDeleted    bool                   `protobuf:"varint,6,opt,name=include_deleted,json=includeDeleted,proto3" json:"include_deleted,omitempty"`
+	Pagination        *PageRequest           `protobuf:"bytes,7,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -727,9 +551,9 @@ func (*ListApprovalConfigsRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_approval_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *ListApprovalConfigsRequest) GetIds() []string {
+func (x *ListApprovalConfigsRequest) GetTicketTypes() []string {
 	if x != nil {
-		return x.Ids
+		return x.TicketTypes
 	}
 	return nil
 }
@@ -737,13 +561,6 @@ func (x *ListApprovalConfigsRequest) GetIds() []string {
 func (x *ListApprovalConfigsRequest) GetActionTypes() []string {
 	if x != nil {
 		return x.ActionTypes
-	}
-	return nil
-}
-
-func (x *ListApprovalConfigsRequest) GetTicketTypes() []string {
-	if x != nil {
-		return x.TicketTypes
 	}
 	return nil
 }
@@ -836,18 +653,21 @@ func (x *ListApprovalConfigsResponse) GetPagination() *PageInfo {
 }
 
 type ApprovalRequestData struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TicketId          string                 `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	ActionType        string                 `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
-	ExecutionId       string                 `protobuf:"bytes,4,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
-	Requester         string                 `protobuf:"bytes,5,opt,name=requester,proto3" json:"requester,omitempty"`
-	Status            ApprovalStatus         `protobuf:"varint,6,opt,name=status,proto3,enum=api.v1.ApprovalStatus" json:"status,omitempty"`
-	RequiredApprovals int32                  `protobuf:"varint,7,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	EligibleRoles     []string               `protobuf:"bytes,8,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
-	Decisions         []*ApprovalDecision    `protobuf:"bytes,9,rep,name=decisions,proto3" json:"decisions,omitempty"`
-	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	state             protoimpl.MessageState     `protogen:"open.v1"`
+	Id                string                     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TicketId          string                     `protobuf:"bytes,2,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	TicketType        string                     `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	ActionType        string                     `protobuf:"bytes,4,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	TargetId          string                     `protobuf:"bytes,5,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	Requester         string                     `protobuf:"bytes,6,opt,name=requester,proto3" json:"requester,omitempty"`
+	Origin            string                     `protobuf:"bytes,7,opt,name=origin,proto3" json:"origin,omitempty"`
+	Metadata          map[string]*structpb.Value `protobuf:"bytes,8,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Status            ApprovalStatus             `protobuf:"varint,9,opt,name=status,proto3,enum=api.v1.ApprovalStatus" json:"status,omitempty"`
+	RequiredApprovals int32                      `protobuf:"varint,10,opt,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	EligibleRoles     []string                   `protobuf:"bytes,11,rep,name=eligible_roles,json=eligibleRoles,proto3" json:"eligible_roles,omitempty"`
+	Decisions         []*ApprovalDecision        `protobuf:"bytes,12,rep,name=decisions,proto3" json:"decisions,omitempty"`
+	CreatedAt         *timestamppb.Timestamp     `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp     `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -896,6 +716,13 @@ func (x *ApprovalRequestData) GetTicketId() string {
 	return ""
 }
 
+func (x *ApprovalRequestData) GetTicketType() string {
+	if x != nil {
+		return x.TicketType
+	}
+	return ""
+}
+
 func (x *ApprovalRequestData) GetActionType() string {
 	if x != nil {
 		return x.ActionType
@@ -903,9 +730,9 @@ func (x *ApprovalRequestData) GetActionType() string {
 	return ""
 }
 
-func (x *ApprovalRequestData) GetExecutionId() string {
+func (x *ApprovalRequestData) GetTargetId() string {
 	if x != nil {
-		return x.ExecutionId
+		return x.TargetId
 	}
 	return ""
 }
@@ -915,6 +742,20 @@ func (x *ApprovalRequestData) GetRequester() string {
 		return x.Requester
 	}
 	return ""
+}
+
+func (x *ApprovalRequestData) GetOrigin() string {
+	if x != nil {
+		return x.Origin
+	}
+	return ""
+}
+
+func (x *ApprovalRequestData) GetMetadata() map[string]*structpb.Value {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
 }
 
 func (x *ApprovalRequestData) GetStatus() ApprovalStatus {
@@ -1132,15 +973,13 @@ func (x *DecideApprovalResponse) GetRequest() *ApprovalRequestData {
 }
 
 type CreateApprovalRequest struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	TicketId    string                 `protobuf:"bytes,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
-	ExecutionId string                 `protobuf:"bytes,2,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
-	// Types that are valid to be assigned to Target:
-	//
-	//	*CreateApprovalRequest_Id
-	//	*CreateApprovalRequest_ActionType
-	//	*CreateApprovalRequest_TicketType
-	Target        isCreateApprovalRequest_Target `protobuf_oneof:"target"`
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	TicketId      string                     `protobuf:"bytes,1,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	TargetId      string                     `protobuf:"bytes,2,opt,name=target_id,json=targetId,proto3" json:"target_id,omitempty"`
+	TicketType    string                     `protobuf:"bytes,3,opt,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	ActionType    string                     `protobuf:"bytes,4,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Origin        string                     `protobuf:"bytes,5,opt,name=origin,proto3" json:"origin,omitempty"`
+	Metadata      map[string]*structpb.Value `protobuf:"bytes,6,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1182,68 +1021,40 @@ func (x *CreateApprovalRequest) GetTicketId() string {
 	return ""
 }
 
-func (x *CreateApprovalRequest) GetExecutionId() string {
+func (x *CreateApprovalRequest) GetTargetId() string {
 	if x != nil {
-		return x.ExecutionId
-	}
-	return ""
-}
-
-func (x *CreateApprovalRequest) GetTarget() isCreateApprovalRequest_Target {
-	if x != nil {
-		return x.Target
-	}
-	return nil
-}
-
-func (x *CreateApprovalRequest) GetId() string {
-	if x != nil {
-		if x, ok := x.Target.(*CreateApprovalRequest_Id); ok {
-			return x.Id
-		}
-	}
-	return ""
-}
-
-func (x *CreateApprovalRequest) GetActionType() string {
-	if x != nil {
-		if x, ok := x.Target.(*CreateApprovalRequest_ActionType); ok {
-			return x.ActionType
-		}
+		return x.TargetId
 	}
 	return ""
 }
 
 func (x *CreateApprovalRequest) GetTicketType() string {
 	if x != nil {
-		if x, ok := x.Target.(*CreateApprovalRequest_TicketType); ok {
-			return x.TicketType
-		}
+		return x.TicketType
 	}
 	return ""
 }
 
-type isCreateApprovalRequest_Target interface {
-	isCreateApprovalRequest_Target()
+func (x *CreateApprovalRequest) GetActionType() string {
+	if x != nil {
+		return x.ActionType
+	}
+	return ""
 }
 
-type CreateApprovalRequest_Id struct {
-	Id string `protobuf:"bytes,3,opt,name=id,proto3,oneof"`
+func (x *CreateApprovalRequest) GetOrigin() string {
+	if x != nil {
+		return x.Origin
+	}
+	return ""
 }
 
-type CreateApprovalRequest_ActionType struct {
-	ActionType string `protobuf:"bytes,4,opt,name=action_type,json=actionType,proto3,oneof"`
+func (x *CreateApprovalRequest) GetMetadata() map[string]*structpb.Value {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
 }
-
-type CreateApprovalRequest_TicketType struct {
-	TicketType string `protobuf:"bytes,5,opt,name=ticket_type,json=ticketType,proto3,oneof"`
-}
-
-func (*CreateApprovalRequest_Id) isCreateApprovalRequest_Target() {}
-
-func (*CreateApprovalRequest_ActionType) isCreateApprovalRequest_Target() {}
-
-func (*CreateApprovalRequest_TicketType) isCreateApprovalRequest_Target() {}
 
 type CreateApprovalResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1292,14 +1103,16 @@ func (x *CreateApprovalResponse) GetRequest() *ApprovalRequestData {
 type ListApprovalsRequest struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	TicketIds         []string               `protobuf:"bytes,1,rep,name=ticket_ids,json=ticketIds,proto3" json:"ticket_ids,omitempty"`
-	ActionTypes       []string               `protobuf:"bytes,2,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
-	Requesters        []string               `protobuf:"bytes,3,rep,name=requesters,proto3" json:"requesters,omitempty"`
-	Statuses          []ApprovalStatus       `protobuf:"varint,4,rep,packed,name=statuses,proto3,enum=api.v1.ApprovalStatus" json:"statuses,omitempty"`
-	ExecutionIds      []string               `protobuf:"bytes,5,rep,name=execution_ids,json=executionIds,proto3" json:"execution_ids,omitempty"`
-	RequiredApprovals []int32                `protobuf:"varint,6,rep,packed,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	Approvers         []string               `protobuf:"bytes,7,rep,name=approvers,proto3" json:"approvers,omitempty"`
-	TimeRange         *TimeRange             `protobuf:"bytes,8,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
-	Pagination        *PageRequest           `protobuf:"bytes,9,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	TicketTypes       []string               `protobuf:"bytes,2,rep,name=ticket_types,json=ticketTypes,proto3" json:"ticket_types,omitempty"`
+	ActionTypes       []string               `protobuf:"bytes,3,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
+	Requesters        []string               `protobuf:"bytes,4,rep,name=requesters,proto3" json:"requesters,omitempty"`
+	Statuses          []ApprovalStatus       `protobuf:"varint,5,rep,packed,name=statuses,proto3,enum=api.v1.ApprovalStatus" json:"statuses,omitempty"`
+	TargetIds         []string               `protobuf:"bytes,6,rep,name=target_ids,json=targetIds,proto3" json:"target_ids,omitempty"`
+	RequiredApprovals []int32                `protobuf:"varint,7,rep,packed,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	Approvers         []string               `protobuf:"bytes,8,rep,name=approvers,proto3" json:"approvers,omitempty"`
+	TimeRange         *TimeRange             `protobuf:"bytes,9,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
+	Pagination        *PageRequest           `protobuf:"bytes,10,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Origins           []string               `protobuf:"bytes,11,rep,name=origins,proto3" json:"origins,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1341,6 +1154,13 @@ func (x *ListApprovalsRequest) GetTicketIds() []string {
 	return nil
 }
 
+func (x *ListApprovalsRequest) GetTicketTypes() []string {
+	if x != nil {
+		return x.TicketTypes
+	}
+	return nil
+}
+
 func (x *ListApprovalsRequest) GetActionTypes() []string {
 	if x != nil {
 		return x.ActionTypes
@@ -1362,9 +1182,9 @@ func (x *ListApprovalsRequest) GetStatuses() []ApprovalStatus {
 	return nil
 }
 
-func (x *ListApprovalsRequest) GetExecutionIds() []string {
+func (x *ListApprovalsRequest) GetTargetIds() []string {
 	if x != nil {
-		return x.ExecutionIds
+		return x.TargetIds
 	}
 	return nil
 }
@@ -1393,6 +1213,13 @@ func (x *ListApprovalsRequest) GetTimeRange() *TimeRange {
 func (x *ListApprovalsRequest) GetPagination() *PageRequest {
 	if x != nil {
 		return x.Pagination
+	}
+	return nil
+}
+
+func (x *ListApprovalsRequest) GetOrigins() []string {
+	if x != nil {
+		return x.Origins
 	}
 	return nil
 }
@@ -1453,85 +1280,83 @@ var File_api_proto_v1_approval_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\n" +
-	"\x1bapi/proto/v1/approval.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19api/proto/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1aapi/proto/v1/options.proto\"\xf7\x02\n" +
-	"\x0eApprovalConfig\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
-	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
-	"actionType\x12!\n" +
-	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
-	"ticketType\x12-\n" +
-	"\x12required_approvals\x18\x04 \x01(\x05R\x11requiredApprovals\x12%\n" +
-	"\x0eeligible_roles\x18\x05 \x03(\tR\religibleRoles\x129\n" +
+	"\x1bapi/proto/v1/approval.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x19api/proto/v1/common.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1aapi/proto/v1/options.proto\"\xd9\x02\n" +
+	"\x0eApprovalConfig\x12\x1f\n" +
+	"\vticket_type\x18\x01 \x01(\tR\n" +
+	"ticketType\x12\x1f\n" +
+	"\vaction_type\x18\x02 \x01(\tR\n" +
+	"actionType\x12-\n" +
+	"\x12required_approvals\x18\x03 \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\x04 \x03(\tR\religibleRoles\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAtB\b\n" +
-	"\x06target\"M\n" +
+	"deleted_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"M\n" +
 	"\x1bCreateApprovalConfigRequest\x12.\n" +
 	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"N\n" +
 	"\x1cCreateApprovalConfigResponse\x12.\n" +
-	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"|\n" +
-	"\x18GetApprovalConfigRequest\x12\x10\n" +
-	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x12!\n" +
-	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
-	"actionType\x12!\n" +
-	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
-	"ticketTypeB\b\n" +
-	"\x06target\"\xd5\x01\n" +
-	"\x1bUpdateApprovalConfigRequest\x12\x10\n" +
-	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x12!\n" +
-	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
-	"actionType\x12!\n" +
-	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
-	"ticketType\x12-\n" +
-	"\x12required_approvals\x18\x04 \x01(\x05R\x11requiredApprovals\x12%\n" +
-	"\x0eeligible_roles\x18\x05 \x03(\tR\religibleRolesB\b\n" +
-	"\x06target\"N\n" +
+	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"\\\n" +
+	"\x18GetApprovalConfigRequest\x12\x1f\n" +
+	"\vticket_type\x18\x01 \x01(\tR\n" +
+	"ticketType\x12\x1f\n" +
+	"\vaction_type\x18\x02 \x01(\tR\n" +
+	"actionType\"\xb5\x01\n" +
+	"\x1bUpdateApprovalConfigRequest\x12\x1f\n" +
+	"\vticket_type\x18\x01 \x01(\tR\n" +
+	"ticketType\x12\x1f\n" +
+	"\vaction_type\x18\x02 \x01(\tR\n" +
+	"actionType\x12-\n" +
+	"\x12required_approvals\x18\x03 \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\x04 \x03(\tR\religibleRoles\"N\n" +
 	"\x1cUpdateApprovalConfigResponse\x12.\n" +
-	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"\x7f\n" +
-	"\x1bDeleteApprovalConfigRequest\x12\x10\n" +
-	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x12!\n" +
-	"\vaction_type\x18\x02 \x01(\tH\x00R\n" +
-	"actionType\x12!\n" +
-	"\vticket_type\x18\x03 \x01(\tH\x00R\n" +
-	"ticketTypeB\b\n" +
-	"\x06target\"\x1e\n" +
-	"\x1cDeleteApprovalConfigResponse\"\xda\x02\n" +
-	"\x1aListApprovalConfigsRequest\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\tR\x03ids\x12!\n" +
-	"\faction_types\x18\x02 \x03(\tR\vactionTypes\x12!\n" +
-	"\fticket_types\x18\x03 \x03(\tR\vticketTypes\x12-\n" +
-	"\x12required_approvals\x18\x04 \x01(\x05R\x11requiredApprovals\x12%\n" +
-	"\x0eeligible_roles\x18\x05 \x03(\tR\religibleRoles\x120\n" +
+	"\x06config\x18\x01 \x01(\v2\x16.api.v1.ApprovalConfigR\x06config\"_\n" +
+	"\x1bDeleteApprovalConfigRequest\x12\x1f\n" +
+	"\vticket_type\x18\x01 \x01(\tR\n" +
+	"ticketType\x12\x1f\n" +
+	"\vaction_type\x18\x02 \x01(\tR\n" +
+	"actionType\"\x1e\n" +
+	"\x1cDeleteApprovalConfigResponse\"\xc8\x02\n" +
+	"\x1aListApprovalConfigsRequest\x12!\n" +
+	"\fticket_types\x18\x01 \x03(\tR\vticketTypes\x12!\n" +
+	"\faction_types\x18\x02 \x03(\tR\vactionTypes\x12-\n" +
+	"\x12required_approvals\x18\x03 \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\x04 \x03(\tR\religibleRoles\x120\n" +
 	"\n" +
-	"time_range\x18\x06 \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x12'\n" +
-	"\x0finclude_deleted\x18\a \x01(\bR\x0eincludeDeleted\x123\n" +
+	"time_range\x18\x05 \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x12'\n" +
+	"\x0finclude_deleted\x18\x06 \x01(\bR\x0eincludeDeleted\x123\n" +
 	"\n" +
-	"pagination\x18\b \x01(\v2\x13.api.v1.PageRequestR\n" +
+	"pagination\x18\a \x01(\v2\x13.api.v1.PageRequestR\n" +
 	"pagination\"\x81\x01\n" +
 	"\x1bListApprovalConfigsResponse\x120\n" +
 	"\aconfigs\x18\x01 \x03(\v2\x16.api.v1.ApprovalConfigR\aconfigs\x120\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
-	"pagination\"\xd8\x03\n" +
+	"pagination\"\xa7\x05\n" +
 	"\x13ApprovalRequestData\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tticket_id\x18\x02 \x01(\tR\bticketId\x12\x1f\n" +
-	"\vaction_type\x18\x03 \x01(\tR\n" +
-	"actionType\x12!\n" +
-	"\fexecution_id\x18\x04 \x01(\tR\vexecutionId\x12\x1c\n" +
-	"\trequester\x18\x05 \x01(\tR\trequester\x12.\n" +
-	"\x06status\x18\x06 \x01(\x0e2\x16.api.v1.ApprovalStatusR\x06status\x12-\n" +
-	"\x12required_approvals\x18\a \x01(\x05R\x11requiredApprovals\x12%\n" +
-	"\x0eeligible_roles\x18\b \x03(\tR\religibleRoles\x126\n" +
-	"\tdecisions\x18\t \x03(\v2\x18.api.v1.ApprovalDecisionR\tdecisions\x129\n" +
+	"\vticket_type\x18\x03 \x01(\tR\n" +
+	"ticketType\x12\x1f\n" +
+	"\vaction_type\x18\x04 \x01(\tR\n" +
+	"actionType\x12\x1b\n" +
+	"\ttarget_id\x18\x05 \x01(\tR\btargetId\x12\x1c\n" +
+	"\trequester\x18\x06 \x01(\tR\trequester\x12\x16\n" +
+	"\x06origin\x18\a \x01(\tR\x06origin\x12E\n" +
+	"\bmetadata\x18\b \x03(\v2).api.v1.ApprovalRequestData.MetadataEntryR\bmetadata\x12.\n" +
+	"\x06status\x18\t \x01(\x0e2\x16.api.v1.ApprovalStatusR\x06status\x12-\n" +
+	"\x12required_approvals\x18\n" +
+	" \x01(\x05R\x11requiredApprovals\x12%\n" +
+	"\x0eeligible_roles\x18\v \x03(\tR\religibleRoles\x126\n" +
+	"\tdecisions\x18\f \x03(\v2\x18.api.v1.ApprovalDecisionR\tdecisions\x129\n" +
 	"\n" +
-	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x9d\x01\n" +
+	"updated_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x1aS\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"\x9d\x01\n" +
 	"\x10ApprovalDecision\x12\x1a\n" +
 	"\bapprover\x18\x01 \x01(\tR\bapprover\x12\x1a\n" +
 	"\bapproved\x18\x02 \x01(\bR\bapproved\x12\x16\n" +
@@ -1543,34 +1368,41 @@ const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\aapprove\x18\x02 \x01(\bR\aapprove\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\"O\n" +
 	"\x16DecideApprovalResponse\x125\n" +
-	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"\xb9\x01\n" +
+	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"\xc9\x02\n" +
 	"\x15CreateApprovalRequest\x12\x1b\n" +
-	"\tticket_id\x18\x01 \x01(\tR\bticketId\x12!\n" +
-	"\fexecution_id\x18\x02 \x01(\tR\vexecutionId\x12\x10\n" +
-	"\x02id\x18\x03 \x01(\tH\x00R\x02id\x12!\n" +
-	"\vaction_type\x18\x04 \x01(\tH\x00R\n" +
-	"actionType\x12!\n" +
-	"\vticket_type\x18\x05 \x01(\tH\x00R\n" +
-	"ticketTypeB\b\n" +
-	"\x06target\"O\n" +
+	"\tticket_id\x18\x01 \x01(\tR\bticketId\x12\x1b\n" +
+	"\ttarget_id\x18\x02 \x01(\tR\btargetId\x12\x1f\n" +
+	"\vticket_type\x18\x03 \x01(\tR\n" +
+	"ticketType\x12\x1f\n" +
+	"\vaction_type\x18\x04 \x01(\tR\n" +
+	"actionType\x12\x16\n" +
+	"\x06origin\x18\x05 \x01(\tR\x06origin\x12G\n" +
+	"\bmetadata\x18\x06 \x03(\v2+.api.v1.CreateApprovalRequest.MetadataEntryR\bmetadata\x1aS\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"O\n" +
 	"\x16CreateApprovalResponse\x125\n" +
-	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"\x85\x03\n" +
+	"\arequest\x18\x01 \x01(\v2\x1b.api.v1.ApprovalRequestDataR\arequest\"\xbc\x03\n" +
 	"\x14ListApprovalsRequest\x12\x1d\n" +
 	"\n" +
 	"ticket_ids\x18\x01 \x03(\tR\tticketIds\x12!\n" +
-	"\faction_types\x18\x02 \x03(\tR\vactionTypes\x12\x1e\n" +
+	"\fticket_types\x18\x02 \x03(\tR\vticketTypes\x12!\n" +
+	"\faction_types\x18\x03 \x03(\tR\vactionTypes\x12\x1e\n" +
 	"\n" +
-	"requesters\x18\x03 \x03(\tR\n" +
+	"requesters\x18\x04 \x03(\tR\n" +
 	"requesters\x122\n" +
-	"\bstatuses\x18\x04 \x03(\x0e2\x16.api.v1.ApprovalStatusR\bstatuses\x12#\n" +
-	"\rexecution_ids\x18\x05 \x03(\tR\fexecutionIds\x12-\n" +
-	"\x12required_approvals\x18\x06 \x03(\x05R\x11requiredApprovals\x12\x1c\n" +
-	"\tapprovers\x18\a \x03(\tR\tapprovers\x120\n" +
+	"\bstatuses\x18\x05 \x03(\x0e2\x16.api.v1.ApprovalStatusR\bstatuses\x12\x1d\n" +
 	"\n" +
-	"time_range\x18\b \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x123\n" +
+	"target_ids\x18\x06 \x03(\tR\ttargetIds\x12-\n" +
+	"\x12required_approvals\x18\a \x03(\x05R\x11requiredApprovals\x12\x1c\n" +
+	"\tapprovers\x18\b \x03(\tR\tapprovers\x120\n" +
 	"\n" +
-	"pagination\x18\t \x01(\v2\x13.api.v1.PageRequestR\n" +
-	"pagination\"\x82\x01\n" +
+	"time_range\x18\t \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x123\n" +
+	"\n" +
+	"pagination\x18\n" +
+	" \x01(\v2\x13.api.v1.PageRequestR\n" +
+	"pagination\x12\x18\n" +
+	"\aorigins\x18\v \x03(\tR\aorigins\"\x82\x01\n" +
 	"\x15ListApprovalsResponse\x127\n" +
 	"\brequests\x18\x01 \x03(\v2\x1b.api.v1.ApprovalRequestDataR\brequests\x120\n" +
 	"\n" +
@@ -1580,8 +1412,7 @@ const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\x1bAPPROVAL_STATUS_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17APPROVAL_STATUS_PENDING\x10\x01\x12\x1c\n" +
 	"\x18APPROVAL_STATUS_APPROVED\x10\x02\x12\x1c\n" +
-	"\x18APPROVAL_STATUS_REJECTED\x10\x032\xbd\n" +
-	"\n" +
+	"\x18APPROVAL_STATUS_REJECTED\x10\x032\x82\v\n" +
 	"\x0fApprovalService\x12\x98\x01\n" +
 	"\x0eCreateApproval\x12\x1d.api.v1.CreateApprovalRequest\x1a\x1e.api.v1.CreateApprovalResponse\"G\x82\xb5\x18'\n" +
 	"\x0fwrite:approvals\x12\x05admin\x12\x05agent\x12\x06system\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/approvals\x12\xb0\x01\n" +
@@ -1590,13 +1421,13 @@ const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\rListApprovals\x12\x1c.api.v1.ListApprovalsRequest\x1a\x1d.api.v1.ListApprovalsResponse\"E\x82\xb5\x18(\n" +
 	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/approvals\x12\xa2\x01\n" +
 	"\x14CreateApprovalConfig\x12#.api.v1.CreateApprovalConfigRequest\x1a$.api.v1.CreateApprovalConfigResponse\"?\x82\xb5\x18\x18\n" +
-	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/approval-configs\x12\xa0\x01\n" +
-	"\x11GetApprovalConfig\x12 .api.v1.GetApprovalConfigRequest\x1a\x16.api.v1.ApprovalConfig\"Q\x82\xb5\x18(\n" +
-	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/approval-configs/{id}\x12\xa7\x01\n" +
-	"\x14UpdateApprovalConfig\x12#.api.v1.UpdateApprovalConfigRequest\x1a$.api.v1.UpdateApprovalConfigResponse\"D\x82\xb5\x18\x18\n" +
-	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x02\":\x01*\x1a\x1d/api/v1/approval-configs/{id}\x12\xa4\x01\n" +
-	"\x14DeleteApprovalConfig\x12#.api.v1.DeleteApprovalConfigRequest\x1a$.api.v1.DeleteApprovalConfigResponse\"A\x82\xb5\x18\x18\n" +
-	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x02\x1f*\x1d/api/v1/approval-configs/{id}\x12\xac\x01\n" +
+	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/approval-configs\x12\xb7\x01\n" +
+	"\x11GetApprovalConfig\x12 .api.v1.GetApprovalConfigRequest\x1a\x16.api.v1.ApprovalConfig\"h\x82\xb5\x18(\n" +
+	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x026\x124/api/v1/approval-configs/{ticket_type}/{action_type}\x12\xbe\x01\n" +
+	"\x14UpdateApprovalConfig\x12#.api.v1.UpdateApprovalConfigRequest\x1a$.api.v1.UpdateApprovalConfigResponse\"[\x82\xb5\x18\x18\n" +
+	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x029:\x01*\x1a4/api/v1/approval-configs/{ticket_type}/{action_type}\x12\xbb\x01\n" +
+	"\x14DeleteApprovalConfig\x12#.api.v1.DeleteApprovalConfigRequest\x1a$.api.v1.DeleteApprovalConfigResponse\"X\x82\xb5\x18\x18\n" +
+	"\x0fwrite:approvals\x12\x05admin\x82\xd3\xe4\x93\x026*4/api/v1/approval-configs/{ticket_type}/{action_type}\x12\xac\x01\n" +
 	"\x13ListApprovalConfigs\x12\".api.v1.ListApprovalConfigsRequest\x1a#.api.v1.ListApprovalConfigsResponse\"L\x82\xb5\x18(\n" +
 	"\x0eread:approvals\x12\x05admin\x12\bapprover\x12\x05agent\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/approval-configsB7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
 
@@ -1613,7 +1444,7 @@ func file_api_proto_v1_approval_proto_rawDescGZIP() []byte {
 }
 
 var file_api_proto_v1_approval_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_proto_v1_approval_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_api_proto_v1_approval_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_api_proto_v1_approval_proto_goTypes = []any{
 	(ApprovalStatus)(0),                  // 0: api.v1.ApprovalStatus
 	(*ApprovalConfig)(nil),               // 1: api.v1.ApprovalConfig
@@ -1634,55 +1465,62 @@ var file_api_proto_v1_approval_proto_goTypes = []any{
 	(*CreateApprovalResponse)(nil),       // 16: api.v1.CreateApprovalResponse
 	(*ListApprovalsRequest)(nil),         // 17: api.v1.ListApprovalsRequest
 	(*ListApprovalsResponse)(nil),        // 18: api.v1.ListApprovalsResponse
-	(*timestamppb.Timestamp)(nil),        // 19: google.protobuf.Timestamp
-	(*TimeRange)(nil),                    // 20: api.v1.TimeRange
-	(*PageRequest)(nil),                  // 21: api.v1.PageRequest
-	(*PageInfo)(nil),                     // 22: api.v1.PageInfo
+	nil,                                  // 19: api.v1.ApprovalRequestData.MetadataEntry
+	nil,                                  // 20: api.v1.CreateApprovalRequest.MetadataEntry
+	(*timestamppb.Timestamp)(nil),        // 21: google.protobuf.Timestamp
+	(*TimeRange)(nil),                    // 22: api.v1.TimeRange
+	(*PageRequest)(nil),                  // 23: api.v1.PageRequest
+	(*PageInfo)(nil),                     // 24: api.v1.PageInfo
+	(*structpb.Value)(nil),               // 25: google.protobuf.Value
 }
 var file_api_proto_v1_approval_proto_depIdxs = []int32{
-	19, // 0: api.v1.ApprovalConfig.created_at:type_name -> google.protobuf.Timestamp
-	19, // 1: api.v1.ApprovalConfig.updated_at:type_name -> google.protobuf.Timestamp
-	19, // 2: api.v1.ApprovalConfig.deleted_at:type_name -> google.protobuf.Timestamp
+	21, // 0: api.v1.ApprovalConfig.created_at:type_name -> google.protobuf.Timestamp
+	21, // 1: api.v1.ApprovalConfig.updated_at:type_name -> google.protobuf.Timestamp
+	21, // 2: api.v1.ApprovalConfig.deleted_at:type_name -> google.protobuf.Timestamp
 	1,  // 3: api.v1.CreateApprovalConfigRequest.config:type_name -> api.v1.ApprovalConfig
 	1,  // 4: api.v1.CreateApprovalConfigResponse.config:type_name -> api.v1.ApprovalConfig
 	1,  // 5: api.v1.UpdateApprovalConfigResponse.config:type_name -> api.v1.ApprovalConfig
-	20, // 6: api.v1.ListApprovalConfigsRequest.time_range:type_name -> api.v1.TimeRange
-	21, // 7: api.v1.ListApprovalConfigsRequest.pagination:type_name -> api.v1.PageRequest
+	22, // 6: api.v1.ListApprovalConfigsRequest.time_range:type_name -> api.v1.TimeRange
+	23, // 7: api.v1.ListApprovalConfigsRequest.pagination:type_name -> api.v1.PageRequest
 	1,  // 8: api.v1.ListApprovalConfigsResponse.configs:type_name -> api.v1.ApprovalConfig
-	22, // 9: api.v1.ListApprovalConfigsResponse.pagination:type_name -> api.v1.PageInfo
-	0,  // 10: api.v1.ApprovalRequestData.status:type_name -> api.v1.ApprovalStatus
-	12, // 11: api.v1.ApprovalRequestData.decisions:type_name -> api.v1.ApprovalDecision
-	19, // 12: api.v1.ApprovalRequestData.created_at:type_name -> google.protobuf.Timestamp
-	19, // 13: api.v1.ApprovalRequestData.updated_at:type_name -> google.protobuf.Timestamp
-	19, // 14: api.v1.ApprovalDecision.decided_at:type_name -> google.protobuf.Timestamp
-	11, // 15: api.v1.DecideApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
-	11, // 16: api.v1.CreateApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
-	0,  // 17: api.v1.ListApprovalsRequest.statuses:type_name -> api.v1.ApprovalStatus
-	20, // 18: api.v1.ListApprovalsRequest.time_range:type_name -> api.v1.TimeRange
-	21, // 19: api.v1.ListApprovalsRequest.pagination:type_name -> api.v1.PageRequest
-	11, // 20: api.v1.ListApprovalsResponse.requests:type_name -> api.v1.ApprovalRequestData
-	22, // 21: api.v1.ListApprovalsResponse.pagination:type_name -> api.v1.PageInfo
-	15, // 22: api.v1.ApprovalService.CreateApproval:input_type -> api.v1.CreateApprovalRequest
-	13, // 23: api.v1.ApprovalService.DecideApproval:input_type -> api.v1.DecideApprovalRequest
-	17, // 24: api.v1.ApprovalService.ListApprovals:input_type -> api.v1.ListApprovalsRequest
-	2,  // 25: api.v1.ApprovalService.CreateApprovalConfig:input_type -> api.v1.CreateApprovalConfigRequest
-	4,  // 26: api.v1.ApprovalService.GetApprovalConfig:input_type -> api.v1.GetApprovalConfigRequest
-	5,  // 27: api.v1.ApprovalService.UpdateApprovalConfig:input_type -> api.v1.UpdateApprovalConfigRequest
-	7,  // 28: api.v1.ApprovalService.DeleteApprovalConfig:input_type -> api.v1.DeleteApprovalConfigRequest
-	9,  // 29: api.v1.ApprovalService.ListApprovalConfigs:input_type -> api.v1.ListApprovalConfigsRequest
-	16, // 30: api.v1.ApprovalService.CreateApproval:output_type -> api.v1.CreateApprovalResponse
-	14, // 31: api.v1.ApprovalService.DecideApproval:output_type -> api.v1.DecideApprovalResponse
-	18, // 32: api.v1.ApprovalService.ListApprovals:output_type -> api.v1.ListApprovalsResponse
-	3,  // 33: api.v1.ApprovalService.CreateApprovalConfig:output_type -> api.v1.CreateApprovalConfigResponse
-	1,  // 34: api.v1.ApprovalService.GetApprovalConfig:output_type -> api.v1.ApprovalConfig
-	6,  // 35: api.v1.ApprovalService.UpdateApprovalConfig:output_type -> api.v1.UpdateApprovalConfigResponse
-	8,  // 36: api.v1.ApprovalService.DeleteApprovalConfig:output_type -> api.v1.DeleteApprovalConfigResponse
-	10, // 37: api.v1.ApprovalService.ListApprovalConfigs:output_type -> api.v1.ListApprovalConfigsResponse
-	30, // [30:38] is the sub-list for method output_type
-	22, // [22:30] is the sub-list for method input_type
-	22, // [22:22] is the sub-list for extension type_name
-	22, // [22:22] is the sub-list for extension extendee
-	0,  // [0:22] is the sub-list for field type_name
+	24, // 9: api.v1.ListApprovalConfigsResponse.pagination:type_name -> api.v1.PageInfo
+	19, // 10: api.v1.ApprovalRequestData.metadata:type_name -> api.v1.ApprovalRequestData.MetadataEntry
+	0,  // 11: api.v1.ApprovalRequestData.status:type_name -> api.v1.ApprovalStatus
+	12, // 12: api.v1.ApprovalRequestData.decisions:type_name -> api.v1.ApprovalDecision
+	21, // 13: api.v1.ApprovalRequestData.created_at:type_name -> google.protobuf.Timestamp
+	21, // 14: api.v1.ApprovalRequestData.updated_at:type_name -> google.protobuf.Timestamp
+	21, // 15: api.v1.ApprovalDecision.decided_at:type_name -> google.protobuf.Timestamp
+	11, // 16: api.v1.DecideApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
+	20, // 17: api.v1.CreateApprovalRequest.metadata:type_name -> api.v1.CreateApprovalRequest.MetadataEntry
+	11, // 18: api.v1.CreateApprovalResponse.request:type_name -> api.v1.ApprovalRequestData
+	0,  // 19: api.v1.ListApprovalsRequest.statuses:type_name -> api.v1.ApprovalStatus
+	22, // 20: api.v1.ListApprovalsRequest.time_range:type_name -> api.v1.TimeRange
+	23, // 21: api.v1.ListApprovalsRequest.pagination:type_name -> api.v1.PageRequest
+	11, // 22: api.v1.ListApprovalsResponse.requests:type_name -> api.v1.ApprovalRequestData
+	24, // 23: api.v1.ListApprovalsResponse.pagination:type_name -> api.v1.PageInfo
+	25, // 24: api.v1.ApprovalRequestData.MetadataEntry.value:type_name -> google.protobuf.Value
+	25, // 25: api.v1.CreateApprovalRequest.MetadataEntry.value:type_name -> google.protobuf.Value
+	15, // 26: api.v1.ApprovalService.CreateApproval:input_type -> api.v1.CreateApprovalRequest
+	13, // 27: api.v1.ApprovalService.DecideApproval:input_type -> api.v1.DecideApprovalRequest
+	17, // 28: api.v1.ApprovalService.ListApprovals:input_type -> api.v1.ListApprovalsRequest
+	2,  // 29: api.v1.ApprovalService.CreateApprovalConfig:input_type -> api.v1.CreateApprovalConfigRequest
+	4,  // 30: api.v1.ApprovalService.GetApprovalConfig:input_type -> api.v1.GetApprovalConfigRequest
+	5,  // 31: api.v1.ApprovalService.UpdateApprovalConfig:input_type -> api.v1.UpdateApprovalConfigRequest
+	7,  // 32: api.v1.ApprovalService.DeleteApprovalConfig:input_type -> api.v1.DeleteApprovalConfigRequest
+	9,  // 33: api.v1.ApprovalService.ListApprovalConfigs:input_type -> api.v1.ListApprovalConfigsRequest
+	16, // 34: api.v1.ApprovalService.CreateApproval:output_type -> api.v1.CreateApprovalResponse
+	14, // 35: api.v1.ApprovalService.DecideApproval:output_type -> api.v1.DecideApprovalResponse
+	18, // 36: api.v1.ApprovalService.ListApprovals:output_type -> api.v1.ListApprovalsResponse
+	3,  // 37: api.v1.ApprovalService.CreateApprovalConfig:output_type -> api.v1.CreateApprovalConfigResponse
+	1,  // 38: api.v1.ApprovalService.GetApprovalConfig:output_type -> api.v1.ApprovalConfig
+	6,  // 39: api.v1.ApprovalService.UpdateApprovalConfig:output_type -> api.v1.UpdateApprovalConfigResponse
+	8,  // 40: api.v1.ApprovalService.DeleteApprovalConfig:output_type -> api.v1.DeleteApprovalConfigResponse
+	10, // 41: api.v1.ApprovalService.ListApprovalConfigs:output_type -> api.v1.ListApprovalConfigsResponse
+	34, // [34:42] is the sub-list for method output_type
+	26, // [26:34] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	26, // [26:26] is the sub-list for extension extendee
+	0,  // [0:26] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_approval_proto_init() }
@@ -1692,37 +1530,13 @@ func file_api_proto_v1_approval_proto_init() {
 	}
 	file_api_proto_v1_common_proto_init()
 	file_api_proto_v1_options_proto_init()
-	file_api_proto_v1_approval_proto_msgTypes[0].OneofWrappers = []any{
-		(*ApprovalConfig_ActionType)(nil),
-		(*ApprovalConfig_TicketType)(nil),
-	}
-	file_api_proto_v1_approval_proto_msgTypes[3].OneofWrappers = []any{
-		(*GetApprovalConfigRequest_Id)(nil),
-		(*GetApprovalConfigRequest_ActionType)(nil),
-		(*GetApprovalConfigRequest_TicketType)(nil),
-	}
-	file_api_proto_v1_approval_proto_msgTypes[4].OneofWrappers = []any{
-		(*UpdateApprovalConfigRequest_Id)(nil),
-		(*UpdateApprovalConfigRequest_ActionType)(nil),
-		(*UpdateApprovalConfigRequest_TicketType)(nil),
-	}
-	file_api_proto_v1_approval_proto_msgTypes[6].OneofWrappers = []any{
-		(*DeleteApprovalConfigRequest_Id)(nil),
-		(*DeleteApprovalConfigRequest_ActionType)(nil),
-		(*DeleteApprovalConfigRequest_TicketType)(nil),
-	}
-	file_api_proto_v1_approval_proto_msgTypes[14].OneofWrappers = []any{
-		(*CreateApprovalRequest_Id)(nil),
-		(*CreateApprovalRequest_ActionType)(nil),
-		(*CreateApprovalRequest_TicketType)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_approval_proto_rawDesc), len(file_api_proto_v1_approval_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   18,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

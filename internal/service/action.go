@@ -82,7 +82,7 @@ func (s *ActionServiceServer) ExecuteAction(ctx context.Context, req *apiv1.Exec
 		EventId:    uuid.NewString(),
 		EventType:  eventType,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: execution.ID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: execution.ToProto()},
@@ -189,7 +189,7 @@ func (s *ActionServiceServer) CreateActionSchema(ctx context.Context, req *apiv1
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ActionSchemaCreated,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: schema.ActionType,
 		Data:       eventbus.ProtoMarshaler{Message: schema.ToProto()},
@@ -282,7 +282,7 @@ func (s *ActionServiceServer) UpdateActionSchema(ctx context.Context, req *apiv1
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ActionSchemaUpdated,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: updated.ActionType,
 		Data:       eventbus.ProtoMarshaler{Message: updated.ToProto()},
@@ -303,7 +303,7 @@ func (s *ActionServiceServer) DeleteActionSchema(ctx context.Context, req *apiv1
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ActionSchemaDeleted,
 		EventTime:  time.Now().UTC(),
-		Source:     eventconsts.SourceSupportTicket,
+		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: req.ActionType,
 	}
@@ -322,8 +322,8 @@ func (s *ActionServiceServer) HandleApprovalDecided(ctx context.Context, evt *ev
 		return err
 	}
 
-	if approval.ExecutionId == "" {
-		return nil // No execution to update
+	if approval.Origin != eventconsts.SourceAction {
+		return nil
 	}
 
 	status := int32(apiv1.ActionStatus_ACTION_STATUS_REJECTED)
@@ -332,15 +332,15 @@ func (s *ActionServiceServer) HandleApprovalDecided(ctx context.Context, evt *ev
 	}
 
 	update := model.ActionExecutionUpdate{
-		Status:    &status,
+		Status: &status,
 	}
 
-	if err := s.repo.UpdateExecution(ctx, approval.ExecutionId, update); err != nil {
+	if err := s.repo.UpdateExecution(ctx, approval.TargetId, update); err != nil {
 		return err
 	}
 
 	if status == int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS) {
-		execution, err := s.repo.GetExecution(ctx, approval.ExecutionId)
+		execution, err := s.repo.GetExecution(ctx, approval.TargetId)
 		if err != nil {
 			return err
 		}
@@ -349,7 +349,7 @@ func (s *ActionServiceServer) HandleApprovalDecided(ctx context.Context, evt *ev
 				EventId:    uuid.NewString(),
 				EventType:  eventconsts.ActionExecutionTriggered,
 				EventTime:  time.Now().UTC(),
-				Source:     eventconsts.SourceSupportTicket,
+				Source:     eventconsts.SourceAction,
 				Schema:     eventconsts.SchemaAction,
 				ResourceID: execution.ID.Hex(),
 				Data:       eventbus.ProtoMarshaler{Message: execution.ToProto()},
@@ -396,8 +396,8 @@ func (s *ActionServiceServer) HandleActionExecutionExecuted(ctx context.Context,
 	}
 
 	update := model.ActionExecutionUpdate{
-		Status:    &status,
-		Result:    modelResult,
+		Status: &status,
+		Result: modelResult,
 	}
 
 	if err := s.repo.UpdateExecution(ctx, result.ExecutionId, update); err != nil {
@@ -415,7 +415,7 @@ func (s *ActionServiceServer) HandleActionExecutionExecuted(ctx context.Context,
 			EventId:    uuid.NewString(),
 			EventType:  eventconsts.ActionExecutionCompleted,
 			EventTime:  time.Now().UTC(),
-			Source:     eventconsts.SourceSupportTicket,
+			Source:     eventconsts.SourceAction,
 			Schema:     eventconsts.SchemaAction,
 			ResourceID: execution.ID.Hex(),
 			Data:       eventbus.ProtoMarshaler{Message: execution.ToProto()},

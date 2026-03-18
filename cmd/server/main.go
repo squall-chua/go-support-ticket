@@ -150,14 +150,31 @@ func main() {
 		log.Fatalf("Failed to create action subscriber broker: %v", err)
 	}
 
+	ticketSubBroker, err := kafka.NewBroker(kafka.Config{
+		Brokers: []string{kafkaURL},
+		Writer: kafka.WriterConfig{
+			BatchSize:    10,
+			WriteTimeout: 5 * time.Second,
+		},
+		Reader: kafka.ReaderConfig{
+			GroupID: "ticket-service",
+		},
+	})
+	if err != nil {
+		log.Fatalf("Failed to create ticket subscriber broker: %v", err)
+	}
+
 	approvalSub := event.NewSubscriber(router, map[string]event.Broker{"kafka": approvalSubBroker}, nil)
 	approvalSvc.RegisterHandlers(approvalSub)
 
 	actionSub := event.NewSubscriber(router, map[string]event.Broker{"kafka": actionSubBroker}, nil)
 	actionSvc.RegisterHandlers(actionSub)
 
+	ticketSub := event.NewSubscriber(router, map[string]event.Broker{"kafka": ticketSubBroker}, nil)
+	ticketSvc.RegisterHandlers(ticketSub)
+
 	// Start subscribers in the background
-	subs := []event.Subscriber{approvalSub, actionSub}
+	subs := []event.Subscriber{approvalSub, actionSub, ticketSub}
 	for _, s := range subs {
 		sub := s
 		g.Go(func() error {
