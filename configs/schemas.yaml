@@ -1,120 +1,93 @@
 approval_config:
-  approval_config.created:
-    queue_type: kafka
-    destinations:
-      - approval-events
-    dlq_postfix: .failed
-  approval_config.updated:
-    queue_type: kafka
-    destinations:
-      - approval-events
-    dlq_postfix: .failed
-  approval_config.deleted:
-    queue_type: kafka
-    destinations:
-      - approval-events
-    dlq_postfix: .failed
+  queue_type: kafka
+  dlq_postfix: .failed
+  events:
+    approval_config.created:
+      destinations:
+        - approval-events
+    approval_config.updated:
+      destinations:
+        - approval-events
+    approval_config.deleted:
+      destinations:
+        - approval-events
+
 approval:
-  approval.requested:
-    queue_type: kafka
-    destinations:
-      - approval-events
-    dlq_postfix: .failed
-  approval.decided:
-    queue_type: kafka
-    destinations:
-      - approval-events
-    dlq_postfix: .failed
+  queue_type: kafka
+  dlq_postfix: .failed
+  events:
+    approval.requested:
+      destinations:
+        - approval-events
+    approval.decided:
+      destinations:
+        - approval-events
+
 action:
-  action.schema.created:
-    queue_type: kafka
-    destinations:
-      - action-events
-    dlq_postfix: .failed
-  action.schema.updated:
-    queue_type: kafka
-    destinations:
-      - action-events
-    dlq_postfix: .failed
-  action.schema.deleted:
-    queue_type: kafka
-    destinations:
-      - action-events
-    dlq_postfix: .failed
-  action.execution.status.updated:
-    queue_type: kafka
-    destinations:
-      - action-events
-    dlq_postfix: .failed
-  action.execution.triggered:
-    queue_type: kafka
-    destinations:
-      - action-events
-    dlq_postfix: .failed
-  action.execution.completed:
-    queue_type: kafka
-    destinations:
-      - action-events
-    dlq_postfix: .failed
-  action.execution.pending_approval:
-    queue_type: kafka
-    destinations:
-      - action-events
-    dlq_postfix: .failed
+  queue_type: kafka
+  dlq_postfix: .failed
+  events:
+    action.schema.created:
+      destinations:
+        - action-events
+    action.schema.updated:
+      destinations:
+        - action-events
+    action.schema.deleted:
+      destinations:
+        - action-events
+    action.execution.status.updated:
+      destinations:
+        - action-events
+    action.execution.triggered:
+      destinations:
+        - action-events
+    action.execution.completed:
+      destinations:
+        - action-events
+    action.execution.pending_approval:
+      destinations:
+        - action-events
+
 ticket_type:
-  ticket_type.created:
-    queue_type: kafka
-    destinations:
-      - ticket-type-events
-    dlq_postfix: .failed
-  ticket_type.updated:
-    queue_type: kafka
-    destinations:
-      - ticket-type-events
-    dlq_postfix: .failed
-  ticket_type.deleted:
-    queue_type: kafka
-    destinations:
-      - ticket-type-events
-    dlq_postfix: .failed
+  queue_type: kafka
+  dlq_postfix: .failed
+  events:
+    ticket_type.created:
+      destinations:
+        - ticket-type-events
+    ticket_type.updated:
+      destinations:
+        - ticket-type-events
+    ticket_type.deleted:
+      destinations:
+        - ticket-type-events
+
 ticket:
-  ticket.created:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.updated:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.assigned:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.comment.added:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.update.pending_approval:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.merged:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.merge.pending_approval:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
-  ticket.deleted:
-    queue_type: kafka
-    destinations:
-      - ticket-events
-    dlq_postfix: .failed
+  queue_type: kafka
+  dlq_postfix: .failed
+  events:
+    ticket.created:
+      destinations:
+        - ticket-events
+    ticket.updated:
+      destinations:
+        - ticket-events
+    ticket.assigned:
+      destinations:
+        - ticket-events
+    ticket.comment.added:
+      destinations:
+        - ticket-events
+    ticket.update.pending_approval:
+      destinations:
+        - ticket-events
+    ticket.merged:
+      destinations:
+        - ticket-events
+    ticket.merge.pending_approval:
+      destinations:
+        - ticket-events
+    ticket.deleted:
+      destinations:
+        - ticket-events
