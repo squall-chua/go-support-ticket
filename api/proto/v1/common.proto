@@ -5,6 +5,7 @@ package api.v1;
 option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 message PageRequest {
   int32 page_size = 1;
@@ -25,4 +26,30 @@ enum SortOrder {
   SORT_ORDER_UNSPECIFIED = 0;
   SORT_ORDER_ASC = 1;
   SORT_ORDER_DESC = 2;
+}
+
+message MetadataFilter {
+  enum Operator {
+    OPERATOR_UNSPECIFIED = 0;
+    OPERATOR_EQUAL = 1;
+    OPERATOR_NOT_EQUAL = 2;
+    OPERATOR_GREATER_THAN = 3;
+    OPERATOR_LESS_THAN = 4;
+    OPERATOR_GREATER_THAN_OR_EQUAL = 5;
+    OPERATOR_LESS_THAN_OR_EQUAL = 6;
+    OPERATOR_CONTAINS = 7;
+    OPERATOR_IN = 8;
+    OPERATOR_NOT_IN = 9;
+    OPERATOR_EXISTS = 10;
+    OPERATOR_NOT_EXISTS = 11;
+    OPERATOR_STARTS_WITH = 12;
+    OPERATOR_ENDS_WITH = 13;
+    OPERATOR_REGEX = 14;
+    OPERATOR_IS_NULL = 15;
+    OPERATOR_IS_NOT_NULL = 16;
+  }
+
+  string key = 1;
+  Operator operator = 2;
+  google.protobuf.Value value = 3;
 }

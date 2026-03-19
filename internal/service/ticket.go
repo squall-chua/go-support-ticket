@@ -79,10 +79,12 @@ func (s *TicketServiceServer) CreateTicketType(ctx context.Context, req *apiv1.C
 		TicketType: tType.ToProto(),
 	}
 
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketTypeCreated,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaTicketType,
 		ResourceID: tType.ID.Hex(),
@@ -172,10 +174,12 @@ func (s *TicketServiceServer) UpdateTicketType(ctx context.Context, req *apiv1.U
 		TicketType: tType.ToProto(),
 	}
 
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketTypeUpdated,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaTicketType,
 		ResourceID: tType.ID.Hex(),
@@ -190,10 +194,12 @@ func (s *TicketServiceServer) DeleteTicketType(ctx context.Context, req *apiv1.D
 	if err := s.typeRepo.DeleteType(ctx, req.Id); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketTypeDeleted,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaTicketType,
 		ResourceID: req.Id,
@@ -245,6 +251,7 @@ func (s *TicketServiceServer) CreateTicket(ctx context.Context, req *apiv1.Creat
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketCreated,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaSupportTicket,
 		ResourceID: ticket.ID.Hex(),
@@ -512,9 +519,13 @@ func (s *TicketServiceServer) ListTickets(ctx context.Context, req *apiv1.ListTi
 		filter.UserRoles = tokenInfo.Roles
 	}
 	if len(req.Metadata) > 0 {
-		filter.Metadata = make(model.Metadata)
-		for k, v := range req.Metadata {
-			filter.Metadata[k] = v.AsInterface()
+		filter.Metadata = make([]model.MetadataFilter, len(req.Metadata))
+		for i, v := range req.Metadata {
+			filter.Metadata[i] = model.MetadataFilter{
+				Key:      v.Key,
+				Operator: model.MetadataOperator(v.Operator),
+				Value:    v.Value.AsInterface(),
+			}
 		}
 	}
 
@@ -575,6 +586,7 @@ func (s *TicketServiceServer) AddComment(ctx context.Context, req *apiv1.AddComm
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketCommentAdded,
 		EventTime:  time.Now().UTC(),
+		User:       author,
 		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaSupportTicket,
 		ResourceID: req.TicketId,
@@ -603,6 +615,7 @@ func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.Delet
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.TicketDeleted,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaSupportTicket,
 		ResourceID: req.TicketId,
@@ -616,10 +629,12 @@ func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.Delet
 }
 
 func (s *TicketServiceServer) publishEvent(ctx context.Context, eventType, resourceID string, data any, metadata map[string]any) {
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventType,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceTicket,
 		Schema:     eventconsts.SchemaSupportTicket,
 		ResourceID: resourceID,
@@ -685,7 +700,7 @@ func (s *TicketServiceServer) HandleApprovalDecided(ctx context.Context, evt *ev
 
 			ticket, err := s.repo.UpdateTicket(ctx, approval.TicketId, update, userID, roles)
 			if err == nil && ticket != nil {
-				s.publishTicketUpdated(ctx, ticket)
+				s.publishTicketUpdated(middleware.WithUser(ctx, approval.Requester), ticket)
 			}
 			return err
 		} else if approval.Status == apiv1.ApprovalStatus_APPROVAL_STATUS_REJECTED {
@@ -725,7 +740,7 @@ func (s *TicketServiceServer) HandleApprovalDecided(ctx context.Context, evt *ev
 
 				pb, _ := source.ToProto()
 				metadata := map[string]any{"target_ticket_id": targetIDStr}
-				s.publishEvent(ctx, eventconsts.TicketMerged, source.ID.Hex(), eventbus.ProtoMarshaler{Message: pb}, metadata)
+				s.publishEvent(middleware.WithUser(ctx, approval.Requester), eventconsts.TicketMerged, source.ID.Hex(), eventbus.ProtoMarshaler{Message: pb}, metadata)
 			}
 			return err
 		} else if approval.Status == apiv1.ApprovalStatus_APPROVAL_STATUS_REJECTED {

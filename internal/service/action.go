@@ -82,6 +82,7 @@ func (s *ActionServiceServer) ExecuteAction(ctx context.Context, req *apiv1.Exec
 		EventId:    uuid.NewString(),
 		EventType:  eventType,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: execution.ID.Hex(),
@@ -185,10 +186,12 @@ func (s *ActionServiceServer) CreateActionSchema(ctx context.Context, req *apiv1
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ActionSchemaCreated,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: schema.ActionType,
@@ -278,10 +281,12 @@ func (s *ActionServiceServer) UpdateActionSchema(ctx context.Context, req *apiv1
 		return nil, status.Error(codes.NotFound, "action schema not found after update")
 	}
 
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ActionSchemaUpdated,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: updated.ActionType,
@@ -299,10 +304,12 @@ func (s *ActionServiceServer) DeleteActionSchema(ctx context.Context, req *apiv1
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ActionSchemaDeleted,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
 		ResourceID: req.ActionType,
@@ -345,10 +352,12 @@ func (s *ActionServiceServer) HandleApprovalDecided(ctx context.Context, evt *ev
 			return err
 		}
 		if execution != nil {
+			userID := approval.Requester
 			triggeredEvt := event.Event{
 				EventId:    uuid.NewString(),
 				EventType:  eventconsts.ActionExecutionTriggered,
 				EventTime:  time.Now().UTC(),
+				User:       userID,
 				Source:     eventconsts.SourceAction,
 				Schema:     eventconsts.SchemaAction,
 				ResourceID: execution.ID.Hex(),
@@ -411,10 +420,12 @@ func (s *ActionServiceServer) HandleActionExecutionExecuted(ctx context.Context,
 	}
 
 	if execution != nil {
+		userID := evt.User
 		completeEvt := event.Event{
 			EventId:    uuid.NewString(),
 			EventType:  eventconsts.ActionExecutionCompleted,
 			EventTime:  time.Now().UTC(),
+			User:       userID,
 			Source:     eventconsts.SourceAction,
 			Schema:     eventconsts.SchemaAction,
 			ResourceID: execution.ID.Hex(),

@@ -18,23 +18,43 @@ func NewAuditRepo(col *mongo.Collection) *AuditRepo {
 }
 
 func (r *AuditRepo) CreateLog(ctx context.Context, log *model.AuditLog) error {
-	if log.CreatedAt.IsZero() {
-		log.CreatedAt = time.Now().UTC()
+	if log.EventTime.IsZero() {
+		log.EventTime = time.Now().UTC()
 	}
 	_, err := r.coll.InsertOne(ctx, log)
 	return err
 }
 
-func (r *AuditRepo) ListLogs(ctx context.Context, ticketID, action string, limit, offset int32) ([]*model.AuditLog, int32, error) {
+func (r *AuditRepo) ListLogs(ctx context.Context, filter model.AuditLogFilter, limit, offset int32) ([]*model.AuditLog, int32, error) {
 	f := gmqb.Field[model.AuditLog]
-	filter := gmqb.NewFilter()
+	q := gmqb.NewFilter()
 
-	if ticketID != "" {
-		filter.Eq(f("TicketID"), ticketID)
+	if len(filter.EventIDs) > 0 {
+		q.In(f("EventID"), filter.EventIDs)
 	}
-	if action != "" {
-		filter.Eq(f("Action"), action)
+	if len(filter.EventTypes) > 0 {
+		q.In(f("EventType"), filter.EventTypes)
+	}
+	if len(filter.Users) > 0 {
+		q.In(f("User"), filter.Users)
+	}
+	if len(filter.Sources) > 0 {
+		q.In(f("Source"), filter.Sources)
+	}
+	if len(filter.Schemas) > 0 {
+		q.In(f("Schema"), filter.Schemas)
+	}
+	if len(filter.ResourceIDs) > 0 {
+		q.In(f("ResourceID"), filter.ResourceIDs)
+	}
+	if !filter.StartTime.IsZero() {
+		q.Gte(f("EventTime"), filter.StartTime)
+	}
+	if !filter.EndTime.IsZero() {
+		q.Lt(f("EventTime"), filter.EndTime)
 	}
 
-	return listPaginated(ctx, r.coll, filter, gmqb.Desc(f("CreatedAt")), limit, offset)
+	applyMetadataFilters(q, "metadata", filter.Metadata)
+
+	return listPaginated(ctx, r.coll, q, gmqb.Desc(f("EventTime")), limit, offset)
 }

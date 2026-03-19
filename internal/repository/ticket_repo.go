@@ -226,9 +226,7 @@ func (r *TicketRepo) ListTickets(ctx context.Context, filter model.TicketFilter,
 		}
 	}
 
-	for k, v := range filter.Metadata {
-		q.Eq(f("Metadata")+"."+k, v)
-	}
+	applyMetadataFilters(q, "metadata", filter.Metadata)
 
 	visibilityFilter := r.buildVisibilityFilter(userID, roles)
 

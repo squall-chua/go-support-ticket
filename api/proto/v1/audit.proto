@@ -6,26 +6,48 @@ option go_package = "github.com/squall-chua/go-support-ticket/api/v1;apiv1";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
+import "google/protobuf/any.proto";
 import "api/proto/v1/common.proto";
 import "google/api/annotations.proto";
 import "api/proto/v1/options.proto";
 
 message AuditEntry {
   string id = 1;
-  string ticket_id = 2;
-  string user_id = 3;
-  string action = 4;
-  string details = 5;
-  map<string, google.protobuf.Value> metadata = 6;
-  google.protobuf.Timestamp created_at = 7;
+  string event_id = 2;
+  string event_type = 3;
+  google.protobuf.Timestamp event_time = 4;
+  string user = 5;
+  string source = 6;
+  string schema = 7;
+  string resource_id = 8;
+  google.protobuf.Any data = 9;
+  map<string, google.protobuf.Value> metadata = 10;
 }
 
 message ListAuditTrailRequest {
+  repeated string event_ids = 1;
+  repeated string event_types = 2;
+  repeated string users = 3;
+  repeated string sources = 4;
+  repeated string schemas = 5;
+  repeated string resource_ids = 6;
+  repeated MetadataFilter metadata = 7;
+  TimeRange time_range = 8;
+  PageRequest pagination = 9;
+}
+
+
+message ListAuditTrailResponse {
+  repeated AuditEntry entries = 1;
+  PageInfo pagination = 2;
+}
+
+message GetTicketAuditTrailRequest {
   string ticket_id = 1;
   PageRequest pagination = 2;
 }
 
-message ListAuditTrailResponse {
+message GetTicketAuditTrailResponse {
   repeated AuditEntry entries = 1;
   PageInfo pagination = 2;
 }
@@ -33,11 +55,20 @@ message ListAuditTrailResponse {
 service AuditService {
   rpc ListAuditTrail(ListAuditTrailRequest) returns (ListAuditTrailResponse) {
     option (google.api.http) = {
-      get: "/api/v1/tickets/{ticket_id}/audit-trail"
+      get: "/api/v1/audit-trail"
     };
     option (auth.v1.rule) = {
       required_scopes: ["read:audit"]
       required_roles: ["admin"]
+    };
+  }
+
+  rpc GetTicketAuditTrail(GetTicketAuditTrailRequest) returns (GetTicketAuditTrailResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/tickets/{ticket_id}/audit-trail"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["read:tickets"]
     };
   }
 }

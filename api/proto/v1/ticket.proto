@@ -231,7 +231,7 @@ message ListTicketsRequest {
   repeated string customer_id = 7;
   repeated string created_by = 8;
   repeated string merged_into = 9;
-  map<string, google.protobuf.Value> metadata = 10;
+  repeated MetadataFilter metadata = 10;
 
   // Sorting
   repeated TicketSort sort = 11;

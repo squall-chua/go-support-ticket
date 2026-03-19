@@ -53,7 +53,7 @@ type TicketFilter struct {
 	CustomerIDs         []string
 	CreatedBy           []string
 	MergedInto          []string
-	Metadata            Metadata
+	Metadata            []MetadataFilter
 	IncludeDeleted      bool
 	UserRoles           []string
 }

@@ -9,6 +9,7 @@ package apiv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -69,6 +70,97 @@ func (x SortOrder) Number() protoreflect.EnumNumber {
 // Deprecated: Use SortOrder.Descriptor instead.
 func (SortOrder) EnumDescriptor() ([]byte, []int) {
 	return file_api_proto_v1_common_proto_rawDescGZIP(), []int{0}
+}
+
+type MetadataFilter_Operator int32
+
+const (
+	MetadataFilter_OPERATOR_UNSPECIFIED           MetadataFilter_Operator = 0
+	MetadataFilter_OPERATOR_EQUAL                 MetadataFilter_Operator = 1
+	MetadataFilter_OPERATOR_NOT_EQUAL             MetadataFilter_Operator = 2
+	MetadataFilter_OPERATOR_GREATER_THAN          MetadataFilter_Operator = 3
+	MetadataFilter_OPERATOR_LESS_THAN             MetadataFilter_Operator = 4
+	MetadataFilter_OPERATOR_GREATER_THAN_OR_EQUAL MetadataFilter_Operator = 5
+	MetadataFilter_OPERATOR_LESS_THAN_OR_EQUAL    MetadataFilter_Operator = 6
+	MetadataFilter_OPERATOR_CONTAINS              MetadataFilter_Operator = 7
+	MetadataFilter_OPERATOR_IN                    MetadataFilter_Operator = 8
+	MetadataFilter_OPERATOR_NOT_IN                MetadataFilter_Operator = 9
+	MetadataFilter_OPERATOR_EXISTS                MetadataFilter_Operator = 10
+	MetadataFilter_OPERATOR_NOT_EXISTS            MetadataFilter_Operator = 11
+	MetadataFilter_OPERATOR_STARTS_WITH           MetadataFilter_Operator = 12
+	MetadataFilter_OPERATOR_ENDS_WITH             MetadataFilter_Operator = 13
+	MetadataFilter_OPERATOR_REGEX                 MetadataFilter_Operator = 14
+	MetadataFilter_OPERATOR_IS_NULL               MetadataFilter_Operator = 15
+	MetadataFilter_OPERATOR_IS_NOT_NULL           MetadataFilter_Operator = 16
+)
+
+// Enum value maps for MetadataFilter_Operator.
+var (
+	MetadataFilter_Operator_name = map[int32]string{
+		0:  "OPERATOR_UNSPECIFIED",
+		1:  "OPERATOR_EQUAL",
+		2:  "OPERATOR_NOT_EQUAL",
+		3:  "OPERATOR_GREATER_THAN",
+		4:  "OPERATOR_LESS_THAN",
+		5:  "OPERATOR_GREATER_THAN_OR_EQUAL",
+		6:  "OPERATOR_LESS_THAN_OR_EQUAL",
+		7:  "OPERATOR_CONTAINS",
+		8:  "OPERATOR_IN",
+		9:  "OPERATOR_NOT_IN",
+		10: "OPERATOR_EXISTS",
+		11: "OPERATOR_NOT_EXISTS",
+		12: "OPERATOR_STARTS_WITH",
+		13: "OPERATOR_ENDS_WITH",
+		14: "OPERATOR_REGEX",
+		15: "OPERATOR_IS_NULL",
+		16: "OPERATOR_IS_NOT_NULL",
+	}
+	MetadataFilter_Operator_value = map[string]int32{
+		"OPERATOR_UNSPECIFIED":           0,
+		"OPERATOR_EQUAL":                 1,
+		"OPERATOR_NOT_EQUAL":             2,
+		"OPERATOR_GREATER_THAN":          3,
+		"OPERATOR_LESS_THAN":             4,
+		"OPERATOR_GREATER_THAN_OR_EQUAL": 5,
+		"OPERATOR_LESS_THAN_OR_EQUAL":    6,
+		"OPERATOR_CONTAINS":              7,
+		"OPERATOR_IN":                    8,
+		"OPERATOR_NOT_IN":                9,
+		"OPERATOR_EXISTS":                10,
+		"OPERATOR_NOT_EXISTS":            11,
+		"OPERATOR_STARTS_WITH":           12,
+		"OPERATOR_ENDS_WITH":             13,
+		"OPERATOR_REGEX":                 14,
+		"OPERATOR_IS_NULL":               15,
+		"OPERATOR_IS_NOT_NULL":           16,
+	}
+)
+
+func (x MetadataFilter_Operator) Enum() *MetadataFilter_Operator {
+	p := new(MetadataFilter_Operator)
+	*p = x
+	return p
+}
+
+func (x MetadataFilter_Operator) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MetadataFilter_Operator) Descriptor() protoreflect.EnumDescriptor {
+	return file_api_proto_v1_common_proto_enumTypes[1].Descriptor()
+}
+
+func (MetadataFilter_Operator) Type() protoreflect.EnumType {
+	return &file_api_proto_v1_common_proto_enumTypes[1]
+}
+
+func (x MetadataFilter_Operator) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use MetadataFilter_Operator.Descriptor instead.
+func (MetadataFilter_Operator) EnumDescriptor() ([]byte, []int) {
+	return file_api_proto_v1_common_proto_rawDescGZIP(), []int{3, 0}
 }
 
 type PageRequest struct {
@@ -227,11 +319,71 @@ func (x *TimeRange) GetEndTime() *timestamppb.Timestamp {
 	return nil
 }
 
+type MetadataFilter struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Key           string                  `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Operator      MetadataFilter_Operator `protobuf:"varint,2,opt,name=operator,proto3,enum=api.v1.MetadataFilter_Operator" json:"operator,omitempty"`
+	Value         *structpb.Value         `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MetadataFilter) Reset() {
+	*x = MetadataFilter{}
+	mi := &file_api_proto_v1_common_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MetadataFilter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MetadataFilter) ProtoMessage() {}
+
+func (x *MetadataFilter) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_common_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MetadataFilter.ProtoReflect.Descriptor instead.
+func (*MetadataFilter) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_common_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *MetadataFilter) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *MetadataFilter) GetOperator() MetadataFilter_Operator {
+	if x != nil {
+		return x.Operator
+	}
+	return MetadataFilter_OPERATOR_UNSPECIFIED
+}
+
+func (x *MetadataFilter) GetValue() *structpb.Value {
+	if x != nil {
+		return x.Value
+	}
+	return nil
+}
+
 var File_api_proto_v1_common_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_common_proto_rawDesc = "" +
 	"\n" +
-	"\x19api/proto/v1/common.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"K\n" +
+	"\x19api/proto/v1/common.proto\x12\x06api.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"K\n" +
 	"\vPageRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1f\n" +
 	"\vpage_number\x18\x02 \x01(\x05R\n" +
@@ -244,7 +396,30 @@ const file_api_proto_v1_common_proto_rawDesc = "" +
 	"\tTimeRange\x129\n" +
 	"\n" +
 	"start_time\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
-	"\bend_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime*P\n" +
+	"\bend_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\"\xb9\x04\n" +
+	"\x0eMetadataFilter\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12;\n" +
+	"\boperator\x18\x02 \x01(\x0e2\x1f.api.v1.MetadataFilter.OperatorR\boperator\x12,\n" +
+	"\x05value\x18\x03 \x01(\v2\x16.google.protobuf.ValueR\x05value\"\xa9\x03\n" +
+	"\bOperator\x12\x18\n" +
+	"\x14OPERATOR_UNSPECIFIED\x10\x00\x12\x12\n" +
+	"\x0eOPERATOR_EQUAL\x10\x01\x12\x16\n" +
+	"\x12OPERATOR_NOT_EQUAL\x10\x02\x12\x19\n" +
+	"\x15OPERATOR_GREATER_THAN\x10\x03\x12\x16\n" +
+	"\x12OPERATOR_LESS_THAN\x10\x04\x12\"\n" +
+	"\x1eOPERATOR_GREATER_THAN_OR_EQUAL\x10\x05\x12\x1f\n" +
+	"\x1bOPERATOR_LESS_THAN_OR_EQUAL\x10\x06\x12\x15\n" +
+	"\x11OPERATOR_CONTAINS\x10\a\x12\x0f\n" +
+	"\vOPERATOR_IN\x10\b\x12\x13\n" +
+	"\x0fOPERATOR_NOT_IN\x10\t\x12\x13\n" +
+	"\x0fOPERATOR_EXISTS\x10\n" +
+	"\x12\x17\n" +
+	"\x13OPERATOR_NOT_EXISTS\x10\v\x12\x18\n" +
+	"\x14OPERATOR_STARTS_WITH\x10\f\x12\x16\n" +
+	"\x12OPERATOR_ENDS_WITH\x10\r\x12\x12\n" +
+	"\x0eOPERATOR_REGEX\x10\x0e\x12\x14\n" +
+	"\x10OPERATOR_IS_NULL\x10\x0f\x12\x18\n" +
+	"\x14OPERATOR_IS_NOT_NULL\x10\x10*P\n" +
 	"\tSortOrder\x12\x1a\n" +
 	"\x16SORT_ORDER_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eSORT_ORDER_ASC\x10\x01\x12\x13\n" +
@@ -262,23 +437,28 @@ func file_api_proto_v1_common_proto_rawDescGZIP() []byte {
 	return file_api_proto_v1_common_proto_rawDescData
 }
 
-var file_api_proto_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_proto_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_api_proto_v1_common_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_api_proto_v1_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_api_proto_v1_common_proto_goTypes = []any{
 	(SortOrder)(0),                // 0: api.v1.SortOrder
-	(*PageRequest)(nil),           // 1: api.v1.PageRequest
-	(*PageInfo)(nil),              // 2: api.v1.PageInfo
-	(*TimeRange)(nil),             // 3: api.v1.TimeRange
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(MetadataFilter_Operator)(0),  // 1: api.v1.MetadataFilter.Operator
+	(*PageRequest)(nil),           // 2: api.v1.PageRequest
+	(*PageInfo)(nil),              // 3: api.v1.PageInfo
+	(*TimeRange)(nil),             // 4: api.v1.TimeRange
+	(*MetadataFilter)(nil),        // 5: api.v1.MetadataFilter
+	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*structpb.Value)(nil),        // 7: google.protobuf.Value
 }
 var file_api_proto_v1_common_proto_depIdxs = []int32{
-	4, // 0: api.v1.TimeRange.start_time:type_name -> google.protobuf.Timestamp
-	4, // 1: api.v1.TimeRange.end_time:type_name -> google.protobuf.Timestamp
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 0: api.v1.TimeRange.start_time:type_name -> google.protobuf.Timestamp
+	6, // 1: api.v1.TimeRange.end_time:type_name -> google.protobuf.Timestamp
+	1, // 2: api.v1.MetadataFilter.operator:type_name -> api.v1.MetadataFilter.Operator
+	7, // 3: api.v1.MetadataFilter.value:type_name -> google.protobuf.Value
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_common_proto_init() }
@@ -291,8 +471,8 @@ func file_api_proto_v1_common_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_common_proto_rawDesc), len(file_api_proto_v1_common_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   3,
+			NumEnums:      2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

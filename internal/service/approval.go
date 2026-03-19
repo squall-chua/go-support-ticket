@@ -86,6 +86,7 @@ func (s *ApprovalServiceServer) CreateApproval(ctx context.Context, req *apiv1.C
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ApprovalRequested,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceApproval,
 		Schema:     eventconsts.SchemaApproval,
 		ResourceID: req.TicketId,
@@ -174,6 +175,7 @@ func (s *ApprovalServiceServer) DecideApproval(ctx context.Context, req *apiv1.D
 			EventId:    uuid.NewString(),
 			EventType:  eventconsts.ApprovalDecided,
 			EventTime:  time.Now().UTC(),
+			User:       approver,
 			Source:     eventconsts.SourceApproval,
 			Schema:     eventconsts.SchemaApproval,
 			ResourceID: approval.TicketID,
@@ -239,10 +241,12 @@ func (s *ApprovalServiceServer) CreateApprovalConfig(ctx context.Context, req *a
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ApprovalConfigCreated,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceApproval,
 		Schema:     eventconsts.SchemaApprovalConfig,
 		ResourceID: config.ApprovalConfigID.Hex(),
@@ -289,10 +293,12 @@ func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *a
 		return nil, status.Error(codes.NotFound, "approval config not found")
 	}
 
+	userID, _ := middleware.UserFromContext(ctx)
 	evt := event.Event{
 		EventId:    uuid.NewString(),
 		EventType:  eventconsts.ApprovalConfigUpdated,
 		EventTime:  time.Now().UTC(),
+		User:       userID,
 		Source:     eventconsts.SourceApproval,
 		Schema:     eventconsts.SchemaApprovalConfig,
 		ResourceID: updated.ApprovalConfigID.Hex(),
@@ -315,10 +321,12 @@ func (s *ApprovalServiceServer) DeleteApprovalConfig(ctx context.Context, req *a
 	}
 
 	if config != nil {
+		userID, _ := middleware.UserFromContext(ctx)
 		evt := event.Event{
 			EventId:    uuid.NewString(),
 			EventType:  eventconsts.ApprovalConfigDeleted,
 			EventTime:  time.Now().UTC(),
+			User:       userID,
 			Source:     eventconsts.SourceApproval,
 			Schema:     eventconsts.SchemaApprovalConfig,
 			ResourceID: config.ApprovalConfigID.Hex(),

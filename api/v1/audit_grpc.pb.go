@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuditService_ListAuditTrail_FullMethodName = "/api.v1.AuditService/ListAuditTrail"
+	AuditService_ListAuditTrail_FullMethodName      = "/api.v1.AuditService/ListAuditTrail"
+	AuditService_GetTicketAuditTrail_FullMethodName = "/api.v1.AuditService/GetTicketAuditTrail"
 )
 
 // AuditServiceClient is the client API for AuditService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuditServiceClient interface {
 	ListAuditTrail(ctx context.Context, in *ListAuditTrailRequest, opts ...grpc.CallOption) (*ListAuditTrailResponse, error)
+	GetTicketAuditTrail(ctx context.Context, in *GetTicketAuditTrailRequest, opts ...grpc.CallOption) (*GetTicketAuditTrailResponse, error)
 }
 
 type auditServiceClient struct {
@@ -47,11 +49,22 @@ func (c *auditServiceClient) ListAuditTrail(ctx context.Context, in *ListAuditTr
 	return out, nil
 }
 
+func (c *auditServiceClient) GetTicketAuditTrail(ctx context.Context, in *GetTicketAuditTrailRequest, opts ...grpc.CallOption) (*GetTicketAuditTrailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTicketAuditTrailResponse)
+	err := c.cc.Invoke(ctx, AuditService_GetTicketAuditTrail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuditServiceServer is the server API for AuditService service.
 // All implementations should embed UnimplementedAuditServiceServer
 // for forward compatibility.
 type AuditServiceServer interface {
 	ListAuditTrail(context.Context, *ListAuditTrailRequest) (*ListAuditTrailResponse, error)
+	GetTicketAuditTrail(context.Context, *GetTicketAuditTrailRequest) (*GetTicketAuditTrailResponse, error)
 }
 
 // UnimplementedAuditServiceServer should be embedded to have
@@ -63,6 +76,9 @@ type UnimplementedAuditServiceServer struct{}
 
 func (UnimplementedAuditServiceServer) ListAuditTrail(context.Context, *ListAuditTrailRequest) (*ListAuditTrailResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListAuditTrail not implemented")
+}
+func (UnimplementedAuditServiceServer) GetTicketAuditTrail(context.Context, *GetTicketAuditTrailRequest) (*GetTicketAuditTrailResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetTicketAuditTrail not implemented")
 }
 func (UnimplementedAuditServiceServer) testEmbeddedByValue() {}
 
@@ -102,6 +118,24 @@ func _AuditService_ListAuditTrail_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuditService_GetTicketAuditTrail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTicketAuditTrailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuditServiceServer).GetTicketAuditTrail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuditService_GetTicketAuditTrail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuditServiceServer).GetTicketAuditTrail(ctx, req.(*GetTicketAuditTrailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuditService_ServiceDesc is the grpc.ServiceDesc for AuditService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -112,6 +146,10 @@ var AuditService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAuditTrail",
 			Handler:    _AuditService_ListAuditTrail_Handler,
+		},
+		{
+			MethodName: "GetTicketAuditTrail",
+			Handler:    _AuditService_GetTicketAuditTrail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -116,12 +116,26 @@ func main() {
 	repos := repository.NewRepositories(db)
 	g, ctx := errgroup.WithContext(ctx)
 
-	auditSvc := service.NewAuditServiceServer(repos.Audit)
+	auditSvc := service.NewAuditServiceServer(repos.Audit, repos.Tickets)
 	approvalSvc := service.NewApprovalServiceServer(repos.Approvals, repos.ApprovalConfigs, publisher)
 	actionSvc := service.NewActionServiceServer(repos.Executions, repos.ActionSchemas, publisher)
 	ticketSvc := service.NewTicketServiceServer(repos.Tickets, repos.TicketTypes, publisher)
 
 	// Initialize subscribers
+	auditSubBroker, err := kafka.NewBroker(kafka.Config{
+		Brokers: []string{kafkaURL},
+		Writer: kafka.WriterConfig{
+			BatchSize:    10,
+			WriteTimeout: 5 * time.Second,
+		},
+		Reader: kafka.ReaderConfig{
+			GroupID: "audit-service",
+		},
+	})
+	if err != nil {
+		log.Fatalf("Failed to create audit subscriber broker: %v", err)
+	}
+
 	approvalSubBroker, err := kafka.NewBroker(kafka.Config{
 		Brokers: []string{kafkaURL},
 		Writer: kafka.WriterConfig{
@@ -173,8 +187,11 @@ func main() {
 	ticketSub := event.NewSubscriber(router, map[string]event.Broker{"kafka": ticketSubBroker}, nil)
 	ticketSvc.RegisterHandlers(ticketSub)
 
+	auditSub := event.NewSubscriber(router, map[string]event.Broker{"kafka": auditSubBroker}, nil)
+	auditSvc.RegisterHandlers(auditSub)
+
 	// Start subscribers in the background
-	subs := []event.Subscriber{approvalSub, actionSub, ticketSub}
+	subs := []event.Subscriber{approvalSub, actionSub, ticketSub, auditSub}
 	for _, s := range subs {
 		sub := s
 		g.Go(func() error {

@@ -1106,13 +1106,13 @@ type ListApprovalsRequest struct {
 	TicketTypes       []string               `protobuf:"bytes,2,rep,name=ticket_types,json=ticketTypes,proto3" json:"ticket_types,omitempty"`
 	ActionTypes       []string               `protobuf:"bytes,3,rep,name=action_types,json=actionTypes,proto3" json:"action_types,omitempty"`
 	Requesters        []string               `protobuf:"bytes,4,rep,name=requesters,proto3" json:"requesters,omitempty"`
-	Statuses          []ApprovalStatus       `protobuf:"varint,5,rep,packed,name=statuses,proto3,enum=api.v1.ApprovalStatus" json:"statuses,omitempty"`
-	TargetIds         []string               `protobuf:"bytes,6,rep,name=target_ids,json=targetIds,proto3" json:"target_ids,omitempty"`
-	RequiredApprovals []int32                `protobuf:"varint,7,rep,packed,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
-	Approvers         []string               `protobuf:"bytes,8,rep,name=approvers,proto3" json:"approvers,omitempty"`
-	TimeRange         *TimeRange             `protobuf:"bytes,9,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
-	Pagination        *PageRequest           `protobuf:"bytes,10,opt,name=pagination,proto3" json:"pagination,omitempty"`
-	Origins           []string               `protobuf:"bytes,11,rep,name=origins,proto3" json:"origins,omitempty"`
+	Origins           []string               `protobuf:"bytes,5,rep,name=origins,proto3" json:"origins,omitempty"`
+	Statuses          []ApprovalStatus       `protobuf:"varint,6,rep,packed,name=statuses,proto3,enum=api.v1.ApprovalStatus" json:"statuses,omitempty"`
+	TargetIds         []string               `protobuf:"bytes,7,rep,name=target_ids,json=targetIds,proto3" json:"target_ids,omitempty"`
+	RequiredApprovals []int32                `protobuf:"varint,8,rep,packed,name=required_approvals,json=requiredApprovals,proto3" json:"required_approvals,omitempty"`
+	Approvers         []string               `protobuf:"bytes,9,rep,name=approvers,proto3" json:"approvers,omitempty"`
+	TimeRange         *TimeRange             `protobuf:"bytes,10,opt,name=time_range,json=timeRange,proto3" json:"time_range,omitempty"`
+	Pagination        *PageRequest           `protobuf:"bytes,11,opt,name=pagination,proto3" json:"pagination,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1175,6 +1175,13 @@ func (x *ListApprovalsRequest) GetRequesters() []string {
 	return nil
 }
 
+func (x *ListApprovalsRequest) GetOrigins() []string {
+	if x != nil {
+		return x.Origins
+	}
+	return nil
+}
+
 func (x *ListApprovalsRequest) GetStatuses() []ApprovalStatus {
 	if x != nil {
 		return x.Statuses
@@ -1213,13 +1220,6 @@ func (x *ListApprovalsRequest) GetTimeRange() *TimeRange {
 func (x *ListApprovalsRequest) GetPagination() *PageRequest {
 	if x != nil {
 		return x.Pagination
-	}
-	return nil
-}
-
-func (x *ListApprovalsRequest) GetOrigins() []string {
-	if x != nil {
-		return x.Origins
 	}
 	return nil
 }
@@ -1390,19 +1390,19 @@ const file_api_proto_v1_approval_proto_rawDesc = "" +
 	"\faction_types\x18\x03 \x03(\tR\vactionTypes\x12\x1e\n" +
 	"\n" +
 	"requesters\x18\x04 \x03(\tR\n" +
-	"requesters\x122\n" +
-	"\bstatuses\x18\x05 \x03(\x0e2\x16.api.v1.ApprovalStatusR\bstatuses\x12\x1d\n" +
+	"requesters\x12\x18\n" +
+	"\aorigins\x18\x05 \x03(\tR\aorigins\x122\n" +
+	"\bstatuses\x18\x06 \x03(\x0e2\x16.api.v1.ApprovalStatusR\bstatuses\x12\x1d\n" +
 	"\n" +
-	"target_ids\x18\x06 \x03(\tR\ttargetIds\x12-\n" +
-	"\x12required_approvals\x18\a \x03(\x05R\x11requiredApprovals\x12\x1c\n" +
-	"\tapprovers\x18\b \x03(\tR\tapprovers\x120\n" +
+	"target_ids\x18\a \x03(\tR\ttargetIds\x12-\n" +
+	"\x12required_approvals\x18\b \x03(\x05R\x11requiredApprovals\x12\x1c\n" +
+	"\tapprovers\x18\t \x03(\tR\tapprovers\x120\n" +
 	"\n" +
-	"time_range\x18\t \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x123\n" +
+	"time_range\x18\n" +
+	" \x01(\v2\x11.api.v1.TimeRangeR\ttimeRange\x123\n" +
 	"\n" +
-	"pagination\x18\n" +
-	" \x01(\v2\x13.api.v1.PageRequestR\n" +
-	"pagination\x12\x18\n" +
-	"\aorigins\x18\v \x03(\tR\aorigins\"\x82\x01\n" +
+	"pagination\x18\v \x01(\v2\x13.api.v1.PageRequestR\n" +
+	"pagination\"\x82\x01\n" +
 	"\x15ListApprovalsResponse\x127\n" +
 	"\brequests\x18\x01 \x03(\v2\x1b.api.v1.ApprovalRequestDataR\brequests\x120\n" +
 	"\n" +

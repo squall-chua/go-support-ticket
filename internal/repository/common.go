@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/squall-chua/gmqb"
+	"github.com/squall-chua/go-support-ticket/internal/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -57,4 +59,52 @@ func listPaginated[T any](ctx context.Context, coll *gmqb.Collection[T], filter 
 	}
 
 	return toPtrSlice(res.Data), int32(total), nil
+}
+
+func applyMetadataFilters(q gmqb.Filter, metadataField string, filters []model.MetadataFilter) {
+	for _, meta := range filters {
+		field := metadataField + "." + meta.Key
+		switch meta.Operator {
+		case model.OpEqual:
+			q.Eq(field, meta.Value)
+		case model.OpNotEqual:
+			q.Ne(field, meta.Value)
+		case model.OpGreaterThan:
+			q.Gt(field, meta.Value)
+		case model.OpGreaterThanOrEqual:
+			q.Gte(field, meta.Value)
+		case model.OpLessThan:
+			q.Lt(field, meta.Value)
+		case model.OpLessThanOrEqual:
+			q.Lte(field, meta.Value)
+		case model.OpContains:
+			if v, ok := meta.Value.(string); ok {
+				q.Regex(field, ".*"+regexp.QuoteMeta(v)+".*", "i")
+			}
+		case model.OpIn:
+			q.In(field, meta.Value)
+		case model.OpNotIn:
+			q.Nin(field, meta.Value)
+		case model.OpExists:
+			q.Exists(field, true)
+		case model.OpNotExists:
+			q.Exists(field, false)
+		case model.OpStartsWith:
+			if v, ok := meta.Value.(string); ok {
+				q.Regex(field, "^"+regexp.QuoteMeta(v), "i")
+			}
+		case model.OpEndsWith:
+			if v, ok := meta.Value.(string); ok {
+				q.Regex(field, regexp.QuoteMeta(v)+"$", "i")
+			}
+		case model.OpRegex:
+			if v, ok := meta.Value.(string); ok {
+				q.Regex(field, v, "i")
+			}
+		case model.OpIsNull:
+			q.Eq(field, nil)
+		case model.OpIsNotNull:
+			q.Ne(field, nil)
+		}
+	}
 }

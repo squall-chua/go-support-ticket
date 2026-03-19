@@ -2015,16 +2015,16 @@ func (x *TicketSort) GetOrder() SortOrder {
 type ListTicketsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Filtering
-	Statuses            []TicketStatus             `protobuf:"varint,1,rep,packed,name=statuses,proto3,enum=api.v1.TicketStatus" json:"statuses,omitempty"`
-	AssignedTo          []string                   `protobuf:"bytes,2,rep,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
-	TitleContains       *string                    `protobuf:"bytes,3,opt,name=title_contains,json=titleContains,proto3,oneof" json:"title_contains,omitempty"`
-	DescriptionContains *string                    `protobuf:"bytes,4,opt,name=description_contains,json=descriptionContains,proto3,oneof" json:"description_contains,omitempty"`
-	TicketType          []string                   `protobuf:"bytes,5,rep,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
-	Priority            []TicketPriority           `protobuf:"varint,6,rep,packed,name=priority,proto3,enum=api.v1.TicketPriority" json:"priority,omitempty"`
-	CustomerId          []string                   `protobuf:"bytes,7,rep,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
-	CreatedBy           []string                   `protobuf:"bytes,8,rep,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
-	MergedInto          []string                   `protobuf:"bytes,9,rep,name=merged_into,json=mergedInto,proto3" json:"merged_into,omitempty"`
-	Metadata            map[string]*structpb.Value `protobuf:"bytes,10,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Statuses            []TicketStatus    `protobuf:"varint,1,rep,packed,name=statuses,proto3,enum=api.v1.TicketStatus" json:"statuses,omitempty"`
+	AssignedTo          []string          `protobuf:"bytes,2,rep,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
+	TitleContains       *string           `protobuf:"bytes,3,opt,name=title_contains,json=titleContains,proto3,oneof" json:"title_contains,omitempty"`
+	DescriptionContains *string           `protobuf:"bytes,4,opt,name=description_contains,json=descriptionContains,proto3,oneof" json:"description_contains,omitempty"`
+	TicketType          []string          `protobuf:"bytes,5,rep,name=ticket_type,json=ticketType,proto3" json:"ticket_type,omitempty"`
+	Priority            []TicketPriority  `protobuf:"varint,6,rep,packed,name=priority,proto3,enum=api.v1.TicketPriority" json:"priority,omitempty"`
+	CustomerId          []string          `protobuf:"bytes,7,rep,name=customer_id,json=customerId,proto3" json:"customer_id,omitempty"`
+	CreatedBy           []string          `protobuf:"bytes,8,rep,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	MergedInto          []string          `protobuf:"bytes,9,rep,name=merged_into,json=mergedInto,proto3" json:"merged_into,omitempty"`
+	Metadata            []*MetadataFilter `protobuf:"bytes,10,rep,name=metadata,proto3" json:"metadata,omitempty"`
 	// Sorting
 	Sort []*TicketSort `protobuf:"bytes,11,rep,name=sort,proto3" json:"sort,omitempty"`
 	// Pagination
@@ -2127,7 +2127,7 @@ func (x *ListTicketsRequest) GetMergedInto() []string {
 	return nil
 }
 
-func (x *ListTicketsRequest) GetMetadata() map[string]*structpb.Value {
+func (x *ListTicketsRequest) GetMetadata() []*MetadataFilter {
 	if x != nil {
 		return x.Metadata
 	}
@@ -2483,7 +2483,7 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"\x11FIELD_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eFIELD_PRIORITY\x10\x01\x12\x14\n" +
 	"\x10FIELD_CREATED_AT\x10\x02\x12\x14\n" +
-	"\x10FIELD_UPDATED_AT\x10\x03\"\xce\x05\n" +
+	"\x10FIELD_UPDATED_AT\x10\x03\"\xe7\x04\n" +
 	"\x12ListTicketsRequest\x120\n" +
 	"\bstatuses\x18\x01 \x03(\x0e2\x14.api.v1.TicketStatusR\bstatuses\x12\x1f\n" +
 	"\vassigned_to\x18\x02 \x03(\tR\n" +
@@ -2498,17 +2498,14 @@ const file_api_proto_v1_ticket_proto_rawDesc = "" +
 	"\n" +
 	"created_by\x18\b \x03(\tR\tcreatedBy\x12\x1f\n" +
 	"\vmerged_into\x18\t \x03(\tR\n" +
-	"mergedInto\x12D\n" +
+	"mergedInto\x122\n" +
 	"\bmetadata\x18\n" +
-	" \x03(\v2(.api.v1.ListTicketsRequest.MetadataEntryR\bmetadata\x12&\n" +
+	" \x03(\v2\x16.api.v1.MetadataFilterR\bmetadata\x12&\n" +
 	"\x04sort\x18\v \x03(\v2\x12.api.v1.TicketSortR\x04sort\x123\n" +
 	"\n" +
 	"pagination\x18\f \x01(\v2\x13.api.v1.PageRequestR\n" +
 	"pagination\x12'\n" +
-	"\x0finclude_deleted\x18\r \x01(\bR\x0eincludeDeleted\x1aS\n" +
-	"\rMetadataEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
-	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01B\x11\n" +
+	"\x0finclude_deleted\x18\r \x01(\bR\x0eincludeDeletedB\x11\n" +
 	"\x0f_title_containsB\x17\n" +
 	"\x15_description_contains\"q\n" +
 	"\x13ListTicketsResponse\x12(\n" +
@@ -2575,7 +2572,7 @@ func file_api_proto_v1_ticket_proto_rawDescGZIP() []byte {
 }
 
 var file_api_proto_v1_ticket_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_api_proto_v1_ticket_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
+var file_api_proto_v1_ticket_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_api_proto_v1_ticket_proto_goTypes = []any{
 	(TicketStatus)(0),                 // 0: api.v1.TicketStatus
 	(TicketPriority)(0),               // 1: api.v1.TicketPriority
@@ -2618,35 +2615,35 @@ var file_api_proto_v1_ticket_proto_goTypes = []any{
 	nil,                               // 38: api.v1.Ticket.MetadataEntry
 	nil,                               // 39: api.v1.CreateTicketRequest.MetadataEntry
 	nil,                               // 40: api.v1.UpdateTicketRequest.MetadataEntry
-	nil,                               // 41: api.v1.ListTicketsRequest.MetadataEntry
-	(*timestamppb.Timestamp)(nil),     // 42: google.protobuf.Timestamp
-	(SortOrder)(0),                    // 43: api.v1.SortOrder
-	(*PageRequest)(nil),               // 44: api.v1.PageRequest
-	(*PageInfo)(nil),                  // 45: api.v1.PageInfo
+	(*timestamppb.Timestamp)(nil),     // 41: google.protobuf.Timestamp
+	(SortOrder)(0),                    // 42: api.v1.SortOrder
+	(*PageRequest)(nil),               // 43: api.v1.PageRequest
+	(*PageInfo)(nil),                  // 44: api.v1.PageInfo
+	(*MetadataFilter)(nil),            // 45: api.v1.MetadataFilter
 	(*structpb.Value)(nil),            // 46: google.protobuf.Value
 }
 var file_api_proto_v1_ticket_proto_depIdxs = []int32{
-	42, // 0: api.v1.Comment.created_at:type_name -> google.protobuf.Timestamp
+	41, // 0: api.v1.Comment.created_at:type_name -> google.protobuf.Timestamp
 	36, // 1: api.v1.Comment.metadata:type_name -> api.v1.Comment.MetadataEntry
 	37, // 2: api.v1.AddCommentRequest.metadata:type_name -> api.v1.AddCommentRequest.MetadataEntry
 	4,  // 3: api.v1.AddCommentResponse.comment:type_name -> api.v1.Comment
-	42, // 4: api.v1.TicketType.created_at:type_name -> google.protobuf.Timestamp
-	42, // 5: api.v1.TicketType.updated_at:type_name -> google.protobuf.Timestamp
-	42, // 6: api.v1.TicketType.deleted_at:type_name -> google.protobuf.Timestamp
+	41, // 4: api.v1.TicketType.created_at:type_name -> google.protobuf.Timestamp
+	41, // 5: api.v1.TicketType.updated_at:type_name -> google.protobuf.Timestamp
+	41, // 6: api.v1.TicketType.deleted_at:type_name -> google.protobuf.Timestamp
 	0,  // 7: api.v1.Ticket.status:type_name -> api.v1.TicketStatus
 	1,  // 8: api.v1.Ticket.priority:type_name -> api.v1.TicketPriority
 	4,  // 9: api.v1.Ticket.comments:type_name -> api.v1.Comment
 	38, // 10: api.v1.Ticket.metadata:type_name -> api.v1.Ticket.MetadataEntry
-	42, // 11: api.v1.Ticket.created_at:type_name -> google.protobuf.Timestamp
-	42, // 12: api.v1.Ticket.updated_at:type_name -> google.protobuf.Timestamp
-	42, // 13: api.v1.Ticket.deleted_at:type_name -> google.protobuf.Timestamp
+	41, // 11: api.v1.Ticket.created_at:type_name -> google.protobuf.Timestamp
+	41, // 12: api.v1.Ticket.updated_at:type_name -> google.protobuf.Timestamp
+	41, // 13: api.v1.Ticket.deleted_at:type_name -> google.protobuf.Timestamp
 	7,  // 14: api.v1.CreateTicketTypeResponse.ticket_type:type_name -> api.v1.TicketType
 	2,  // 15: api.v1.TicketTypeSort.field:type_name -> api.v1.TicketTypeSort.Field
-	43, // 16: api.v1.TicketTypeSort.order:type_name -> api.v1.SortOrder
+	42, // 16: api.v1.TicketTypeSort.order:type_name -> api.v1.SortOrder
 	11, // 17: api.v1.ListTicketTypesRequest.sorts:type_name -> api.v1.TicketTypeSort
-	44, // 18: api.v1.ListTicketTypesRequest.pagination:type_name -> api.v1.PageRequest
+	43, // 18: api.v1.ListTicketTypesRequest.pagination:type_name -> api.v1.PageRequest
 	7,  // 19: api.v1.ListTicketTypesResponse.ticket_types:type_name -> api.v1.TicketType
-	45, // 20: api.v1.ListTicketTypesResponse.pagination:type_name -> api.v1.PageInfo
+	44, // 20: api.v1.ListTicketTypesResponse.pagination:type_name -> api.v1.PageInfo
 	7,  // 21: api.v1.UpdateTicketTypeResponse.ticket_type:type_name -> api.v1.TicketType
 	1,  // 22: api.v1.CreateTicketRequest.priority:type_name -> api.v1.TicketPriority
 	39, // 23: api.v1.CreateTicketRequest.metadata:type_name -> api.v1.CreateTicketRequest.MetadataEntry
@@ -2661,51 +2658,50 @@ var file_api_proto_v1_ticket_proto_depIdxs = []int32{
 	8,  // 32: api.v1.MergeTicketsResponse.source_ticket:type_name -> api.v1.Ticket
 	8,  // 33: api.v1.MergeTicketsResponse.target_ticket:type_name -> api.v1.Ticket
 	3,  // 34: api.v1.TicketSort.field:type_name -> api.v1.TicketSort.Field
-	43, // 35: api.v1.TicketSort.order:type_name -> api.v1.SortOrder
+	42, // 35: api.v1.TicketSort.order:type_name -> api.v1.SortOrder
 	0,  // 36: api.v1.ListTicketsRequest.statuses:type_name -> api.v1.TicketStatus
 	1,  // 37: api.v1.ListTicketsRequest.priority:type_name -> api.v1.TicketPriority
-	41, // 38: api.v1.ListTicketsRequest.metadata:type_name -> api.v1.ListTicketsRequest.MetadataEntry
+	45, // 38: api.v1.ListTicketsRequest.metadata:type_name -> api.v1.MetadataFilter
 	31, // 39: api.v1.ListTicketsRequest.sort:type_name -> api.v1.TicketSort
-	44, // 40: api.v1.ListTicketsRequest.pagination:type_name -> api.v1.PageRequest
+	43, // 40: api.v1.ListTicketsRequest.pagination:type_name -> api.v1.PageRequest
 	8,  // 41: api.v1.ListTicketsResponse.tickets:type_name -> api.v1.Ticket
-	45, // 42: api.v1.ListTicketsResponse.pagination:type_name -> api.v1.PageInfo
+	44, // 42: api.v1.ListTicketsResponse.pagination:type_name -> api.v1.PageInfo
 	46, // 43: api.v1.Comment.MetadataEntry.value:type_name -> google.protobuf.Value
 	46, // 44: api.v1.AddCommentRequest.MetadataEntry.value:type_name -> google.protobuf.Value
 	46, // 45: api.v1.Ticket.MetadataEntry.value:type_name -> google.protobuf.Value
 	46, // 46: api.v1.CreateTicketRequest.MetadataEntry.value:type_name -> google.protobuf.Value
 	46, // 47: api.v1.UpdateTicketRequest.MetadataEntry.value:type_name -> google.protobuf.Value
-	46, // 48: api.v1.ListTicketsRequest.MetadataEntry.value:type_name -> google.protobuf.Value
-	9,  // 49: api.v1.TicketService.CreateTicketType:input_type -> api.v1.CreateTicketTypeRequest
-	12, // 50: api.v1.TicketService.ListTicketTypes:input_type -> api.v1.ListTicketTypesRequest
-	14, // 51: api.v1.TicketService.UpdateTicketType:input_type -> api.v1.UpdateTicketTypeRequest
-	16, // 52: api.v1.TicketService.DeleteTicketType:input_type -> api.v1.DeleteTicketTypeRequest
-	18, // 53: api.v1.TicketService.CreateTicket:input_type -> api.v1.CreateTicketRequest
-	20, // 54: api.v1.TicketService.GetTicket:input_type -> api.v1.GetTicketRequest
-	22, // 55: api.v1.TicketService.UpdateTicket:input_type -> api.v1.UpdateTicketRequest
-	24, // 56: api.v1.TicketService.AssignTicket:input_type -> api.v1.AssignTicketRequest
-	26, // 57: api.v1.TicketService.DistributeTickets:input_type -> api.v1.DistributeTicketsRequest
-	29, // 58: api.v1.TicketService.MergeTickets:input_type -> api.v1.MergeTicketsRequest
-	32, // 59: api.v1.TicketService.ListTickets:input_type -> api.v1.ListTicketsRequest
-	5,  // 60: api.v1.TicketService.AddComment:input_type -> api.v1.AddCommentRequest
-	34, // 61: api.v1.TicketService.DeleteTicket:input_type -> api.v1.DeleteTicketRequest
-	10, // 62: api.v1.TicketService.CreateTicketType:output_type -> api.v1.CreateTicketTypeResponse
-	13, // 63: api.v1.TicketService.ListTicketTypes:output_type -> api.v1.ListTicketTypesResponse
-	15, // 64: api.v1.TicketService.UpdateTicketType:output_type -> api.v1.UpdateTicketTypeResponse
-	17, // 65: api.v1.TicketService.DeleteTicketType:output_type -> api.v1.DeleteTicketTypeResponse
-	19, // 66: api.v1.TicketService.CreateTicket:output_type -> api.v1.CreateTicketResponse
-	21, // 67: api.v1.TicketService.GetTicket:output_type -> api.v1.GetTicketResponse
-	23, // 68: api.v1.TicketService.UpdateTicket:output_type -> api.v1.UpdateTicketResponse
-	25, // 69: api.v1.TicketService.AssignTicket:output_type -> api.v1.AssignTicketResponse
-	28, // 70: api.v1.TicketService.DistributeTickets:output_type -> api.v1.DistributeTicketsResponse
-	30, // 71: api.v1.TicketService.MergeTickets:output_type -> api.v1.MergeTicketsResponse
-	33, // 72: api.v1.TicketService.ListTickets:output_type -> api.v1.ListTicketsResponse
-	6,  // 73: api.v1.TicketService.AddComment:output_type -> api.v1.AddCommentResponse
-	35, // 74: api.v1.TicketService.DeleteTicket:output_type -> api.v1.DeleteTicketResponse
-	62, // [62:75] is the sub-list for method output_type
-	49, // [49:62] is the sub-list for method input_type
-	49, // [49:49] is the sub-list for extension type_name
-	49, // [49:49] is the sub-list for extension extendee
-	0,  // [0:49] is the sub-list for field type_name
+	9,  // 48: api.v1.TicketService.CreateTicketType:input_type -> api.v1.CreateTicketTypeRequest
+	12, // 49: api.v1.TicketService.ListTicketTypes:input_type -> api.v1.ListTicketTypesRequest
+	14, // 50: api.v1.TicketService.UpdateTicketType:input_type -> api.v1.UpdateTicketTypeRequest
+	16, // 51: api.v1.TicketService.DeleteTicketType:input_type -> api.v1.DeleteTicketTypeRequest
+	18, // 52: api.v1.TicketService.CreateTicket:input_type -> api.v1.CreateTicketRequest
+	20, // 53: api.v1.TicketService.GetTicket:input_type -> api.v1.GetTicketRequest
+	22, // 54: api.v1.TicketService.UpdateTicket:input_type -> api.v1.UpdateTicketRequest
+	24, // 55: api.v1.TicketService.AssignTicket:input_type -> api.v1.AssignTicketRequest
+	26, // 56: api.v1.TicketService.DistributeTickets:input_type -> api.v1.DistributeTicketsRequest
+	29, // 57: api.v1.TicketService.MergeTickets:input_type -> api.v1.MergeTicketsRequest
+	32, // 58: api.v1.TicketService.ListTickets:input_type -> api.v1.ListTicketsRequest
+	5,  // 59: api.v1.TicketService.AddComment:input_type -> api.v1.AddCommentRequest
+	34, // 60: api.v1.TicketService.DeleteTicket:input_type -> api.v1.DeleteTicketRequest
+	10, // 61: api.v1.TicketService.CreateTicketType:output_type -> api.v1.CreateTicketTypeResponse
+	13, // 62: api.v1.TicketService.ListTicketTypes:output_type -> api.v1.ListTicketTypesResponse
+	15, // 63: api.v1.TicketService.UpdateTicketType:output_type -> api.v1.UpdateTicketTypeResponse
+	17, // 64: api.v1.TicketService.DeleteTicketType:output_type -> api.v1.DeleteTicketTypeResponse
+	19, // 65: api.v1.TicketService.CreateTicket:output_type -> api.v1.CreateTicketResponse
+	21, // 66: api.v1.TicketService.GetTicket:output_type -> api.v1.GetTicketResponse
+	23, // 67: api.v1.TicketService.UpdateTicket:output_type -> api.v1.UpdateTicketResponse
+	25, // 68: api.v1.TicketService.AssignTicket:output_type -> api.v1.AssignTicketResponse
+	28, // 69: api.v1.TicketService.DistributeTickets:output_type -> api.v1.DistributeTicketsResponse
+	30, // 70: api.v1.TicketService.MergeTickets:output_type -> api.v1.MergeTicketsResponse
+	33, // 71: api.v1.TicketService.ListTickets:output_type -> api.v1.ListTicketsResponse
+	6,  // 72: api.v1.TicketService.AddComment:output_type -> api.v1.AddCommentResponse
+	35, // 73: api.v1.TicketService.DeleteTicket:output_type -> api.v1.DeleteTicketResponse
+	61, // [61:74] is the sub-list for method output_type
+	48, // [48:61] is the sub-list for method input_type
+	48, // [48:48] is the sub-list for extension type_name
+	48, // [48:48] is the sub-list for extension extendee
+	0,  // [0:48] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_ticket_proto_init() }
@@ -2727,7 +2723,7 @@ func file_api_proto_v1_ticket_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_ticket_proto_rawDesc), len(file_api_proto_v1_ticket_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   38,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

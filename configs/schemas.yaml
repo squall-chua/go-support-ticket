@@ -1,93 +1,57 @@
 approval_config:
   queue_type: kafka
   dlq_postfix: .failed
+  destinations:
+    - approval-config-events
   events:
     approval_config.created:
-      destinations:
-        - approval-events
     approval_config.updated:
-      destinations:
-        - approval-events
     approval_config.deleted:
-      destinations:
-        - approval-events
 
 approval:
   queue_type: kafka
   dlq_postfix: .failed
+  destinations:
+    - approval-events
   events:
     approval.requested:
-      destinations:
-        - approval-events
     approval.decided:
-      destinations:
-        - approval-events
 
 action:
   queue_type: kafka
   dlq_postfix: .failed
+  destinations:
+    - action-events
   events:
     action.schema.created:
-      destinations:
-        - action-events
     action.schema.updated:
-      destinations:
-        - action-events
     action.schema.deleted:
-      destinations:
-        - action-events
     action.execution.status.updated:
-      destinations:
-        - action-events
     action.execution.triggered:
-      destinations:
-        - action-events
     action.execution.completed:
-      destinations:
-        - action-events
     action.execution.pending_approval:
-      destinations:
-        - action-events
 
 ticket_type:
   queue_type: kafka
   dlq_postfix: .failed
+  destinations:
+    - ticket-type-events
   events:
     ticket_type.created:
-      destinations:
-        - ticket-type-events
     ticket_type.updated:
-      destinations:
-        - ticket-type-events
     ticket_type.deleted:
-      destinations:
-        - ticket-type-events
 
 ticket:
   queue_type: kafka
   dlq_postfix: .failed
+  destinations:
+    - ticket-events
   events:
     ticket.created:
-      destinations:
-        - ticket-events
     ticket.updated:
-      destinations:
-        - ticket-events
     ticket.assigned:
-      destinations:
-        - ticket-events
     ticket.comment.added:
-      destinations:
-        - ticket-events
     ticket.update.pending_approval:
-      destinations:
-        - ticket-events
     ticket.merged:
-      destinations:
-        - ticket-events
     ticket.merge.pending_approval:
-      destinations:
-        - ticket-events
     ticket.deleted:
-      destinations:
-        - ticket-events

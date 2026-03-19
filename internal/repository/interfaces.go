@@ -56,7 +56,7 @@ type ApprovalConfigRepository interface {
 
 type AuditRepository interface {
 	CreateLog(ctx context.Context, log *model.AuditLog) error
-	ListLogs(ctx context.Context, ticketID, action string, limit, offset int32) ([]*model.AuditLog, int32, error)
+	ListLogs(ctx context.Context, filter model.AuditLogFilter, limit, offset int32) ([]*model.AuditLog, int32, error)
 }
 
 // Repositories is a container for all domain repositories.
