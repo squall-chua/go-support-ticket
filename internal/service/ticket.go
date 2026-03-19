@@ -318,6 +318,10 @@ func (s *TicketServiceServer) UpdateTicket(ctx context.Context, req *apiv1.Updat
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	if current != nil && current.Status == int32(apiv1.TicketStatus_TICKET_STATUS_PENDING_APPROVAL) {
+		return nil, status.Error(codes.FailedPrecondition, "ticket is currently pending approval and cannot be updated")
+	}
+
 	// Override update logic if the ticket requires approval
 	if current != nil && current.RequireApproval {
 		// Map changes to metadata for approval
@@ -381,6 +385,14 @@ func (s *TicketServiceServer) UpdateTicket(ctx context.Context, req *apiv1.Updat
 func (s *TicketServiceServer) AssignTicket(ctx context.Context, req *apiv1.AssignTicketRequest) (*apiv1.AssignTicketResponse, error) {
 	userID := s.getUserID(ctx)
 	roles := s.getUserRoles(ctx)
+
+	current, err := s.repo.GetTicket(ctx, req.TicketId, userID, roles)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if current != nil && current.Status == int32(apiv1.TicketStatus_TICKET_STATUS_PENDING_APPROVAL) {
+		return nil, status.Error(codes.FailedPrecondition, "ticket is currently pending approval and cannot be updated")
+	}
 
 	update := model.TicketUpdate{
 		AssignedTo: &req.AssignTo,
@@ -661,6 +673,14 @@ func (s *TicketServiceServer) AddComment(ctx context.Context, req *apiv1.AddComm
 func (s *TicketServiceServer) DeleteTicket(ctx context.Context, req *apiv1.DeleteTicketRequest) (*apiv1.DeleteTicketResponse, error) {
 	userID := s.getUserID(ctx)
 	roles := s.getUserRoles(ctx)
+	current, err := s.repo.GetTicket(ctx, req.TicketId, userID, roles)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if current != nil && current.Status == int32(apiv1.TicketStatus_TICKET_STATUS_PENDING_APPROVAL) {
+		return nil, status.Error(codes.FailedPrecondition, "ticket is currently pending approval and cannot be deleted")
+	}
+
 	ticket, err := s.repo.DeleteTicket(ctx, req.TicketId, userID, roles)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
