@@ -13,23 +13,26 @@ type TicketRepository interface {
 	UpdateTickets(ctx context.Context, updates map[string]model.TicketUpdate, userID string, roles []string) ([]*model.Ticket, error)
 	ListTickets(ctx context.Context, filter model.TicketFilter, sorts []model.TicketSort, userID string, roles []string, limit, offset int32) ([]*model.Ticket, int32, error)
 	AddComment(ctx context.Context, ticketID string, comment *model.Comment, userID string, roles []string) error
-	DeleteTicket(ctx context.Context, id string, userID string, roles []string) error
+	DeleteTicket(ctx context.Context, id string, userID string, roles []string) (*model.Ticket, error)
+	InitiateMerge(ctx context.Context, sourceID, targetID string, updateSource, updateTarget model.TicketUpdate, userID string, roles []string) (*model.Ticket, *model.Ticket, error)
+	FulfillMerge(ctx context.Context, sourceID, targetID string, updateSource, updateTarget model.TicketUpdate, comment *model.Comment, userID string, roles []string) (*model.Ticket, *model.Ticket, error)
+	RejectMerge(ctx context.Context, sourceID, targetID string, updateSource, updateTarget model.TicketUpdate, userID string, roles []string) error
 }
 
 type TicketTypeRepository interface {
 	CreateType(ctx context.Context, tType *model.TicketType) error
 	GetType(ctx context.Context, idOrName string) (*model.TicketType, error)
 	ListTypes(ctx context.Context, filter model.TicketTypeFilter, sorts []model.TicketTypeSort, limit, offset int32) ([]*model.TicketType, int32, error)
-	UpdateType(ctx context.Context, id string, update model.TicketTypeUpdate) (*model.TicketType, error)
-	DeleteType(ctx context.Context, id string) error
+	UpdateType(ctx context.Context, id string, update model.TicketTypeUpdate, returnNew bool) (*model.TicketType, error)
+	DeleteType(ctx context.Context, id string) (*model.TicketType, error)
 }
 
 type ActionSchemaRepository interface {
 	CreateSchema(ctx context.Context, schema *model.ActionSchema) error
-	GetSchema(ctx context.Context, actionType string) (*model.ActionSchema, error)
+	GetSchema(ctx context.Context, idOrType string) (*model.ActionSchema, error)
 	ListSchemas(ctx context.Context, filter model.ActionSchemaFilter, limit, offset int32) ([]*model.ActionSchema, int32, error)
-	UpdateSchema(ctx context.Context, actionType string, update model.ActionSchemaUpdate) error
-	DeleteSchema(ctx context.Context, actionType string) error
+	UpdateSchema(ctx context.Context, id string, update model.ActionSchemaUpdate, returnNew bool) (*model.ActionSchema, error)
+	DeleteSchema(ctx context.Context, id string) (*model.ActionSchema, error)
 }
 
 type ActionExecutionRepository interface {
@@ -49,7 +52,7 @@ type ApprovalRepository interface {
 type ApprovalConfigRepository interface {
 	CreateConfig(ctx context.Context, config *model.ApprovalConfig) error
 	GetConfig(ctx context.Context, ticketType, actionType string) (*model.ApprovalConfig, error)
-	UpdateConfig(ctx context.Context, ticketType, actionType string, update model.ApprovalConfigUpdate) (*model.ApprovalConfig, error)
+	UpdateConfig(ctx context.Context, ticketType, actionType string, update model.ApprovalConfigUpdate, returnNew bool) (*model.ApprovalConfig, error)
 	DeleteConfig(ctx context.Context, ticketType, actionType string) (*model.ApprovalConfig, error)
 	ListConfigs(ctx context.Context, filter model.ApprovalConfigFilter, limit, offset int32) ([]*model.ApprovalConfig, int32, error)
 }

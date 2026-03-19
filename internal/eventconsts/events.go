@@ -21,6 +21,7 @@ const (
 	ApprovalConfigUpdated = "approval_config.updated"
 	ApprovalConfigDeleted = "approval_config.deleted"
 	ApprovalRequested     = "approval.requested"
+	ApprovalPending       = "approval.pending"
 	ApprovalDecided       = "approval.decided"
 
 	// Action events

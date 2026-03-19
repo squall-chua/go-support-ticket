@@ -53,9 +53,6 @@ func (s *ApprovalServiceServer) CreateApproval(ctx context.Context, req *apiv1.C
 	if err == nil && config != nil {
 		requiredApprovals = config.RequiredApprovals
 		eligibleRoles = config.EligibleRoles
-		if config.ActionType != "" {
-			actionType = config.ActionType
-		}
 	}
 
 	approval := &model.Approval{
@@ -89,9 +86,8 @@ func (s *ApprovalServiceServer) CreateApproval(ctx context.Context, req *apiv1.C
 		User:       userID,
 		Source:     eventconsts.SourceApproval,
 		Schema:     eventconsts.SchemaApproval,
-		ResourceID: req.TicketId,
+		ResourceID: approval.ID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: approval.ToProto()},
-		Metadata:   map[string]any{"target_id": req.TargetId},
 	}
 	_ = s.publisher.Publish(ctx, &evt)
 
@@ -170,16 +166,27 @@ func (s *ApprovalServiceServer) DecideApproval(ctx context.Context, req *apiv1.D
 	approval.Decisions = newDecisions
 
 	// If approved/rejected (final state), publish final decision event
+	// If still pending, publish pending event
+	var eventType string
 	if newStatus == int32(apiv1.ApprovalStatus_APPROVAL_STATUS_APPROVED) || newStatus == int32(apiv1.ApprovalStatus_APPROVAL_STATUS_REJECTED) {
+		eventType = eventconsts.ApprovalDecided
+	} else if newStatus == int32(apiv1.ApprovalStatus_APPROVAL_STATUS_PENDING) {
+		eventType = eventconsts.ApprovalPending
+	}
+
+	if eventType != "" {
 		decisionEvt := event.Event{
 			EventId:    uuid.NewString(),
-			EventType:  eventconsts.ApprovalDecided,
+			EventType:  eventType,
 			EventTime:  time.Now().UTC(),
 			User:       approver,
 			Source:     eventconsts.SourceApproval,
 			Schema:     eventconsts.SchemaApproval,
-			ResourceID: approval.TicketID,
+			ResourceID: approval.ID.Hex(),
 			Data:       eventbus.ProtoMarshaler{Message: approval.ToProto()},
+			Metadata: map[string]any{
+				"decision": eventbus.ProtoMarshaler{Message: decision.ToProto()},
+			},
 		}
 		_ = s.publisher.Publish(ctx, &decisionEvt)
 	}
@@ -285,12 +292,17 @@ func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *a
 		EligibleRoles:     req.EligibleRoles,
 	}
 
-	updated, err := s.configRepo.UpdateConfig(ctx, ticketType, actionType, update)
+	before, err := s.configRepo.UpdateConfig(ctx, ticketType, actionType, update, false)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	if updated == nil {
+	if before == nil {
 		return nil, status.Error(codes.NotFound, "approval config not found")
+	}
+
+	updated, err := s.configRepo.GetConfig(ctx, ticketType, actionType)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	userID, _ := middleware.UserFromContext(ctx)
@@ -303,6 +315,10 @@ func (s *ApprovalServiceServer) UpdateApprovalConfig(ctx context.Context, req *a
 		Schema:     eventconsts.SchemaApprovalConfig,
 		ResourceID: updated.ApprovalConfigID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: updated.ToProto()},
+		Metadata: map[string]any{
+			"before": eventbus.ProtoMarshaler{Message: before.ToProto()},
+			"update": eventbus.ProtoMarshaler{Message: req},
+		},
 	}
 	_ = s.publisher.Publish(ctx, &evt)
 

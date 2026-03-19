@@ -78,7 +78,7 @@ func (r *TicketTypeRepo) ListTypes(ctx context.Context, filter model.TicketTypeF
 	return listPaginated(ctx, r.coll, q, sortSpec, limit, offset)
 }
 
-func (r *TicketTypeRepo) UpdateType(ctx context.Context, id string, update model.TicketTypeUpdate) (*model.TicketType, error) {
+func (r *TicketTypeRepo) UpdateType(ctx context.Context, id string, update model.TicketTypeUpdate, returnNew bool) (*model.TicketType, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -109,16 +109,20 @@ func (r *TicketTypeRepo) UpdateType(ctx context.Context, id string, update model
 
 	u = u.Set(f("UpdatedAt"), time.Now().UTC())
 
-	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq(f("ID"), oid), u, gmqb.WithReturnDocument(options.After))
+	returnDoc := options.Before
+	if returnNew {
+		returnDoc = options.After
+	}
+
+	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq(f("ID"), oid), u, gmqb.WithReturnDocument(returnDoc))
 }
 
-func (r *TicketTypeRepo) DeleteType(ctx context.Context, id string) error {
+func (r *TicketTypeRepo) DeleteType(ctx context.Context, id string) (*model.TicketType, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	f := gmqb.Field[model.TicketType]
 	update := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
-	_, err = r.coll.UpdateOne(ctx, gmqb.Eq(f("ID"), oid), update)
-	return err
+	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq(f("ID"), oid), update, gmqb.WithReturnDocument(options.After))
 }

@@ -15,6 +15,7 @@ approval:
     - approval-events
   events:
     approval.requested:
+    approval.pending:
     approval.decided:
 
 action:

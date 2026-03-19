@@ -130,7 +130,7 @@ message ListActionExecutionsResponse {
 }
 
 message UpdateActionSchemaRequest {
-  string action_type = 1;
+  string id = 1;
   optional string display_name = 2;
   optional string description = 3;
   repeated ActionParameter parameters = 4;
@@ -156,7 +156,7 @@ message CreateActionSchemaResponse {
 }
 
 message DeleteActionSchemaRequest {
-  string action_type = 1;
+  string id = 1;
 }
 
 message DeleteActionSchemaResponse {}
@@ -208,7 +208,7 @@ service ActionService {
   }
   rpc UpdateActionSchema(UpdateActionSchemaRequest) returns (UpdateActionSchemaResponse) {
     option (google.api.http) = {
-      put: "/api/v1/action-schemas/{action_type}"
+      put: "/api/v1/action-schemas/{id}"
       body: "*"
     };
     option (auth.v1.rule) = {
@@ -218,7 +218,7 @@ service ActionService {
   }
   rpc DeleteActionSchema(DeleteActionSchemaRequest) returns (DeleteActionSchemaResponse) {
     option (google.api.http) = {
-      delete: "/api/v1/action-schemas/{action_type}"
+      delete: "/api/v1/action-schemas/{id}"
     };
     option (auth.v1.rule) = {
       required_scopes: ["write:actions"]

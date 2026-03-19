@@ -286,7 +286,7 @@
         ]
       }
     },
-    "/api/v1/action-schemas/{actionType}": {
+    "/api/v1/action-schemas/{id}": {
       "delete": {
         "operationId": "ActionService_DeleteActionSchema",
         "responses": {
@@ -305,7 +305,7 @@
         },
         "parameters": [
           {
-            "name": "actionType",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
@@ -333,7 +333,7 @@
         },
         "parameters": [
           {
-            "name": "actionType",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"

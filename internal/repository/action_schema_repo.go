@@ -6,7 +6,9 @@ import (
 
 	"github.com/squall-chua/gmqb"
 	"github.com/squall-chua/go-support-ticket/internal/model"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type ActionSchemaRepo struct {
@@ -25,12 +27,15 @@ func (r *ActionSchemaRepo) CreateSchema(ctx context.Context, schema *model.Actio
 	return err
 }
 
-func (r *ActionSchemaRepo) GetSchema(ctx context.Context, actionType string) (*model.ActionSchema, error) {
+func (r *ActionSchemaRepo) GetSchema(ctx context.Context, idOrType string) (*model.ActionSchema, error) {
 	f := gmqb.Field[model.ActionSchema]
-	return r.coll.FindOne(ctx, gmqb.And(
-		gmqb.Eq(f("ActionType"), actionType),
-		gmqb.Eq(f("DeletedAt"), nil),
-	))
+	q := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
+	if oid, err := bson.ObjectIDFromHex(idOrType); err == nil {
+		q = q.Eq(f("ID"), oid)
+	} else {
+		q = q.Eq(f("ActionType"), idOrType)
+	}
+	return r.coll.FindOne(ctx, q)
 }
 
 func (r *ActionSchemaRepo) ListSchemas(ctx context.Context, filter model.ActionSchemaFilter, limit, offset int32) ([]*model.ActionSchema, int32, error) {
@@ -63,7 +68,7 @@ func (r *ActionSchemaRepo) ListSchemas(ctx context.Context, filter model.ActionS
 	return listPaginated(ctx, r.coll, q, gmqb.Desc(f("CreatedAt")), limit, offset)
 }
 
-func (r *ActionSchemaRepo) UpdateSchema(ctx context.Context, actionType string, update model.ActionSchemaUpdate) error {
+func (r *ActionSchemaRepo) UpdateSchema(ctx context.Context, id string, update model.ActionSchemaUpdate, returnNew bool) (*model.ActionSchema, error) {
 	f := gmqb.Field[model.ActionSchema]
 	u := gmqb.NewUpdate()
 
@@ -84,24 +89,35 @@ func (r *ActionSchemaRepo) UpdateSchema(ctx context.Context, actionType string, 
 	}
 
 	if u.IsEmpty() {
-		return nil
+		return r.GetSchema(ctx, id)
 	}
 
 	u = u.Set(f("UpdatedAt"), time.Now().UTC())
 
-	_, err := r.coll.UpdateOne(ctx, gmqb.And(
-		gmqb.Eq(f("ActionType"), actionType),
-		gmqb.Eq(f("DeletedAt"), nil),
-	), u)
-	return err
+	returnDoc := options.Before
+	if returnNew {
+		returnDoc = options.After
+	}
+
+	q := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
+	if oid, err := bson.ObjectIDFromHex(id); err == nil {
+		q = q.Eq(f("ID"), oid)
+	} else {
+		q = q.Eq(f("ActionType"), id)
+	}
+
+	return r.coll.FindOneAndUpdate(ctx, q, u, gmqb.WithReturnDocument(returnDoc))
 }
 
-func (r *ActionSchemaRepo) DeleteSchema(ctx context.Context, actionType string) error {
+func (r *ActionSchemaRepo) DeleteSchema(ctx context.Context, id string) (*model.ActionSchema, error) {
 	f := gmqb.Field[model.ActionSchema]
+	q := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
+	if oid, err := bson.ObjectIDFromHex(id); err == nil {
+		q = q.Eq(f("ID"), oid)
+	} else {
+		q = q.Eq(f("ActionType"), id)
+	}
+
 	u := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
-	_, err := r.coll.UpdateOne(ctx, gmqb.And(
-		gmqb.Eq(f("ActionType"), actionType),
-		gmqb.Eq(f("DeletedAt"), nil),
-	), u)
-	return err
+	return r.coll.FindOneAndUpdate(ctx, q, u, gmqb.WithReturnDocument(options.Before))
 }

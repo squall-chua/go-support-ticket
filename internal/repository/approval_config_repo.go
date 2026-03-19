@@ -7,6 +7,7 @@ import (
 	"github.com/squall-chua/gmqb"
 	"github.com/squall-chua/go-support-ticket/internal/model"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type ApprovalConfigRepo struct {
@@ -32,7 +33,7 @@ func (r *ApprovalConfigRepo) GetConfig(ctx context.Context, ticketType, actionTy
 	return r.coll.FindOne(ctx, q)
 }
 
-func (r *ApprovalConfigRepo) UpdateConfig(ctx context.Context, ticketType, actionType string, update model.ApprovalConfigUpdate) (*model.ApprovalConfig, error) {
+func (r *ApprovalConfigRepo) UpdateConfig(ctx context.Context, ticketType, actionType string, update model.ApprovalConfigUpdate, returnNew bool) (*model.ApprovalConfig, error) {
 	f := gmqb.Field[model.ApprovalConfig]
 	q := gmqb.NewFilter().Eq(f("DeletedAt"), nil)
 	q.Eq(f("TicketType"), ticketType).Eq(f("ActionType"), actionType)
@@ -45,7 +46,12 @@ func (r *ApprovalConfigRepo) UpdateConfig(ctx context.Context, ticketType, actio
 		u.Set(f("EligibleRoles"), update.EligibleRoles)
 	}
 
-	return r.coll.FindOneAndUpdate(ctx, q, u)
+	returnDoc := options.Before
+	if returnNew {
+		returnDoc = options.After
+	}
+
+	return r.coll.FindOneAndUpdate(ctx, q, u, gmqb.WithReturnDocument(returnDoc))
 }
 
 func (r *ApprovalConfigRepo) DeleteConfig(ctx context.Context, ticketType, actionType string) (*model.ApprovalConfig, error) {

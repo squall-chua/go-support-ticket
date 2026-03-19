@@ -194,7 +194,7 @@ func (s *ActionServiceServer) CreateActionSchema(ctx context.Context, req *apiv1
 		User:       userID,
 		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
-		ResourceID: schema.ActionType,
+		ResourceID: schema.ID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: schema.ToProto()},
 	}
 	_ = s.publisher.Publish(ctx, &evt)
@@ -268,12 +268,16 @@ func (s *ActionServiceServer) UpdateActionSchema(ctx context.Context, req *apiv1
 		update.ResultSchema = &results
 	}
 
-	if err := s.schema.UpdateSchema(ctx, req.ActionType, update); err != nil {
+	before, err := s.schema.UpdateSchema(ctx, req.Id, update, false)
+	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if before == nil {
+		return nil, status.Error(codes.NotFound, "action schema not found")
 	}
 
 	// Fetch updated schema to return
-	updated, err := s.schema.GetSchema(ctx, req.ActionType)
+	updated, err := s.schema.GetSchema(ctx, before.ID.Hex())
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -289,8 +293,12 @@ func (s *ActionServiceServer) UpdateActionSchema(ctx context.Context, req *apiv1
 		User:       userID,
 		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
-		ResourceID: updated.ActionType,
+		ResourceID: updated.ID.Hex(),
 		Data:       eventbus.ProtoMarshaler{Message: updated.ToProto()},
+		Metadata: map[string]any{
+			"before": eventbus.ProtoMarshaler{Message: before.ToProto()},
+			"update": eventbus.ProtoMarshaler{Message: req},
+		},
 	}
 	_ = s.publisher.Publish(ctx, &evt)
 
@@ -300,8 +308,16 @@ func (s *ActionServiceServer) UpdateActionSchema(ctx context.Context, req *apiv1
 }
 
 func (s *ActionServiceServer) DeleteActionSchema(ctx context.Context, req *apiv1.DeleteActionSchemaRequest) (*apiv1.DeleteActionSchemaResponse, error) {
-	if err := s.schema.DeleteSchema(ctx, req.ActionType); err != nil {
+	if req.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id is required")
+	}
+
+	schema, err := s.schema.DeleteSchema(ctx, req.Id)
+	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if schema == nil {
+		return nil, status.Error(codes.NotFound, "action schema not found")
 	}
 
 	userID, _ := middleware.UserFromContext(ctx)
@@ -312,7 +328,8 @@ func (s *ActionServiceServer) DeleteActionSchema(ctx context.Context, req *apiv1
 		User:       userID,
 		Source:     eventconsts.SourceAction,
 		Schema:     eventconsts.SchemaAction,
-		ResourceID: req.ActionType,
+		ResourceID: schema.ID.Hex(),
+		Data:       eventbus.ProtoMarshaler{Message: schema.ToProto()},
 	}
 	_ = s.publisher.Publish(ctx, &evt)
 	return &apiv1.DeleteActionSchemaResponse{}, nil

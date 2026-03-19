@@ -1068,7 +1068,7 @@ func (x *ListActionExecutionsResponse) GetPagination() *PageInfo {
 
 type UpdateActionSchemaRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	ActionType      string                 `protobuf:"bytes,1,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	DisplayName     *string                `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
 	Description     *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	Parameters      []*ActionParameter     `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty"`
@@ -1108,9 +1108,9 @@ func (*UpdateActionSchemaRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *UpdateActionSchemaRequest) GetActionType() string {
+func (x *UpdateActionSchemaRequest) GetId() string {
 	if x != nil {
-		return x.ActionType
+		return x.Id
 	}
 	return ""
 }
@@ -1324,7 +1324,7 @@ func (x *CreateActionSchemaResponse) GetSchema() *ActionSchema {
 
 type DeleteActionSchemaRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ActionType    string                 `protobuf:"bytes,1,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1359,9 +1359,9 @@ func (*DeleteActionSchemaRequest) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *DeleteActionSchemaRequest) GetActionType() string {
+func (x *DeleteActionSchemaRequest) GetId() string {
 	if x != nil {
-		return x.ActionType
+		return x.Id
 	}
 	return ""
 }
@@ -1518,10 +1518,9 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"executions\x120\n" +
 	"\n" +
 	"pagination\x18\x02 \x01(\v2\x10.api.v1.PageInfoR\n" +
-	"pagination\"\xea\x02\n" +
-	"\x19UpdateActionSchemaRequest\x12\x1f\n" +
-	"\vaction_type\x18\x01 \x01(\tR\n" +
-	"actionType\x12&\n" +
+	"pagination\"\xd9\x02\n" +
+	"\x19UpdateActionSchemaRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12&\n" +
 	"\fdisplay_name\x18\x02 \x01(\tH\x00R\vdisplayName\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01\x127\n" +
 	"\n" +
@@ -1545,10 +1544,9 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\rresult_schema\x18\x05 \x03(\v2\x19.api.v1.ActionResultFieldR\fresultSchema\x12)\n" +
 	"\x10require_approval\x18\x06 \x01(\bR\x0frequireApproval\"J\n" +
 	"\x1aCreateActionSchemaResponse\x12,\n" +
-	"\x06schema\x18\x01 \x01(\v2\x14.api.v1.ActionSchemaR\x06schema\"<\n" +
-	"\x19DeleteActionSchemaRequest\x12\x1f\n" +
-	"\vaction_type\x18\x01 \x01(\tR\n" +
-	"actionType\"\x1c\n" +
+	"\x06schema\x18\x01 \x01(\v2\x14.api.v1.ActionSchemaR\x06schema\"+\n" +
+	"\x19DeleteActionSchemaRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x1c\n" +
 	"\x1aDeleteActionSchemaResponse*\xc6\x01\n" +
 	"\tFieldType\x12\x1a\n" +
 	"\x16FIELD_TYPE_UNSPECIFIED\x10\x00\x12\x15\n" +
@@ -1570,7 +1568,7 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x15ActionExecutionStatus\x12'\n" +
 	"#ACTION_EXECUTION_STATUS_UNSPECIFIED\x10\x00\x12%\n" +
 	"!ACTION_EXECUTION_STATUS_COMPLETED\x10\x01\x12\"\n" +
-	"\x1eACTION_EXECUTION_STATUS_FAILED\x10\x022\xbc\b\n" +
+	"\x1eACTION_EXECUTION_STATUS_FAILED\x10\x022\xaa\b\n" +
 	"\rActionService\x12\x83\x01\n" +
 	"\rExecuteAction\x12\x1c.api.v1.ExecuteActionRequest\x1a\x17.api.v1.ActionExecution\";\x82\xb5\x18\x1d\n" +
 	"\rwrite:actions\x12\x05admin\x12\x05agent\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/actions\x12\x94\x01\n" +
@@ -1581,11 +1579,11 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x12CreateActionSchema\x12!.api.v1.CreateActionSchemaRequest\x1a\".api.v1.CreateActionSchemaResponse\";\x82\xb5\x18\x16\n" +
 	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/action-schemas\x12\x8a\x01\n" +
 	"\x11ListActionSchemas\x12 .api.v1.ListActionSchemasRequest\x1a!.api.v1.ListActionSchemasResponse\"0\x82\xb5\x18\x0e\n" +
-	"\fread:actions\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/action-schemas\x12\xa6\x01\n" +
-	"\x12UpdateActionSchema\x12!.api.v1.UpdateActionSchemaRequest\x1a\".api.v1.UpdateActionSchemaResponse\"I\x82\xb5\x18\x16\n" +
-	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02):\x01*\x1a$/api/v1/action-schemas/{action_type}\x12\xa3\x01\n" +
-	"\x12DeleteActionSchema\x12!.api.v1.DeleteActionSchemaRequest\x1a\".api.v1.DeleteActionSchemaResponse\"F\x82\xb5\x18\x16\n" +
-	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02&*$/api/v1/action-schemas/{action_type}B7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
+	"\fread:actions\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/action-schemas\x12\x9d\x01\n" +
+	"\x12UpdateActionSchema\x12!.api.v1.UpdateActionSchemaRequest\x1a\".api.v1.UpdateActionSchemaResponse\"@\x82\xb5\x18\x16\n" +
+	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02 :\x01*\x1a\x1b/api/v1/action-schemas/{id}\x12\x9a\x01\n" +
+	"\x12DeleteActionSchema\x12!.api.v1.DeleteActionSchemaRequest\x1a\".api.v1.DeleteActionSchemaResponse\"=\x82\xb5\x18\x16\n" +
+	"\rwrite:actions\x12\x05admin\x82\xd3\xe4\x93\x02\x1d*\x1b/api/v1/action-schemas/{id}B7Z5github.com/squall-chua/go-support-ticket/api/v1;apiv1b\x06proto3"
 
 var (
 	file_api_proto_v1_action_proto_rawDescOnce sync.Once

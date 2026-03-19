@@ -269,15 +269,104 @@ func (r *TicketRepo) AddComment(ctx context.Context, ticketID string, comment *m
 	return err
 }
 
-func (r *TicketRepo) DeleteTicket(ctx context.Context, id string, userID string, roles []string) error {
+func (r *TicketRepo) DeleteTicket(ctx context.Context, id string, userID string, roles []string) (*model.Ticket, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	f := gmqb.Field[model.Ticket]
 	query := gmqb.And(gmqb.Eq(f("ID"), oid), r.buildVisibilityFilter(userID, roles))
 
 	update := gmqb.NewUpdate().Set(f("DeletedAt"), time.Now().UTC())
-	_, err = r.coll.UpdateOne(ctx, query, update)
+	return r.coll.FindOneAndUpdate(ctx, query, update, gmqb.WithReturnDocument(options.After))
+}
+
+func (r *TicketRepo) InitiateMerge(ctx context.Context, sourceID, targetID string, updateSource, updateTarget model.TicketUpdate, userID string, roles []string) (*model.Ticket, *model.Ticket, error) {
+	session, err := r.coll.Unwrap().Database().Client().StartSession()
+	if err != nil {
+		return nil, nil, err
+	}
+	defer session.EndSession(ctx)
+
+	var source, target *model.Ticket
+	_, err = session.WithTransaction(ctx, func(sessCtx context.Context) (interface{}, error) {
+		source, err = r.UpdateTicket(sessCtx, sourceID, updateSource, userID, roles)
+		if err != nil {
+			return nil, err
+		}
+
+		target, err = r.UpdateTicket(sessCtx, targetID, updateTarget, userID, roles)
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return source, target, nil
+}
+
+func (r *TicketRepo) FulfillMerge(ctx context.Context, sourceID, targetID string, updateSource, updateTarget model.TicketUpdate, comment *model.Comment, userID string, roles []string) (*model.Ticket, *model.Ticket, error) {
+	session, err := r.coll.Unwrap().Database().Client().StartSession()
+	if err != nil {
+		return nil, nil, err
+	}
+	defer session.EndSession(ctx)
+
+	var source, target *model.Ticket
+	_, err = session.WithTransaction(ctx, func(sessCtx context.Context) (interface{}, error) {
+		source, err = r.UpdateTicket(sessCtx, sourceID, updateSource, userID, roles)
+		if err != nil {
+			return nil, err
+		}
+
+		target, err = r.UpdateTicket(sessCtx, targetID, updateTarget, userID, roles)
+		if err != nil {
+			return nil, err
+		}
+
+		if comment != nil {
+			if err := r.AddComment(sessCtx, targetID, comment, userID, roles); err != nil {
+				return nil, err
+			}
+			// Refresh target to include new comment
+			target, err = r.GetTicket(sessCtx, targetID, userID, roles)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, nil
+	})
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return source, target, nil
+}
+
+func (r *TicketRepo) RejectMerge(ctx context.Context, sourceID, targetID string, updateSource, updateTarget model.TicketUpdate, userID string, roles []string) error {
+	session, err := r.coll.Unwrap().Database().Client().StartSession()
+	if err != nil {
+		return err
+	}
+	defer session.EndSession(ctx)
+
+	_, err = session.WithTransaction(ctx, func(sessCtx context.Context) (interface{}, error) {
+		_, err = r.UpdateTicket(sessCtx, sourceID, updateSource, userID, roles)
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = r.UpdateTicket(sessCtx, targetID, updateTarget, userID, roles)
+		if err != nil {
+			return nil, err
+		}
+		return nil, nil
+	})
+
 	return err
 }
