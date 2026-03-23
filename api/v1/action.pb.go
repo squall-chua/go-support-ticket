@@ -98,6 +98,7 @@ const (
 	ActionStatus_ACTION_STATUS_COMPLETED        ActionStatus = 4
 	ActionStatus_ACTION_STATUS_FAILED           ActionStatus = 5
 	ActionStatus_ACTION_STATUS_REJECTED         ActionStatus = 6
+	ActionStatus_ACTION_STATUS_CANCELLED        ActionStatus = 7
 )
 
 // Enum value maps for ActionStatus.
@@ -110,6 +111,7 @@ var (
 		4: "ACTION_STATUS_COMPLETED",
 		5: "ACTION_STATUS_FAILED",
 		6: "ACTION_STATUS_REJECTED",
+		7: "ACTION_STATUS_CANCELLED",
 	}
 	ActionStatus_value = map[string]int32{
 		"ACTION_STATUS_UNSPECIFIED":      0,
@@ -119,6 +121,7 @@ var (
 		"ACTION_STATUS_COMPLETED":        4,
 		"ACTION_STATUS_FAILED":           5,
 		"ACTION_STATUS_REJECTED":         6,
+		"ACTION_STATUS_CANCELLED":        7,
 	}
 )
 
@@ -1402,6 +1405,102 @@ func (*DeleteActionSchemaResponse) Descriptor() ([]byte, []int) {
 	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{16}
 }
 
+type CancelActionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExecutionId   string                 `protobuf:"bytes,1,opt,name=execution_id,json=executionId,proto3" json:"execution_id,omitempty"`
+	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelActionRequest) Reset() {
+	*x = CancelActionRequest{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelActionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelActionRequest) ProtoMessage() {}
+
+func (x *CancelActionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelActionRequest.ProtoReflect.Descriptor instead.
+func (*CancelActionRequest) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *CancelActionRequest) GetExecutionId() string {
+	if x != nil {
+		return x.ExecutionId
+	}
+	return ""
+}
+
+func (x *CancelActionRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+type CancelActionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Execution     *ActionExecution       `protobuf:"bytes,1,opt,name=execution,proto3" json:"execution,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelActionResponse) Reset() {
+	*x = CancelActionResponse{}
+	mi := &file_api_proto_v1_action_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelActionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelActionResponse) ProtoMessage() {}
+
+func (x *CancelActionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_v1_action_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelActionResponse.ProtoReflect.Descriptor instead.
+func (*CancelActionResponse) Descriptor() ([]byte, []int) {
+	return file_api_proto_v1_action_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *CancelActionResponse) GetExecution() *ActionExecution {
+	if x != nil {
+		return x.Execution
+	}
+	return nil
+}
+
 var File_api_proto_v1_action_proto protoreflect.FileDescriptor
 
 const file_api_proto_v1_action_proto_rawDesc = "" +
@@ -1547,7 +1646,12 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x06schema\x18\x01 \x01(\v2\x14.api.v1.ActionSchemaR\x06schema\"+\n" +
 	"\x19DeleteActionSchemaRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x1c\n" +
-	"\x1aDeleteActionSchemaResponse*\xc6\x01\n" +
+	"\x1aDeleteActionSchemaResponse\"P\n" +
+	"\x13CancelActionRequest\x12!\n" +
+	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\x12\x16\n" +
+	"\x06reason\x18\x02 \x01(\tR\x06reason\"M\n" +
+	"\x14CancelActionResponse\x125\n" +
+	"\texecution\x18\x01 \x01(\v2\x17.api.v1.ActionExecutionR\texecution*\xc6\x01\n" +
 	"\tFieldType\x12\x1a\n" +
 	"\x16FIELD_TYPE_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11FIELD_TYPE_STRING\x10\x01\x12\x16\n" +
@@ -1556,7 +1660,7 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x12FIELD_TYPE_BOOLEAN\x10\x04\x12\x13\n" +
 	"\x0fFIELD_TYPE_ENUM\x10\x05\x12\x15\n" +
 	"\x11FIELD_TYPE_OBJECT\x10\x06\x12\x14\n" +
-	"\x10FIELD_TYPE_ARRAY\x10\a*\xde\x01\n" +
+	"\x10FIELD_TYPE_ARRAY\x10\a*\xfb\x01\n" +
 	"\fActionStatus\x12\x1d\n" +
 	"\x19ACTION_STATUS_UNSPECIFIED\x10\x00\x12\"\n" +
 	"\x1eACTION_STATUS_PENDING_APPROVAL\x10\x01\x12\x19\n" +
@@ -1564,14 +1668,17 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x19ACTION_STATUS_IN_PROGRESS\x10\x03\x12\x1b\n" +
 	"\x17ACTION_STATUS_COMPLETED\x10\x04\x12\x18\n" +
 	"\x14ACTION_STATUS_FAILED\x10\x05\x12\x1a\n" +
-	"\x16ACTION_STATUS_REJECTED\x10\x06*\x8b\x01\n" +
+	"\x16ACTION_STATUS_REJECTED\x10\x06\x12\x1b\n" +
+	"\x17ACTION_STATUS_CANCELLED\x10\a*\x8b\x01\n" +
 	"\x15ActionExecutionStatus\x12'\n" +
 	"#ACTION_EXECUTION_STATUS_UNSPECIFIED\x10\x00\x12%\n" +
 	"!ACTION_EXECUTION_STATUS_COMPLETED\x10\x01\x12\"\n" +
-	"\x1eACTION_EXECUTION_STATUS_FAILED\x10\x022\xaa\b\n" +
+	"\x1eACTION_EXECUTION_STATUS_FAILED\x10\x022\xd3\t\n" +
 	"\rActionService\x12\x83\x01\n" +
 	"\rExecuteAction\x12\x1c.api.v1.ExecuteActionRequest\x1a\x17.api.v1.ActionExecution\";\x82\xb5\x18\x1d\n" +
-	"\rwrite:actions\x12\x05admin\x12\x05agent\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/actions\x12\x94\x01\n" +
+	"\rwrite:actions\x12\x05admin\x12\x05agent\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/actions\x12\xa6\x01\n" +
+	"\fCancelAction\x12\x1b.api.v1.CancelActionRequest\x1a\x1c.api.v1.CancelActionResponse\"[\x82\xb5\x18\x1d\n" +
+	"\rwrite:actions\x12\x05admin\x12\x05agent\x82\xd3\xe4\x93\x024:\x01*\"//api/v1/action-executions/{execution_id}:cancel\x12\x94\x01\n" +
 	"\x12GetActionExecution\x12!.api.v1.GetActionExecutionRequest\x1a\x17.api.v1.ActionExecution\"B\x82\xb5\x18\x0e\n" +
 	"\fread:actions\x82\xd3\xe4\x93\x02*\x12(/api/v1/action-executions/{execution_id}\x12\x96\x01\n" +
 	"\x14ListActionExecutions\x12#.api.v1.ListActionExecutionsRequest\x1a$.api.v1.ListActionExecutionsResponse\"3\x82\xb5\x18\x0e\n" +
@@ -1598,7 +1705,7 @@ func file_api_proto_v1_action_proto_rawDescGZIP() []byte {
 }
 
 var file_api_proto_v1_action_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_api_proto_v1_action_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_api_proto_v1_action_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_api_proto_v1_action_proto_goTypes = []any{
 	(FieldType)(0),                       // 0: api.v1.FieldType
 	(ActionStatus)(0),                    // 1: api.v1.ActionStatus
@@ -1620,72 +1727,77 @@ var file_api_proto_v1_action_proto_goTypes = []any{
 	(*CreateActionSchemaResponse)(nil),   // 17: api.v1.CreateActionSchemaResponse
 	(*DeleteActionSchemaRequest)(nil),    // 18: api.v1.DeleteActionSchemaRequest
 	(*DeleteActionSchemaResponse)(nil),   // 19: api.v1.DeleteActionSchemaResponse
-	nil,                                  // 20: api.v1.ActionExecution.ParametersEntry
-	nil,                                  // 21: api.v1.ActionExecutionResult.ResultsEntry
-	nil,                                  // 22: api.v1.ExecuteActionRequest.ParametersEntry
-	(*structpb.Value)(nil),               // 23: google.protobuf.Value
-	(*timestamppb.Timestamp)(nil),        // 24: google.protobuf.Timestamp
-	(*TimeRange)(nil),                    // 25: api.v1.TimeRange
-	(*PageRequest)(nil),                  // 26: api.v1.PageRequest
-	(*PageInfo)(nil),                     // 27: api.v1.PageInfo
+	(*CancelActionRequest)(nil),          // 20: api.v1.CancelActionRequest
+	(*CancelActionResponse)(nil),         // 21: api.v1.CancelActionResponse
+	nil,                                  // 22: api.v1.ActionExecution.ParametersEntry
+	nil,                                  // 23: api.v1.ActionExecutionResult.ResultsEntry
+	nil,                                  // 24: api.v1.ExecuteActionRequest.ParametersEntry
+	(*structpb.Value)(nil),               // 25: google.protobuf.Value
+	(*timestamppb.Timestamp)(nil),        // 26: google.protobuf.Timestamp
+	(*TimeRange)(nil),                    // 27: api.v1.TimeRange
+	(*PageRequest)(nil),                  // 28: api.v1.PageRequest
+	(*PageInfo)(nil),                     // 29: api.v1.PageInfo
 }
 var file_api_proto_v1_action_proto_depIdxs = []int32{
 	0,  // 0: api.v1.ActionParameter.type:type_name -> api.v1.FieldType
-	23, // 1: api.v1.ActionParameter.default_value:type_name -> google.protobuf.Value
+	25, // 1: api.v1.ActionParameter.default_value:type_name -> google.protobuf.Value
 	0,  // 2: api.v1.ActionResultField.type:type_name -> api.v1.FieldType
 	4,  // 3: api.v1.ActionResultField.children:type_name -> api.v1.ActionResultField
 	3,  // 4: api.v1.ActionSchema.parameters:type_name -> api.v1.ActionParameter
 	4,  // 5: api.v1.ActionSchema.result_schema:type_name -> api.v1.ActionResultField
-	24, // 6: api.v1.ActionSchema.created_at:type_name -> google.protobuf.Timestamp
-	24, // 7: api.v1.ActionSchema.updated_at:type_name -> google.protobuf.Timestamp
-	24, // 8: api.v1.ActionSchema.deleted_at:type_name -> google.protobuf.Timestamp
+	26, // 6: api.v1.ActionSchema.created_at:type_name -> google.protobuf.Timestamp
+	26, // 7: api.v1.ActionSchema.updated_at:type_name -> google.protobuf.Timestamp
+	26, // 8: api.v1.ActionSchema.deleted_at:type_name -> google.protobuf.Timestamp
 	1,  // 9: api.v1.ActionExecution.status:type_name -> api.v1.ActionStatus
-	20, // 10: api.v1.ActionExecution.parameters:type_name -> api.v1.ActionExecution.ParametersEntry
+	22, // 10: api.v1.ActionExecution.parameters:type_name -> api.v1.ActionExecution.ParametersEntry
 	7,  // 11: api.v1.ActionExecution.result:type_name -> api.v1.ActionExecutionResult
-	24, // 12: api.v1.ActionExecution.created_at:type_name -> google.protobuf.Timestamp
-	24, // 13: api.v1.ActionExecution.updated_at:type_name -> google.protobuf.Timestamp
-	24, // 14: api.v1.ActionExecution.execute_at:type_name -> google.protobuf.Timestamp
+	26, // 12: api.v1.ActionExecution.created_at:type_name -> google.protobuf.Timestamp
+	26, // 13: api.v1.ActionExecution.updated_at:type_name -> google.protobuf.Timestamp
+	26, // 14: api.v1.ActionExecution.execute_at:type_name -> google.protobuf.Timestamp
 	2,  // 15: api.v1.ActionExecutionResult.status:type_name -> api.v1.ActionExecutionStatus
-	24, // 16: api.v1.ActionExecutionResult.completed_at:type_name -> google.protobuf.Timestamp
-	21, // 17: api.v1.ActionExecutionResult.results:type_name -> api.v1.ActionExecutionResult.ResultsEntry
-	25, // 18: api.v1.ListActionSchemasRequest.time_range:type_name -> api.v1.TimeRange
-	26, // 19: api.v1.ListActionSchemasRequest.pagination:type_name -> api.v1.PageRequest
+	26, // 16: api.v1.ActionExecutionResult.completed_at:type_name -> google.protobuf.Timestamp
+	23, // 17: api.v1.ActionExecutionResult.results:type_name -> api.v1.ActionExecutionResult.ResultsEntry
+	27, // 18: api.v1.ListActionSchemasRequest.time_range:type_name -> api.v1.TimeRange
+	28, // 19: api.v1.ListActionSchemasRequest.pagination:type_name -> api.v1.PageRequest
 	5,  // 20: api.v1.ListActionSchemasResponse.schemas:type_name -> api.v1.ActionSchema
-	27, // 21: api.v1.ListActionSchemasResponse.pagination:type_name -> api.v1.PageInfo
-	22, // 22: api.v1.ExecuteActionRequest.parameters:type_name -> api.v1.ExecuteActionRequest.ParametersEntry
+	29, // 21: api.v1.ListActionSchemasResponse.pagination:type_name -> api.v1.PageInfo
+	24, // 22: api.v1.ExecuteActionRequest.parameters:type_name -> api.v1.ExecuteActionRequest.ParametersEntry
 	1,  // 23: api.v1.ListActionExecutionsRequest.statuses:type_name -> api.v1.ActionStatus
-	25, // 24: api.v1.ListActionExecutionsRequest.time_range:type_name -> api.v1.TimeRange
-	26, // 25: api.v1.ListActionExecutionsRequest.pagination:type_name -> api.v1.PageRequest
+	27, // 24: api.v1.ListActionExecutionsRequest.time_range:type_name -> api.v1.TimeRange
+	28, // 25: api.v1.ListActionExecutionsRequest.pagination:type_name -> api.v1.PageRequest
 	6,  // 26: api.v1.ListActionExecutionsResponse.executions:type_name -> api.v1.ActionExecution
-	27, // 27: api.v1.ListActionExecutionsResponse.pagination:type_name -> api.v1.PageInfo
+	29, // 27: api.v1.ListActionExecutionsResponse.pagination:type_name -> api.v1.PageInfo
 	3,  // 28: api.v1.UpdateActionSchemaRequest.parameters:type_name -> api.v1.ActionParameter
 	4,  // 29: api.v1.UpdateActionSchemaRequest.result_schema:type_name -> api.v1.ActionResultField
 	5,  // 30: api.v1.UpdateActionSchemaResponse.schema:type_name -> api.v1.ActionSchema
 	3,  // 31: api.v1.CreateActionSchemaRequest.parameters:type_name -> api.v1.ActionParameter
 	4,  // 32: api.v1.CreateActionSchemaRequest.result_schema:type_name -> api.v1.ActionResultField
 	5,  // 33: api.v1.CreateActionSchemaResponse.schema:type_name -> api.v1.ActionSchema
-	23, // 34: api.v1.ActionExecution.ParametersEntry.value:type_name -> google.protobuf.Value
-	23, // 35: api.v1.ActionExecutionResult.ResultsEntry.value:type_name -> google.protobuf.Value
-	23, // 36: api.v1.ExecuteActionRequest.ParametersEntry.value:type_name -> google.protobuf.Value
-	10, // 37: api.v1.ActionService.ExecuteAction:input_type -> api.v1.ExecuteActionRequest
-	11, // 38: api.v1.ActionService.GetActionExecution:input_type -> api.v1.GetActionExecutionRequest
-	12, // 39: api.v1.ActionService.ListActionExecutions:input_type -> api.v1.ListActionExecutionsRequest
-	16, // 40: api.v1.ActionService.CreateActionSchema:input_type -> api.v1.CreateActionSchemaRequest
-	8,  // 41: api.v1.ActionService.ListActionSchemas:input_type -> api.v1.ListActionSchemasRequest
-	14, // 42: api.v1.ActionService.UpdateActionSchema:input_type -> api.v1.UpdateActionSchemaRequest
-	18, // 43: api.v1.ActionService.DeleteActionSchema:input_type -> api.v1.DeleteActionSchemaRequest
-	6,  // 44: api.v1.ActionService.ExecuteAction:output_type -> api.v1.ActionExecution
-	6,  // 45: api.v1.ActionService.GetActionExecution:output_type -> api.v1.ActionExecution
-	13, // 46: api.v1.ActionService.ListActionExecutions:output_type -> api.v1.ListActionExecutionsResponse
-	17, // 47: api.v1.ActionService.CreateActionSchema:output_type -> api.v1.CreateActionSchemaResponse
-	9,  // 48: api.v1.ActionService.ListActionSchemas:output_type -> api.v1.ListActionSchemasResponse
-	15, // 49: api.v1.ActionService.UpdateActionSchema:output_type -> api.v1.UpdateActionSchemaResponse
-	19, // 50: api.v1.ActionService.DeleteActionSchema:output_type -> api.v1.DeleteActionSchemaResponse
-	44, // [44:51] is the sub-list for method output_type
-	37, // [37:44] is the sub-list for method input_type
-	37, // [37:37] is the sub-list for extension type_name
-	37, // [37:37] is the sub-list for extension extendee
-	0,  // [0:37] is the sub-list for field type_name
+	6,  // 34: api.v1.CancelActionResponse.execution:type_name -> api.v1.ActionExecution
+	25, // 35: api.v1.ActionExecution.ParametersEntry.value:type_name -> google.protobuf.Value
+	25, // 36: api.v1.ActionExecutionResult.ResultsEntry.value:type_name -> google.protobuf.Value
+	25, // 37: api.v1.ExecuteActionRequest.ParametersEntry.value:type_name -> google.protobuf.Value
+	10, // 38: api.v1.ActionService.ExecuteAction:input_type -> api.v1.ExecuteActionRequest
+	20, // 39: api.v1.ActionService.CancelAction:input_type -> api.v1.CancelActionRequest
+	11, // 40: api.v1.ActionService.GetActionExecution:input_type -> api.v1.GetActionExecutionRequest
+	12, // 41: api.v1.ActionService.ListActionExecutions:input_type -> api.v1.ListActionExecutionsRequest
+	16, // 42: api.v1.ActionService.CreateActionSchema:input_type -> api.v1.CreateActionSchemaRequest
+	8,  // 43: api.v1.ActionService.ListActionSchemas:input_type -> api.v1.ListActionSchemasRequest
+	14, // 44: api.v1.ActionService.UpdateActionSchema:input_type -> api.v1.UpdateActionSchemaRequest
+	18, // 45: api.v1.ActionService.DeleteActionSchema:input_type -> api.v1.DeleteActionSchemaRequest
+	6,  // 46: api.v1.ActionService.ExecuteAction:output_type -> api.v1.ActionExecution
+	21, // 47: api.v1.ActionService.CancelAction:output_type -> api.v1.CancelActionResponse
+	6,  // 48: api.v1.ActionService.GetActionExecution:output_type -> api.v1.ActionExecution
+	13, // 49: api.v1.ActionService.ListActionExecutions:output_type -> api.v1.ListActionExecutionsResponse
+	17, // 50: api.v1.ActionService.CreateActionSchema:output_type -> api.v1.CreateActionSchemaResponse
+	9,  // 51: api.v1.ActionService.ListActionSchemas:output_type -> api.v1.ListActionSchemasResponse
+	15, // 52: api.v1.ActionService.UpdateActionSchema:output_type -> api.v1.UpdateActionSchemaResponse
+	19, // 53: api.v1.ActionService.DeleteActionSchema:output_type -> api.v1.DeleteActionSchemaResponse
+	46, // [46:54] is the sub-list for method output_type
+	38, // [38:46] is the sub-list for method input_type
+	38, // [38:38] is the sub-list for extension type_name
+	38, // [38:38] is the sub-list for extension extendee
+	0,  // [0:38] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_v1_action_proto_init() }
@@ -1703,7 +1815,7 @@ func file_api_proto_v1_action_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_v1_action_proto_rawDesc), len(file_api_proto_v1_action_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   20,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

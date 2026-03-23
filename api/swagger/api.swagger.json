@@ -87,7 +87,8 @@
                 "ACTION_STATUS_IN_PROGRESS",
                 "ACTION_STATUS_COMPLETED",
                 "ACTION_STATUS_FAILED",
-                "ACTION_STATUS_REJECTED"
+                "ACTION_STATUS_REJECTED",
+                "ACTION_STATUS_CANCELLED"
               ]
             },
             "collectionFormat": "multi"
@@ -159,6 +160,44 @@
             "in": "path",
             "required": true,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "ActionService"
+        ]
+      }
+    },
+    "/api/v1/action-executions/{executionId}:cancel": {
+      "post": {
+        "operationId": "ActionService_CancelAction",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CancelActionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "executionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ActionServiceCancelActionBody"
+            }
           }
         ],
         "tags": [
@@ -1585,6 +1624,14 @@
     }
   },
   "definitions": {
+    "ActionServiceCancelActionBody": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
     "ActionServiceUpdateActionSchemaBody": {
       "type": "object",
       "properties": {
@@ -1946,7 +1993,8 @@
         "ACTION_STATUS_IN_PROGRESS",
         "ACTION_STATUS_COMPLETED",
         "ACTION_STATUS_FAILED",
-        "ACTION_STATUS_REJECTED"
+        "ACTION_STATUS_REJECTED",
+        "ACTION_STATUS_CANCELLED"
       ],
       "default": "ACTION_STATUS_UNSPECIFIED"
     },
@@ -2119,6 +2167,14 @@
         "metadata": {
           "type": "object",
           "additionalProperties": {}
+        }
+      }
+    },
+    "v1CancelActionResponse": {
+      "type": "object",
+      "properties": {
+        "execution": {
+          "$ref": "#/definitions/v1ActionExecution"
         }
       }
     },

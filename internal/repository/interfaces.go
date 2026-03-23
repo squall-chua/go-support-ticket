@@ -38,7 +38,7 @@ type ActionSchemaRepository interface {
 type ActionExecutionRepository interface {
 	CreateExecution(ctx context.Context, execution *model.ActionExecution) error
 	GetExecution(ctx context.Context, id string) (*model.ActionExecution, error)
-	UpdateExecution(ctx context.Context, id string, update model.ActionExecutionUpdate) error
+	UpdateExecution(ctx context.Context, id string, update model.ActionExecutionUpdate, returnNew bool) (*model.ActionExecution, error)
 	ListExecutions(ctx context.Context, filter model.ActionExecutionFilter, limit, offset int32) ([]*model.ActionExecution, int32, error)
 }
 

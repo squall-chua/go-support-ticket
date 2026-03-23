@@ -31,6 +31,7 @@ action:
     action.execution.triggered:
     action.execution.completed:
     action.execution.pending_approval:
+    action.execution.cancelled:
 
 ticket_type:
   queue_type: kafka

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,6 +46,23 @@ func (s *ActionServiceServer) ExecuteAction(ctx context.Context, req *apiv1.Exec
 	}
 	if schema == nil {
 		return nil, status.Error(codes.NotFound, "action schema not found")
+	}
+
+	// Check for existing pending/in-progress actions for this ticket
+	pendingFilter := model.ActionExecutionFilter{
+		TicketIDs: []string{req.TicketId},
+		Statuses: []int32{
+			int32(apiv1.ActionStatus_ACTION_STATUS_PENDING),
+			int32(apiv1.ActionStatus_ACTION_STATUS_PENDING_APPROVAL),
+			int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS),
+		},
+	}
+	existing, _, err := s.repo.ListExecutions(ctx, pendingFilter, 1, 0)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if len(existing) > 0 {
+		return nil, status.Error(codes.FailedPrecondition, "there is already a pending action for this ticket")
 	}
 
 	params := make(map[string]interface{})
@@ -91,6 +109,59 @@ func (s *ActionServiceServer) ExecuteAction(ctx context.Context, req *apiv1.Exec
 	_ = s.publisher.Publish(ctx, &evt)
 
 	return execution.ToProto(), nil
+}
+
+func (s *ActionServiceServer) CancelAction(ctx context.Context, req *apiv1.CancelActionRequest) (*apiv1.CancelActionResponse, error) {
+	execution, err := s.repo.GetExecution(ctx, req.ExecutionId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if execution == nil {
+		return nil, status.Error(codes.NotFound, "execution not found")
+	}
+
+	canCancel := execution.Status == int32(apiv1.ActionStatus_ACTION_STATUS_PENDING) ||
+		execution.Status == int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS)
+
+	if !canCancel {
+		return nil, status.Error(codes.FailedPrecondition, "only pending or in-progress actions can be cancelled")
+	}
+
+	statusUpdate := int32(apiv1.ActionStatus_ACTION_STATUS_CANCELLED)
+	update := model.ActionExecutionUpdate{
+		Status: &statusUpdate,
+		Result: &model.ActionExecutionResult{
+			Status:      int32(apiv1.ActionExecutionStatus_ACTION_EXECUTION_STATUS_FAILED),
+			Error:       fmt.Sprintf("Cancelled: %s", req.Reason),
+			CompletedAt: time.Now().UTC(),
+		},
+	}
+
+	updated, err := s.repo.UpdateExecution(ctx, req.ExecutionId, update, true)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if updated == nil {
+		return nil, status.Error(codes.NotFound, "execution not found after update")
+	}
+
+	userID, _ := middleware.UserFromContext(ctx)
+	evt := event.Event{
+		EventId:    uuid.NewString(),
+		EventType:  eventconsts.ActionExecutionCancelled,
+		EventTime:  time.Now().UTC(),
+		User:       userID,
+		Source:     eventconsts.SourceAction,
+		Schema:     eventconsts.SchemaAction,
+		ResourceID: updated.ID.Hex(),
+		Data:       eventbus.ProtoMarshaler{Message: updated.ToProto()},
+		Metadata:   map[string]any{"reason": req.Reason},
+	}
+	_ = s.publisher.Publish(ctx, &evt)
+
+	return &apiv1.CancelActionResponse{
+		Execution: updated.ToProto(),
+	}, nil
 }
 
 func (s *ActionServiceServer) GetActionExecution(ctx context.Context, req *apiv1.GetActionExecutionRequest) (*apiv1.ActionExecution, error) {
@@ -359,15 +430,12 @@ func (s *ActionServiceServer) HandleApprovalDecided(ctx context.Context, evt *ev
 		Status: &status,
 	}
 
-	if err := s.repo.UpdateExecution(ctx, approval.TargetId, update); err != nil {
+	execution, err := s.repo.UpdateExecution(ctx, approval.TargetId, update, true)
+	if err != nil {
 		return err
 	}
 
 	if status == int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS) {
-		execution, err := s.repo.GetExecution(ctx, approval.TargetId)
-		if err != nil {
-			return err
-		}
 		if execution != nil {
 			userID := approval.Requester
 			triggeredEvt := event.Event{
@@ -426,12 +494,16 @@ func (s *ActionServiceServer) HandleActionExecutionExecuted(ctx context.Context,
 		Result: modelResult,
 	}
 
-	if err := s.repo.UpdateExecution(ctx, result.ExecutionId, update); err != nil {
+	// Only update if not cancelled
+	existing, err := s.repo.GetExecution(ctx, result.ExecutionId)
+	if err != nil {
 		return err
 	}
+	if existing != nil && existing.Status == int32(apiv1.ActionStatus_ACTION_STATUS_CANCELLED) {
+		return nil
+	}
 
-	// Fetch the updated execution to publish the completed event
-	execution, err := s.repo.GetExecution(ctx, result.ExecutionId)
+	execution, err := s.repo.UpdateExecution(ctx, result.ExecutionId, update, true)
 	if err != nil {
 		return err
 	}

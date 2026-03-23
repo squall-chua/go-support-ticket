@@ -33,6 +33,7 @@ const (
 	ActionExecutionExecuted      = "action.execution.executed"
 	ActionExecutionCompleted     = "action.execution.completed"
 	ActionExecutionPending       = "action.execution.pending_approval"
+	ActionExecutionCancelled     = "action.execution.cancelled"
 
 	// Ticket events
 	TicketTypeCreated           = "ticket_type.created"

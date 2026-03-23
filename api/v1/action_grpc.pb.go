@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ActionService_ExecuteAction_FullMethodName        = "/api.v1.ActionService/ExecuteAction"
+	ActionService_CancelAction_FullMethodName         = "/api.v1.ActionService/CancelAction"
 	ActionService_GetActionExecution_FullMethodName   = "/api.v1.ActionService/GetActionExecution"
 	ActionService_ListActionExecutions_FullMethodName = "/api.v1.ActionService/ListActionExecutions"
 	ActionService_CreateActionSchema_FullMethodName   = "/api.v1.ActionService/CreateActionSchema"
@@ -33,6 +34,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ActionServiceClient interface {
 	ExecuteAction(ctx context.Context, in *ExecuteActionRequest, opts ...grpc.CallOption) (*ActionExecution, error)
+	CancelAction(ctx context.Context, in *CancelActionRequest, opts ...grpc.CallOption) (*CancelActionResponse, error)
 	GetActionExecution(ctx context.Context, in *GetActionExecutionRequest, opts ...grpc.CallOption) (*ActionExecution, error)
 	ListActionExecutions(ctx context.Context, in *ListActionExecutionsRequest, opts ...grpc.CallOption) (*ListActionExecutionsResponse, error)
 	CreateActionSchema(ctx context.Context, in *CreateActionSchemaRequest, opts ...grpc.CallOption) (*CreateActionSchemaResponse, error)
@@ -53,6 +55,16 @@ func (c *actionServiceClient) ExecuteAction(ctx context.Context, in *ExecuteActi
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ActionExecution)
 	err := c.cc.Invoke(ctx, ActionService_ExecuteAction_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *actionServiceClient) CancelAction(ctx context.Context, in *CancelActionRequest, opts ...grpc.CallOption) (*CancelActionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CancelActionResponse)
+	err := c.cc.Invoke(ctx, ActionService_CancelAction_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -124,6 +136,7 @@ func (c *actionServiceClient) DeleteActionSchema(ctx context.Context, in *Delete
 // for forward compatibility.
 type ActionServiceServer interface {
 	ExecuteAction(context.Context, *ExecuteActionRequest) (*ActionExecution, error)
+	CancelAction(context.Context, *CancelActionRequest) (*CancelActionResponse, error)
 	GetActionExecution(context.Context, *GetActionExecutionRequest) (*ActionExecution, error)
 	ListActionExecutions(context.Context, *ListActionExecutionsRequest) (*ListActionExecutionsResponse, error)
 	CreateActionSchema(context.Context, *CreateActionSchemaRequest) (*CreateActionSchemaResponse, error)
@@ -141,6 +154,9 @@ type UnimplementedActionServiceServer struct{}
 
 func (UnimplementedActionServiceServer) ExecuteAction(context.Context, *ExecuteActionRequest) (*ActionExecution, error) {
 	return nil, status.Error(codes.Unimplemented, "method ExecuteAction not implemented")
+}
+func (UnimplementedActionServiceServer) CancelAction(context.Context, *CancelActionRequest) (*CancelActionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CancelAction not implemented")
 }
 func (UnimplementedActionServiceServer) GetActionExecution(context.Context, *GetActionExecutionRequest) (*ActionExecution, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetActionExecution not implemented")
@@ -194,6 +210,24 @@ func _ActionService_ExecuteAction_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ActionServiceServer).ExecuteAction(ctx, req.(*ExecuteActionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ActionService_CancelAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelActionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ActionServiceServer).CancelAction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ActionService_CancelAction_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ActionServiceServer).CancelAction(ctx, req.(*CancelActionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -316,6 +350,10 @@ var ActionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExecuteAction",
 			Handler:    _ActionService_ExecuteAction_Handler,
+		},
+		{
+			MethodName: "CancelAction",
+			Handler:    _ActionService_CancelAction_Handler,
 		},
 		{
 			MethodName: "GetActionExecution",

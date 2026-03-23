@@ -29,6 +29,7 @@ enum ActionStatus {
   ACTION_STATUS_COMPLETED = 4;
   ACTION_STATUS_FAILED = 5;
   ACTION_STATUS_REJECTED = 6;
+  ACTION_STATUS_CANCELLED = 7;
 }
 
 message ActionParameter {
@@ -161,10 +162,29 @@ message DeleteActionSchemaRequest {
 
 message DeleteActionSchemaResponse {}
 
+message CancelActionRequest {
+  string execution_id = 1;
+  string reason = 2;
+}
+
+message CancelActionResponse {
+  ActionExecution execution = 1;
+}
+
 service ActionService {
   rpc ExecuteAction(ExecuteActionRequest) returns (ActionExecution) {
     option (google.api.http) = {
       post: "/api/v1/actions"
+      body: "*"
+    };
+    option (auth.v1.rule) = {
+      required_scopes: ["write:actions"]
+      required_roles: ["admin", "agent"]
+    };
+  }
+  rpc CancelAction(CancelActionRequest) returns (CancelActionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/action-executions/{execution_id}:cancel"
       body: "*"
     };
     option (auth.v1.rule) = {

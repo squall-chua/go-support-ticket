@@ -8,6 +8,7 @@ import (
 	"github.com/squall-chua/go-support-ticket/internal/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type ActionExecutionRepo struct {
@@ -35,10 +36,10 @@ func (r *ActionExecutionRepo) GetExecution(ctx context.Context, id string) (*mod
 	return r.coll.FindOne(ctx, gmqb.Eq(f("ID"), oid))
 }
 
-func (r *ActionExecutionRepo) UpdateExecution(ctx context.Context, id string, update model.ActionExecutionUpdate) error {
+func (r *ActionExecutionRepo) UpdateExecution(ctx context.Context, id string, update model.ActionExecutionUpdate, returnNew bool) (*model.ActionExecution, error) {
 	oid, err := bson.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	f := gmqb.Field[model.ActionExecution]
@@ -50,16 +51,14 @@ func (r *ActionExecutionRepo) UpdateExecution(ctx context.Context, id string, up
 	if update.Result != nil {
 		u.Set(f("Result"), update.Result)
 	}
-	if update.CompletedAt != nil {
-		// This field is also in Result, but we might keep it top-level for some reason? 
-		// Actually I removed it from ActionExecution struct in model.
-		// So CompletedAt should be part of Result.
-		// I'll skip setting it top-level since it's gone from the struct.
-	}
 	u.Set(f("UpdatedAt"), time.Now().UTC())
 
-	_, err = r.coll.UpdateOne(ctx, gmqb.Eq(f("ID"), oid), u)
-	return err
+	returnDoc := options.Before
+	if returnNew {
+		returnDoc = options.After
+	}
+
+	return r.coll.FindOneAndUpdate(ctx, gmqb.Eq(f("ID"), oid), u, gmqb.WithReturnDocument(returnDoc))
 }
 
 
