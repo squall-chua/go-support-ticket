@@ -52,7 +52,6 @@ func (s *ActionServiceServer) ExecuteAction(ctx context.Context, req *apiv1.Exec
 	pendingFilter := model.ActionExecutionFilter{
 		TicketIDs: []string{req.TicketId},
 		Statuses: []int32{
-			int32(apiv1.ActionStatus_ACTION_STATUS_PENDING),
 			int32(apiv1.ActionStatus_ACTION_STATUS_PENDING_APPROVAL),
 			int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS),
 		},
@@ -78,13 +77,11 @@ func (s *ActionServiceServer) ExecuteAction(ctx context.Context, req *apiv1.Exec
 		ActionType:    req.ActionType,
 		Parameters:    params,
 		ExecutingUser: userID,
-		Status:        int32(apiv1.ActionStatus_ACTION_STATUS_PENDING),
+		Status:        int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS),
 	}
 
 	if schema.RequireApproval {
 		execution.Status = int32(apiv1.ActionStatus_ACTION_STATUS_PENDING_APPROVAL)
-	} else {
-		execution.Status = int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS)
 	}
 
 	if err := s.repo.CreateExecution(ctx, execution); err != nil {
@@ -120,7 +117,7 @@ func (s *ActionServiceServer) CancelAction(ctx context.Context, req *apiv1.Cance
 		return nil, status.Error(codes.NotFound, "execution not found")
 	}
 
-	canCancel := execution.Status == int32(apiv1.ActionStatus_ACTION_STATUS_PENDING) ||
+	canCancel := execution.Status == int32(apiv1.ActionStatus_ACTION_STATUS_PENDING_APPROVAL) ||
 		execution.Status == int32(apiv1.ActionStatus_ACTION_STATUS_IN_PROGRESS)
 
 	if !canCancel {

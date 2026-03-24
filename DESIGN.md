@@ -81,11 +81,51 @@ sequenceDiagram
     TS->>EB: Publish execution completed event
 ```
 
+### Example Workflow: Action Execution Lifecycle
+
+This diagram illustrates the full lifecycle of an automated action, from initial client request through approval and external 3rd-party execution.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant AS as Action Service
+    participant EB as Event Broker
+    participant AppS as Approval Service
+    participant TP as 3rd-Party Service
+    
+    C->>AS: ExecuteAction(ActionID)
+    
+    Note over AS, AppS: If approval is mandated by policy
+    AS->>EB: Publish action.execution.pending_approval
+    AS-->>C: Return 202 Accepted (Status: PENDING_APPROVAL)
+    
+    AppS->>EB: Publish approval.decided (Approved)
+    
+    EB->>AS: Consume approval.decided
+    AS->>AS: Commit Execution Record (Status: IN_PROGRESS)
+    AS->>EB: Publish action.execution.status.updated
+    AS->>EB: Publish action.execution.triggered
+    
+    Note over EB, TP: Execution Hand-off
+    EB->>TP: Consume action.execution.triggered
+    
+    TP->>TP: Perform actual work (Cloud resources, API calls, etc.)
+    
+    TP->>EB: Publish action.execution.executed (results: {...})
+    
+    Note over EB, AS: Finalizing State
+    EB->>AS: Consume action.execution.executed
+    
+    AS->>AS: Commit Execution Record (Status: COMPLETED)
+    AS->>EB: Publish action.execution.completed
+    AS->>EB: Publish action.execution.status.updated
+```
+
 ### Supported Event Types
 
 - **Approval triggers**: `ticket.update.pending_approval`, `ticket.merge.pending_approval`, `action.execution.pending_approval`
 - **Approval decisions**: `approval.decided`
-- **Action execution tracking**: `action.execution.triggered`, `action.execution.executed`, `action.execution.completed`, `action.execution.status.updated`
+- **Action execution tracking**: `action.execution.triggered`, `action.execution.executed`, `action.execution.completed`, `action.execution.status.updated`, `action.execution.cancelled`
 - **Ticket lifecycle events**: `ticket.created`, `ticket.updated`, `ticket.assigned`, `ticket.merged`, `ticket.comment.added`, `ticket.deleted`
 - **Config & Meta state**: `ticket_type.*`, `action.schema.*`, `approval_config.*`
 

@@ -83,7 +83,6 @@
               "enum": [
                 "ACTION_STATUS_UNSPECIFIED",
                 "ACTION_STATUS_PENDING_APPROVAL",
-                "ACTION_STATUS_PENDING",
                 "ACTION_STATUS_IN_PROGRESS",
                 "ACTION_STATUS_COMPLETED",
                 "ACTION_STATUS_FAILED",
@@ -1989,7 +1988,6 @@
       "enum": [
         "ACTION_STATUS_UNSPECIFIED",
         "ACTION_STATUS_PENDING_APPROVAL",
-        "ACTION_STATUS_PENDING",
         "ACTION_STATUS_IN_PROGRESS",
         "ACTION_STATUS_COMPLETED",
         "ACTION_STATUS_FAILED",

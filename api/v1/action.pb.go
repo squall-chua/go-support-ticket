@@ -93,7 +93,6 @@ type ActionStatus int32
 const (
 	ActionStatus_ACTION_STATUS_UNSPECIFIED      ActionStatus = 0
 	ActionStatus_ACTION_STATUS_PENDING_APPROVAL ActionStatus = 1
-	ActionStatus_ACTION_STATUS_PENDING          ActionStatus = 2
 	ActionStatus_ACTION_STATUS_IN_PROGRESS      ActionStatus = 3
 	ActionStatus_ACTION_STATUS_COMPLETED        ActionStatus = 4
 	ActionStatus_ACTION_STATUS_FAILED           ActionStatus = 5
@@ -106,7 +105,6 @@ var (
 	ActionStatus_name = map[int32]string{
 		0: "ACTION_STATUS_UNSPECIFIED",
 		1: "ACTION_STATUS_PENDING_APPROVAL",
-		2: "ACTION_STATUS_PENDING",
 		3: "ACTION_STATUS_IN_PROGRESS",
 		4: "ACTION_STATUS_COMPLETED",
 		5: "ACTION_STATUS_FAILED",
@@ -116,7 +114,6 @@ var (
 	ActionStatus_value = map[string]int32{
 		"ACTION_STATUS_UNSPECIFIED":      0,
 		"ACTION_STATUS_PENDING_APPROVAL": 1,
-		"ACTION_STATUS_PENDING":          2,
 		"ACTION_STATUS_IN_PROGRESS":      3,
 		"ACTION_STATUS_COMPLETED":        4,
 		"ACTION_STATUS_FAILED":           5,
@@ -1660,16 +1657,15 @@ const file_api_proto_v1_action_proto_rawDesc = "" +
 	"\x12FIELD_TYPE_BOOLEAN\x10\x04\x12\x13\n" +
 	"\x0fFIELD_TYPE_ENUM\x10\x05\x12\x15\n" +
 	"\x11FIELD_TYPE_OBJECT\x10\x06\x12\x14\n" +
-	"\x10FIELD_TYPE_ARRAY\x10\a*\xfb\x01\n" +
+	"\x10FIELD_TYPE_ARRAY\x10\a*\xe6\x01\n" +
 	"\fActionStatus\x12\x1d\n" +
 	"\x19ACTION_STATUS_UNSPECIFIED\x10\x00\x12\"\n" +
-	"\x1eACTION_STATUS_PENDING_APPROVAL\x10\x01\x12\x19\n" +
-	"\x15ACTION_STATUS_PENDING\x10\x02\x12\x1d\n" +
+	"\x1eACTION_STATUS_PENDING_APPROVAL\x10\x01\x12\x1d\n" +
 	"\x19ACTION_STATUS_IN_PROGRESS\x10\x03\x12\x1b\n" +
 	"\x17ACTION_STATUS_COMPLETED\x10\x04\x12\x18\n" +
 	"\x14ACTION_STATUS_FAILED\x10\x05\x12\x1a\n" +
 	"\x16ACTION_STATUS_REJECTED\x10\x06\x12\x1b\n" +
-	"\x17ACTION_STATUS_CANCELLED\x10\a*\x8b\x01\n" +
+	"\x17ACTION_STATUS_CANCELLED\x10\a\"\x04\b\x02\x10\x02*\x8b\x01\n" +
 	"\x15ActionExecutionStatus\x12'\n" +
 	"#ACTION_EXECUTION_STATUS_UNSPECIFIED\x10\x00\x12%\n" +
 	"!ACTION_EXECUTION_STATUS_COMPLETED\x10\x01\x12\"\n" +
